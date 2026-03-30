@@ -441,10 +441,18 @@
     .report-meta {
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: #fbfdff;
+      background: #ffffff !important;
+      color: #111827 !important;
       padding: 14px;
       font-size: 14px;
       line-height: 1.5;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .report-company strong,
+    .report-meta-item > div:last-child,
+    .report-meta-value {
+      color: #111827 !important;
     }
 
     .report-meta-grid {
@@ -462,7 +470,7 @@
 
     .report-meta-label {
       font-weight: 800;
-      color: var(--blue-dark);
+      color: #1e3a8a !important;
     }
 
     .report-band {
@@ -1519,10 +1527,10 @@ input:focus, select:focus, textarea:focus {
             </div>
             <div class="report-meta">
               <div class="report-meta-grid">
-                <div class="report-meta-item"><div class="report-meta-label">Site:</div><div>${escapeHtml(inputs.reportSite.value || '')}</div></div>
-                <div class="report-meta-item"><div class="report-meta-label">Technician:</div><div>${escapeHtml(inputs.reportTechnician.value || '')}</div></div>
-                <div class="report-meta-item"><div class="report-meta-label">Pool / Spa:</div><div>${escapeHtml(inputs.reportPoolName.value || '')}</div></div>
-                <div class="report-meta-item"><div class="report-meta-label">Date:</div><div>${escapeHtml(reportDateDisplay)}</div></div>
+                <div class="report-meta-item"><div class="report-meta-label">Site:</div><div class="report-meta-value">${escapeHtml(inputs.reportSite.value || '')}</div></div>
+                <div class="report-meta-item"><div class="report-meta-label">Technician:</div><div class="report-meta-value">${escapeHtml(inputs.reportTechnician.value || '')}</div></div>
+                <div class="report-meta-item"><div class="report-meta-label">Pool / Spa:</div><div class="report-meta-value">${escapeHtml(inputs.reportPoolName.value || '')}</div></div>
+                <div class="report-meta-item"><div class="report-meta-label">Date:</div><div class="report-meta-value">${escapeHtml(reportDateDisplay)}</div></div>
               </div>
             </div>
           </div>
@@ -1621,10 +1629,11 @@ input:focus, select:focus, textarea:focus {
     .report-sheet { border: 1px solid #cfd8e3; border-radius: 16px; overflow: hidden; background: #fff; width: 100%; }
     .report-title { padding: 18px 18px 8px; font-size: 30px; font-weight: 800; color: #0b3f6c; }
     .report-top { display: grid; grid-template-columns: 1fr 1.2fr; gap: 14px; padding: 0 18px 18px; }
-    .report-company, .report-meta { border: 1px solid #cfd8e3; border-radius: 12px; padding: 14px; background: #fbfdff; font-size: 14px; line-height: 1.5; }
+    .report-company, .report-meta { border: 1px solid #cfd8e3; border-radius: 12px; padding: 14px; background: #ffffff !important; color: #111827 !important; font-size: 14px; line-height: 1.5; box-shadow: inset 0 1px 0 rgba(255,255,255,0.9); }
+    .report-company strong, .report-meta-item > div:last-child, .report-meta-value { color: #111827 !important; }
     .report-meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
     .report-meta-item { display: grid; grid-template-columns: 110px 1fr; gap: 10px; }
-    .report-meta-label { font-weight: 800; color: #0b3f6c; }
+    .report-meta-label { font-weight: 800; color: #1e3a8a !important; }
     .report-band { background: #0f4573; color: #fff; font-weight: 800; font-size: 16px; text-align: center; padding: 10px 14px; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
     th { background: #2d86d5; color: #fff; font-size: 12px; padding: 10px 8px; text-transform: uppercase; word-wrap: break-word; }
@@ -2060,10 +2069,11 @@ input:focus, select:focus, textarea:focus {
               .report-sheet { border: 1px solid #cfd8e3; border-radius: 14px; overflow: hidden; }
               .report-title { padding: 18px 18px 8px; font-size: 30px; font-weight: 800; color: #0b3f6c; }
               .report-top { display: grid; grid-template-columns: 1fr 1.2fr; gap: 14px; padding: 0 18px 18px; }
-              .report-company, .report-meta { border: 1px solid #cfd8e3; border-radius: 12px; padding: 14px; background: #fbfdff; font-size: 14px; line-height: 1.5; }
+              .report-company, .report-meta { border: 1px solid #cfd8e3; border-radius: 12px; padding: 14px; background: #ffffff !important; color: #111827 !important; font-size: 14px; line-height: 1.5; box-shadow: inset 0 1px 0 rgba(255,255,255,0.9); }
+              .report-company strong, .report-meta-item > div:last-child, .report-meta-value { color: #111827 !important; }
               .report-meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
               .report-meta-item { display: grid; grid-template-columns: 110px 1fr; gap: 10px; }
-              .report-meta-label { font-weight: 800; color: #0b3f6c; }
+              .report-meta-label { font-weight: 800; color: #1e3a8a !important; }
               .report-band { background: #0f4573; color: #fff; font-weight: 800; font-size: 16px; text-align: center; padding: 10px 14px; }
               table { width: 100%; border-collapse: collapse; }
               th { background: #2d86d5; color: #fff; font-size: 12px; padding: 10px 8px; }

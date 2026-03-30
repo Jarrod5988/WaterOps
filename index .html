@@ -3,6 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Pool Dosing Calculator" />
+  <meta name="theme-color" content="#1e88e5" />
   <title>MBS FM Pool Dosing Calculator</title>
   <style>
     :root {
@@ -182,6 +190,17 @@
     .button:disabled {
       opacity: 0.55;
       cursor: not-allowed;
+    }
+
+    .button.icon-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .button-icon {
+      font-size: 16px;
+      line-height: 1;
     }
 
     .actions {
@@ -369,6 +388,132 @@
       font-size: 13px;
     }
 
+
+    .report-sheet {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #fff;
+      min-height: 180px;
+    }
+
+    .report-raw {
+      margin-top: 12px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fbfdff;
+      min-height: 220px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+
+    .report-inner {
+      padding: 0;
+      background: #fff;
+    }
+
+    .report-title {
+      padding: 18px 18px 8px;
+      font-size: 32px;
+      line-height: 1.1;
+      font-weight: 800;
+      color: var(--blue-dark);
+    }
+
+    .report-top {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      padding: 0 18px 18px;
+    }
+
+    @media (min-width: 860px) {
+      .report-top {
+        grid-template-columns: 1fr 1.2fr;
+      }
+    }
+
+    .report-company,
+    .report-meta {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfdff;
+      padding: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .report-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 16px;
+    }
+
+    .report-meta-item {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .report-meta-label {
+      font-weight: 800;
+      color: var(--blue-dark);
+    }
+
+    .report-band {
+      background: #0f4573;
+      color: #fff;
+      font-weight: 800;
+      font-size: 16px;
+      text-align: center;
+      padding: 10px 14px;
+    }
+
+    .report-table-wrap {
+      border: 0;
+      border-radius: 0;
+      overflow-x: auto;
+    }
+
+    .report-table {
+      min-width: 980px;
+    }
+
+    .report-table th {
+      background: #2d86d5;
+      color: #fff;
+      font-size: 12px;
+      padding: 10px 8px;
+    }
+
+    .report-table td {
+      font-size: 14px;
+      padding: 10px 8px;
+      border-bottom: 1px solid #dbe6f2;
+    }
+
+    .report-notes {
+      padding: 14px 18px 18px;
+      border-top: 1px solid var(--line);
+      font-size: 15px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .report-footer {
+      padding: 12px 18px 18px;
+      color: var(--blue-dark);
+      font-size: 13px;
+      border-top: 1px solid var(--line);
+      background: #f5f9fe;
+    }
+
+
     .hidden {
       display: none !important;
     }
@@ -550,6 +695,48 @@
         <h2>Water balance alerts</h2>
         <div class="field-grid" id="alertsWrap"></div>
       </section>
+
+      <section class="card span-12">
+        <h2>Water Quality Testing Report</h2>
+        <div class="actions">
+          <button class="button icon-button" type="button" id="saveReportBtn"><span class="button-icon" aria-hidden="true">💾</span><span>Generate &amp; Save</span></button>
+        </div>
+        <div class="field-grid" style="margin-top: 12px;">
+          <div class="field">
+            <label for="reportSite">Site</label>
+            <input id="reportSite" type="text" readonly />
+          </div>
+          <div class="field">
+            <label for="reportPoolName">Pool / Spa</label>
+            <input id="reportPoolName" type="text" readonly />
+          </div>
+          <div class="field">
+            <label for="reportTechnician">Technician</label>
+            <input id="reportTechnician" type="text" value="Jarrod Strange" />
+          </div>
+          <div class="field">
+            <label for="reportDate">Date</label>
+            <input id="reportDate" type="date" />
+          </div>
+          <div class="field">
+            <label for="waterClarity">Water clarity</label>
+            <select id="waterClarity">
+              <option value="Clear">Clear</option>
+              <option value="Slightly Cloudy">Slightly Cloudy</option>
+              <option value="Cloudy">Cloudy</option>
+              <option value="Green">Green</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top: 12px;">
+          <label for="technicianNotes">Additional notes</label>
+          <textarea id="technicianNotes" placeholder="Optional technician notes for the report."></textarea>
+        </div>
+        <div id="reportPreview" class="report-sheet">
+          <div class="summary">Report preview will appear here.</div>
+        </div>
+        <textarea id="reportTextOutput" class="report-raw" readonly></textarea>
+      </section>
     </div>
   </div>
 
@@ -558,11 +745,11 @@
     const STORAGE_KEY = 'mbsfm_pool_dosing_calculator_v5';
 
     const savedPools = [
-      { name: 'Raiders Hydrotherapy Pool', volume: 32000, chlorineMin: 1.5 },
-      { name: 'Raiders Ice Bath', volume: 6000, chlorineMin: 3.0 },
-      { name: 'James Court Pool', volume: 90000, chlorineMin: 1.5 },
-      { name: 'James Court Spa', volume: 6000, chlorineMin: 1.5 },
-      { name: 'Custom Pool', volume: '', chlorineMin: null }
+      { name: 'Raiders Hydrotherapy Pool', volume: 32000, chlorineMin: 1.5, site: 'Raiders' },
+      { name: 'Raiders Ice Bath', volume: 6000, chlorineMin: 3.0, site: 'Raiders' },
+      { name: 'James Court Pool', volume: 90000, chlorineMin: 1.5, site: 'James Court' },
+      { name: 'James Court Spa', volume: 6000, chlorineMin: 1.5, site: 'James Court' },
+      { name: 'Custom Pool', volume: '', chlorineMin: null, site: 'Custom' }
     ];
 
     const el = (id) => document.getElementById(id);
@@ -587,6 +774,14 @@
       targetSalt: el('targetSalt'),
       testTime: el('testTime'),
       ocrText: el('ocrText'),
+      reportSite: el('reportSite'),
+      reportPoolName: el('reportPoolName'),
+      reportTechnician: el('reportTechnician'),
+      reportDate: el('reportDate'),
+      waterClarity: el('waterClarity'),
+      technicianNotes: el('technicianNotes'),
+      reportPreview: el('reportPreview'),
+      reportTextOutput: el('reportTextOutput'),
       doseStatus_acid: null,
       doseStatus_chlorine: null,
       doseStatus_bicarb: null,
@@ -646,6 +841,36 @@
         : 'Minimum range can be set manually for this pool.';
     }
 
+    function getTodayIsoDate() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatReportDate(value) {
+      if (!value) return '';
+      const parts = String(value).split('-');
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      return value;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getSelectedSite() {
+      const selected = getSelectedPoolConfig();
+      if (selected && selected.site) return selected.site;
+      return 'Custom';
+    }
+
     function updatePoolVolumes() {
       const selected = savedPools.find(pool => pool.name === inputs.poolSelect.value);
       const autoVolume = selected && selected.volume !== '' ? selected.volume : '';
@@ -654,6 +879,8 @@
 
       inputs.poolVolumeAuto.value = autoVolume;
       inputs.activeVolume.value = activeVolume || '';
+      if (inputs.reportSite) inputs.reportSite.value = getSelectedSite();
+      if (inputs.reportPoolName) inputs.reportPoolName.value = inputs.poolSelect.value || '';
       el('kpiVolume').textContent = activeVolume ? formatNumber(activeVolume, 0) : '0';
       updateFreeChlorineNote();
     }
@@ -774,6 +1001,7 @@
           notes: 'Dose in stages if it is a large correction.'
         },
         {
+          key: 'stabiliser',
           name: 'Stabiliser (Cyanuric Acid)',
           value: volume !== null && cyanuricAcid !== null && targetCya !== null
             ? Math.max(((targetCya - cyanuricAcid) * 10 * volume) / 10000 / 1000, 0)
@@ -886,6 +1114,318 @@
       return doseRows;
     }
 
+    function getChemicalReason(row) {
+      if (!row || row.roundedValue === null || row.roundedValue <= 0) return '';
+      switch (row.key) {
+        case 'acid':
+          return `Lower pH to ${inputs.targetPh.value || '-'}`;
+        case 'chlorine':
+          return `Raise free chlorine to ${inputs.targetFreeChlorine.value || '-'}`;
+        case 'bicarb':
+          return `Raise alkalinity to ${inputs.targetAlkalinity.value || '-'}`;
+        case 'calcium':
+          return `Raise calcium hardness to ${inputs.targetCalcium.value || '-'}`;
+        case 'stabiliser':
+          return `Raise CYA to ${inputs.targetCya.value || '-'}`;
+        case 'salt':
+          return `Raise salt to ${inputs.targetSalt.value || '-'}`;
+        default:
+          return '';
+      }
+    }
+
+    function buildCorrectiveActionText(doseRows) {
+      const actions = doseRows
+        .filter(row => row.roundedValue !== null && row.roundedValue > 0)
+        .map(row => {
+          const reason = getChemicalReason(row);
+          return `Add ${row.displayValue} ${row.unit} ${row.name}${reason ? ` to ${reason.toLowerCase()}` : ''}.`;
+        });
+
+      if (actions.length === 0) {
+        return 'No corrective chemical addition currently required based on the entered readings and targets.';
+      }
+
+      const extraNotes = (inputs.technicianNotes?.value || '').trim();
+      return [actions.join(' '), extraNotes].filter(Boolean).join('\n\n');
+    }
+
+    function updateReport(doseRows = calculateMainDoses()) {
+      if (!inputs.reportPreview) return;
+
+      const reportDateDisplay = formatReportDate(inputs.reportDate.value);
+      const chemicalsHtml = doseRows.map(row => {
+        const qty = row.roundedValue !== null && row.roundedValue > 0 ? row.displayValue : '';
+        const reason = row.roundedValue !== null && row.roundedValue > 0 ? getChemicalReason(row) : '';
+        const dosed = inputs[`doseStatus_${row.key}`]?.value === 'yes' ? 'Yes' : 'No';
+        return `
+          <tr>
+            <td>${escapeHtml(row.name)}</td>
+            <td>${escapeHtml(qty)}</td>
+            <td>${escapeHtml(row.unit || '')}</td>
+            <td>${escapeHtml(reason)}</td>
+            <td>${escapeHtml(dosed)}</td>
+            <td></td>
+          </tr>
+        `;
+      }).join('');
+
+      const correctiveAction = buildCorrectiveActionText(doseRows);
+      const additionalNotes = (inputs.technicianNotes?.value || '').trim();
+
+      inputs.reportPreview.innerHTML = `
+        <div class="report-inner">
+          <div class="report-title">Water Quality Testing Report</div>
+          <div class="report-top">
+            <div class="report-company">
+              <strong>MBS Facility Maintenance</strong><br>
+              63 Tennant Street<br>
+              Fyshwick ACT 2609<br>
+              (02) 6162 0216<br>
+              info@mbsfm.com.au
+            </div>
+            <div class="report-meta">
+              <div class="report-meta-grid">
+                <div class="report-meta-item"><div class="report-meta-label">Site:</div><div>${escapeHtml(inputs.reportSite.value || '')}</div></div>
+                <div class="report-meta-item"><div class="report-meta-label">Technician:</div><div>${escapeHtml(inputs.reportTechnician.value || '')}</div></div>
+                <div class="report-meta-item"><div class="report-meta-label">Pool / Spa:</div><div>${escapeHtml(inputs.reportPoolName.value || '')}</div></div>
+                <div class="report-meta-item"><div class="report-meta-label">Date:</div><div>${escapeHtml(reportDateDisplay)}</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="report-band">Water Test Results</div>
+          <div class="report-table-wrap">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Water Clarity</th>
+                  <th>Free Chlorine</th>
+                  <th>Target FC</th>
+                  <th>pH</th>
+                  <th>Target pH</th>
+                  <th>Alkalinity</th>
+                  <th>Target Alkalinity</th>
+                  <th>Volume (L)</th>
+                  <th>Calcium</th>
+                  <th>CYA</th>
+                  <th>Copper</th>
+                  <th>Salt</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>${escapeHtml(inputs.waterClarity.value || '')}</td>
+                  <td>${escapeHtml(inputs.freeChlorine.value || '')}</td>
+                  <td>${escapeHtml(inputs.targetFreeChlorine.value || '')}</td>
+                  <td>${escapeHtml(inputs.ph.value || '')}</td>
+                  <td>${escapeHtml(inputs.targetPh.value || '')}</td>
+                  <td>${escapeHtml(inputs.alkalinity.value || '')}</td>
+                  <td>${escapeHtml(inputs.targetAlkalinity.value || '')}</td>
+                  <td>${escapeHtml(inputs.activeVolume.value || '')}</td>
+                  <td>${escapeHtml(inputs.calciumHardness.value || '')}</td>
+                  <td>${escapeHtml(inputs.cyanuricAcid.value || '')}</td>
+                  <td>${escapeHtml(inputs.copper.value || '')}</td>
+                  <td>${escapeHtml(inputs.salt.value || '')}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="report-band">Chemicals Added</div>
+          <div class="report-table-wrap">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Chemical used</th>
+                  <th>Qty</th>
+                  <th>Unit</th>
+                  <th>Reason</th>
+                  <th>Dosed?</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>${chemicalsHtml}</tbody>
+            </table>
+          </div>
+
+          <div class="report-band">Corrective Action / Technician Notes</div>
+          <div class="report-notes">${escapeHtml(correctiveAction)}</div>
+          <div class="report-footer">Generated from the calculator. Update values in the app and this report refreshes automatically.</div>
+        </div>
+      `;
+      if (inputs.reportTextOutput) {
+        inputs.reportTextOutput.value = buildReportText();
+      }
+    }
+
+    function buildReportFilename(extension = 'html') {
+      const datePart = (inputs.reportDate.value || getTodayIsoDate()).replace(/-/g, '');
+      const site = (inputs.reportSite.value || 'site').trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '');
+      const pool = (inputs.reportPoolName.value || 'pool').trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '');
+      return `${site || 'site'}_${pool || 'pool'}_${datePart}_water-quality-report.${extension}`.toLowerCase();
+    }
+
+    function buildStandaloneReportHtml() {
+      const reportHtml = inputs.reportPreview?.innerHTML || '';
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Water Quality Testing Report</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; margin: 20px; color: #1f2937; background: #ffffff; }
+    .report-sheet { border: 1px solid #cfd8e3; border-radius: 14px; overflow: hidden; background: #fff; }
+    .report-title { padding: 18px 18px 8px; font-size: 30px; font-weight: 800; color: #0b3f6c; }
+    .report-top { display: grid; grid-template-columns: 1fr 1.2fr; gap: 14px; padding: 0 18px 18px; }
+    .report-company, .report-meta { border: 1px solid #cfd8e3; border-radius: 12px; padding: 14px; background: #fbfdff; font-size: 14px; line-height: 1.5; }
+    .report-meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
+    .report-meta-item { display: grid; grid-template-columns: 110px 1fr; gap: 10px; }
+    .report-meta-label { font-weight: 800; color: #0b3f6c; }
+    .report-band { background: #0f4573; color: #fff; font-weight: 800; font-size: 16px; text-align: center; padding: 10px 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #2d86d5; color: #fff; font-size: 12px; padding: 10px 8px; text-transform: uppercase; }
+    td { font-size: 14px; padding: 10px 8px; border-bottom: 1px solid #dbe6f2; vertical-align: top; }
+    .report-notes { padding: 14px 18px 18px; white-space: pre-wrap; }
+    .report-footer { padding: 12px 18px 18px; font-size: 13px; color: #0b3f6c; background: #f5f9fe; }
+  </style>
+</head>
+<body>
+  <div class="report-sheet">${reportHtml}</div>
+</body>
+</html>`;
+    }
+
+    async function saveReportFile() {
+      const html = buildStandaloneReportHtml();
+      const filename = buildReportFilename('html');
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+
+      if (navigator.share && window.File) {
+        const file = new File([blob], filename, { type: 'text/html' });
+        try {
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'Water Quality Testing Report',
+              text: 'Choose Save to Files to store this report on your iPhone.',
+              files: [file]
+            });
+            setImportStatus('Report generated. Choose Save to Files on your iPhone.');
+            return;
+          }
+        } catch (error) {
+          if (error && error.name === 'AbortError') {
+            setImportStatus('Save cancelled.');
+            return;
+          }
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      setImportStatus('Report file generated. Save it from your iPhone downloads/files.');
+    }
+
+    function buildReportText() {
+      const doseRows = calculateMainDoses();
+      const reportDateDisplay = formatReportDate(inputs.reportDate.value);
+      const lines = [
+        'Water Quality Testing Report',
+        `Site: ${inputs.reportSite.value || ''}`,
+        `Pool / Spa: ${inputs.reportPoolName.value || ''}`,
+        `Technician: ${inputs.reportTechnician.value || ''}`,
+        `Date: ${reportDateDisplay}`,
+        '',
+        'Water Test Results',
+        `Water clarity: ${inputs.waterClarity.value || ''}`,
+        `Free chlorine: ${inputs.freeChlorine.value || ''}`,
+        `Target FC: ${inputs.targetFreeChlorine.value || ''}`,
+        `pH: ${inputs.ph.value || ''}`,
+        `Target pH: ${inputs.targetPh.value || ''}`,
+        `Alkalinity: ${inputs.alkalinity.value || ''}`,
+        `Target alkalinity: ${inputs.targetAlkalinity.value || ''}`,
+        `Volume (L): ${inputs.activeVolume.value || ''}`,
+        `Calcium: ${inputs.calciumHardness.value || ''}`,
+        `CYA: ${inputs.cyanuricAcid.value || ''}`,
+        `Copper: ${inputs.copper.value || ''}`,
+        `Salt: ${inputs.salt.value || ''}`,
+        '',
+        'Chemicals Added'
+      ];
+
+      doseRows.forEach(row => {
+        const qty = row.roundedValue !== null && row.roundedValue > 0 ? `${row.displayValue} ${row.unit}` : '-';
+        const reason = row.roundedValue !== null && row.roundedValue > 0 ? getChemicalReason(row) : '';
+        const dosed = inputs[`doseStatus_${row.key}`]?.value === 'yes' ? 'Yes' : 'No';
+        lines.push(`${row.name}: ${qty}${reason ? ` | ${reason}` : ''} | Dosed: ${dosed}`);
+      });
+
+      lines.push('');
+      lines.push('Corrective Action / Technician Notes');
+      lines.push(buildCorrectiveActionText(doseRows));
+      if ((inputs.technicianNotes?.value || '').trim()) {
+        lines.push('');
+        lines.push('Additional notes:');
+        lines.push(inputs.technicianNotes.value.trim());
+      }
+      return lines.join('\n');
+    }
+
+    async function copyReport() {
+      const reportText = buildReportText();
+      try {
+        await navigator.clipboard.writeText(reportText);
+        setImportStatus('Report copied to clipboard.');
+      } catch (error) {
+        setImportStatus('Could not copy the report automatically.');
+      }
+    }
+
+    function printReport() {
+      const reportHtml = inputs.reportPreview?.innerHTML || '';
+      const popup = window.open('', '_blank');
+      if (!popup) {
+        setImportStatus('Allow popups to print the report.');
+        return;
+      }
+      popup.document.write(`
+        <html>
+          <head>
+            <title>Water Quality Testing Report</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; margin: 20px; color: #1f2937; }
+              .report-sheet { border: 1px solid #cfd8e3; border-radius: 14px; overflow: hidden; }
+              .report-title { padding: 18px 18px 8px; font-size: 30px; font-weight: 800; color: #0b3f6c; }
+              .report-top { display: grid; grid-template-columns: 1fr 1.2fr; gap: 14px; padding: 0 18px 18px; }
+              .report-company, .report-meta { border: 1px solid #cfd8e3; border-radius: 12px; padding: 14px; background: #fbfdff; font-size: 14px; line-height: 1.5; }
+              .report-meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
+              .report-meta-item { display: grid; grid-template-columns: 110px 1fr; gap: 10px; }
+              .report-meta-label { font-weight: 800; color: #0b3f6c; }
+              .report-band { background: #0f4573; color: #fff; font-weight: 800; font-size: 16px; text-align: center; padding: 10px 14px; }
+              table { width: 100%; border-collapse: collapse; }
+              th { background: #2d86d5; color: #fff; font-size: 12px; padding: 10px 8px; }
+              td { font-size: 14px; padding: 10px 8px; border-bottom: 1px solid #dbe6f2; }
+              .report-notes { padding: 14px 18px 18px; white-space: pre-wrap; }
+              .report-footer { padding: 12px 18px 18px; font-size: 13px; color: #0b3f6c; background: #f5f9fe; }
+            </style>
+          </head>
+          <body>
+            <div class="report-sheet">${reportHtml}</div>
+          </body>
+        </html>
+      `);
+      popup.document.close();
+      popup.focus();
+      popup.print();
+    }
+
     function calculateIceBaths() {
       return;
     }
@@ -910,6 +1450,10 @@
         targetSalt: inputs.targetSalt.value,
         testTime: inputs.testTime.value,
         ocrText: inputs.ocrText.value,
+        reportTechnician: inputs.reportTechnician.value,
+        reportDate: inputs.reportDate.value,
+        waterClarity: inputs.waterClarity.value,
+        technicianNotes: inputs.technicianNotes.value,
         doseStatus_acid: inputs.doseStatus_acid?.value || 'no',
         doseStatus_chlorine: inputs.doseStatus_chlorine?.value || 'no',
         doseStatus_bicarb: inputs.doseStatus_bicarb?.value || 'no',
@@ -945,7 +1489,7 @@
       localStorage.removeItem(STORAGE_KEY);
       [
         'customVolume', 'ph', 'freeChlorine', 'alkalinity', 'calciumHardness',
-        'cyanuricAcid', 'salt', 'copper', 'phosphates', 'testTime', 'ocrText'
+        'cyanuricAcid', 'salt', 'copper', 'phosphates', 'testTime', 'ocrText', 'technicianNotes'
       ].forEach(id => { el(id).value = ''; });
       inputs.targetPh.value = '7.2';
       inputs.targetFreeChlorine.value = '4';
@@ -953,6 +1497,9 @@
       inputs.targetCalcium.value = '250';
       inputs.targetCya.value = '0';
       inputs.targetSalt.value = '1000';
+      inputs.reportTechnician.value = 'Jarrod Strange';
+      inputs.reportDate.value = getTodayIsoDate();
+      inputs.waterClarity.value = 'Clear';
       window.__savedDoseStatuses = {
         doseStatus_acid: 'no',
         doseStatus_chlorine: 'no',
@@ -976,8 +1523,9 @@
 
     function updateAll() {
       updatePoolVolumes();
-      calculateMainDoses();
+      const doseRows = calculateMainDoses();
       calculateIceBaths();
+      updateReport(doseRows);
       saveState();
     }
 
@@ -1380,6 +1928,7 @@
       });
 
       el('resetBtn').addEventListener('click', resetAll);
+      el('saveReportBtn').addEventListener('click', saveReportFile);
       el('takePhotoBtn').addEventListener('click', () => cameraInput.click());
       el('choosePhotoBtn').addEventListener('click', () => libraryInput.click());
       reReadBtn.addEventListener('click', readSelectedPhoto);
@@ -1393,10 +1942,14 @@
       populatePools();
       loadState();
       if (!inputs.poolSelect.value) inputs.poolSelect.value = savedPools[0].name;
+      if (!inputs.reportDate.value) inputs.reportDate.value = getTodayIsoDate();
+      if (!inputs.reportTechnician.value) inputs.reportTechnician.value = 'Jarrod Strange';
+      if (!inputs.waterClarity.value) inputs.waterClarity.value = 'Clear';
       attachListeners();
       updateAll();
-      calculateMainDoses();
-      calculateIceBaths();
+      if (inputs.reportTextOutput && !inputs.reportTextOutput.value) {
+        inputs.reportTextOutput.value = buildReportText();
+      }
     }
 
     init();

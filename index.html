@@ -321,6 +321,45 @@
       font-size: 13px;
     }
 
+    .dose-checklist {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .dose-row {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      background: #fff;
+    }
+
+    .dose-row-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .dose-row-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--brand);
+    }
+
+    .dose-row-amount {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      text-align: right;
+    }
+
+    .dose-row select {
+      width: 100%;
+    }
+
     .summary {
       padding: 12px;
       background: #f7fafc;
@@ -378,7 +417,7 @@
       </section>
 
       <section class="card span-5">
-        <h2>Live dosage snapshot</h2>
+        <h2>Live chemical dosage</h2>
         <div class="kpi-wrap">
           <div class="kpi">
             <div class="name">Active volume</div>
@@ -396,11 +435,13 @@
             <div class="unit">mL</div>
           </div>
           <div class="kpi">
-            <div class="name">Bicarb dose</div>
+            <div class="name">Bicarb dosage</div>
             <div class="value" id="kpiBicarb">0</div>
             <div class="unit">kg</div>
           </div>
         </div>
+        <div class="hint" style="margin-top: 14px;">Use the dropdowns to mark whether each chemical was dosed.</div>
+        <div class="dose-checklist" id="doseChecklist"></div>
       </section>
 
       <section class="card span-12">
@@ -418,23 +459,10 @@
               <canvas id="processedCanvas" class="hidden"></canvas>
             </div>
             <div class="hint">Best results: fill the frame with the blue Spin Touch results screen, keep the phone straight, and avoid glare.</div>
-          </div>
-          <div style="display:none;">
-            <div class="field" style="margin-bottom: 12px;">
-              <label for="importStatus">Import status</label>
-              <div class="summary" id="importStatus">Waiting for a photo.</div>
-            </div>
-            <div class="field" style="margin-bottom: 12px;">
-              <label for="testTime">Detected test time</label>
-              <input id="testTime" type="text" readonly placeholder="Will fill if OCR finds it" />
-            </div>
-            <div class="field">
-              <label for="ocrText">OCR text</label>
-              <textarea id="ocrText" placeholder="OCR output will appear here"></textarea>
-              <div class="actions" style="margin-top: 10px;">
-                <button class="button ghost" type="button" id="applyOcrBtn">Fill from OCR text</button>
-              </div>
-            </div>
+          </div>          <div hidden aria-hidden="true">
+            <div id="importStatus">Waiting for a photo.</div>
+            <input id="testTime" type="hidden" />
+            <textarea id="ocrText" class="hidden"></textarea>
           </div>
         </div>
         <input id="cameraInput" class="hidden" type="file" accept="image/*" capture="environment" />
@@ -527,12 +555,11 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script>
-    const STORAGE_KEY = 'mbsfm_pool_dosing_calculator_v3';
+    const STORAGE_KEY = 'mbsfm_pool_dosing_calculator_v4';
 
     const savedPools = [
       { name: 'Raiders Hydrotherapy Pool', volume: 32000 },
-      { name: 'Raiders Ice Bath 1', volume: 6000 },
-      { name: 'Raiders Ice Bath 3', volume: 6000 },
+      { name: 'Raiders Ice Bath', volume: 6000 },
       { name: 'James Court Pool', volume: 90000 },
       { name: 'James Court Spa', volume: 6000 },
       { name: 'Custom Pool', volume: '' }
@@ -559,8 +586,16 @@
       targetCya: el('targetCya'),
       targetSalt: el('targetSalt'),
       testTime: el('testTime'),
-      ocrText: el('ocrText')
+      ocrText: el('ocrText'),
+      doseStatus_acid: null,
+      doseStatus_chlorine: null,
+      doseStatus_bicarb: null,
+      doseStatus_calcium: null,
+      doseStatus_stabiliser: null,
+      doseStatus_salt: null
     };
+
+    const doseStatusKeys = ['acid', 'chlorine', 'bicarb', 'calcium', 'stabiliser', 'salt'];
 
     const photoPreview = el('photoPreview');
     const processedCanvas = el('processedCanvas');
@@ -631,6 +666,41 @@
       return Math.round(acidL * 1000);
     }
 
+
+    function renderDoseChecklist(doseRows) {
+      const wrap = el('doseChecklist');
+      if (!wrap) return;
+      wrap.innerHTML = doseRows.map(row => {
+        const key = row.key;
+        const statusId = `doseStatus_${key}`;
+        const selected = inputs[statusId]?.value || window.__savedDoseStatuses?.[statusId] || 'no';
+        const amountText = row.roundedValue !== null ? `${row.displayValue} ${row.unit}` : '-';
+        return `
+          <div class="dose-row">
+            <div class="dose-row-top">
+              <div class="dose-row-name">${row.name}</div>
+              <div class="dose-row-amount">${amountText}</div>
+            </div>
+            <div class="field" style="margin:0;">
+              <label for="${statusId}">Dosed?</label>
+              <select id="${statusId}" data-dose-status="true">
+                <option value="no" ${selected === 'no' ? 'selected' : ''}>No</option>
+                <option value="yes" ${selected === 'yes' ? 'selected' : ''}>Yes</option>
+              </select>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      wrap.querySelectorAll('select[data-dose-status="true"]').forEach(select => {
+        inputs[select.id] = select;
+        select.addEventListener('change', () => {
+          inputs[select.id] = select;
+          saveState();
+        });
+      });
+    }
+
     function calculateMainDoses() {
       const volume = toNumber(inputs.activeVolume.value);
       const currentPh = toNumber(inputs.ph.value);
@@ -651,12 +721,14 @@
 
       const doses = [
         {
+          key: 'acid',
           name: 'Hydrochloric Acid 32%',
           value: calculateAcidMl(volume, currentPh, alkalinity, targetPh),
           unit: 'mL',
           notes: 'Estimate only - add in stages and retest.'
         },
         {
+          key: 'chlorine',
           name: 'Liquid Chlorine 12.5%',
           value: volume !== null && freeChlorine !== null && targetFreeChlorine !== null
             ? Math.round(Math.max(((targetFreeChlorine - freeChlorine) * volume) / 125000, 0) * 1000)
@@ -665,6 +737,7 @@
           notes: 'Dose to reach target free chlorine.'
         },
         {
+          key: 'bicarb',
           name: 'Sodium Bicarbonate',
           value: volume !== null && alkalinity !== null && targetAlkalinity !== null
             ? Math.max(((targetAlkalinity - alkalinity) * 18 * volume) / 10000 / 1000, 0)
@@ -673,6 +746,7 @@
           notes: 'Dose to reach target alkalinity.'
         },
         {
+          key: 'calcium',
           name: 'Calcium Chloride',
           value: volume !== null && calciumHardness !== null && targetCalcium !== null
             ? Math.max(((targetCalcium - calciumHardness) * 15 * volume) / 10000 / 1000, 0)
@@ -689,6 +763,7 @@
           notes: 'Outdoor pools only - not usually needed for spas.'
         },
         {
+          key: 'salt',
           name: 'Pool Salt',
           value: volume !== null && salt !== null && targetSalt !== null
             ? Math.max(((targetSalt - salt) * volume) / 1000000, 0)
@@ -727,6 +802,7 @@
       el('kpiAcid').textContent = doseRows[0].roundedValue !== null ? formatNumber(doseRows[0].roundedValue, 0) : '0';
       el('kpiChlorine').textContent = doseRows[1].roundedValue !== null ? formatNumber(doseRows[1].roundedValue, 0) : '0';
       el('kpiBicarb').textContent = doseRows[2].roundedValue !== null ? formatNumber(doseRows[2].roundedValue, 2) : '0';
+      renderDoseChecklist(doseRows);
 
       const alerts = [];
       if (currentPh !== null) {
@@ -796,7 +872,13 @@
         targetCya: inputs.targetCya.value,
         targetSalt: inputs.targetSalt.value,
         testTime: inputs.testTime.value,
-        ocrText: inputs.ocrText.value
+        ocrText: inputs.ocrText.value,
+        doseStatus_acid: inputs.doseStatus_acid?.value || 'no',
+        doseStatus_chlorine: inputs.doseStatus_chlorine?.value || 'no',
+        doseStatus_bicarb: inputs.doseStatus_bicarb?.value || 'no',
+        doseStatus_calcium: inputs.doseStatus_calcium?.value || 'no',
+        doseStatus_stabiliser: inputs.doseStatus_stabiliser?.value || 'no',
+        doseStatus_salt: inputs.doseStatus_salt?.value || 'no'
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
@@ -809,6 +891,14 @@
         Object.entries(state).forEach(([key, value]) => {
           if (inputs[key]) inputs[key].value = value;
         });
+        window.__savedDoseStatuses = {
+          doseStatus_acid: state.doseStatus_acid || 'no',
+          doseStatus_chlorine: state.doseStatus_chlorine || 'no',
+          doseStatus_bicarb: state.doseStatus_bicarb || 'no',
+          doseStatus_calcium: state.doseStatus_calcium || 'no',
+          doseStatus_stabiliser: state.doseStatus_stabiliser || 'no',
+          doseStatus_salt: state.doseStatus_salt || 'no'
+        };
       } catch (error) {
         console.error('Could not load saved state', error);
       }
@@ -826,6 +916,14 @@
       inputs.targetCalcium.value = '250';
       inputs.targetCya.value = '0';
       inputs.targetSalt.value = '1000';
+      window.__savedDoseStatuses = {
+        doseStatus_acid: 'no',
+        doseStatus_chlorine: 'no',
+        doseStatus_bicarb: 'no',
+        doseStatus_calcium: 'no',
+        doseStatus_stabiliser: 'no',
+        doseStatus_salt: 'no'
+      };
       inputs.poolSelect.value = savedPools[0].name;
       if (currentImageUrl) URL.revokeObjectURL(currentImageUrl);
       currentImageUrl = '';
@@ -865,7 +963,7 @@
         `Copper ${inputs.copper.value || '-'} ppm`,
         `Phosphates ${inputs.phosphates.value || '-'} ppb`,
         '',
-        'Recommended dose:'
+        'Chemical dosage:'
       ];
       doseRows.forEach(row => {
         lines.push(`${row.name}: ${row.displayValue || '-'} ${row.unit}`);
@@ -1243,7 +1341,8 @@
       el('takePhotoBtn').addEventListener('click', () => cameraInput.click());
       el('choosePhotoBtn').addEventListener('click', () => libraryInput.click());
       reReadBtn.addEventListener('click', readSelectedPhoto);
-      el('applyOcrBtn').addEventListener('click', applyOcrText);
+      const applyOcrBtn = el('applyOcrBtn');
+      if (applyOcrBtn) applyOcrBtn.addEventListener('click', applyOcrText);
       cameraInput.addEventListener('change', event => handlePhotoFile(event.target.files[0]));
       libraryInput.addEventListener('change', event => handlePhotoFile(event.target.files[0]));
     }

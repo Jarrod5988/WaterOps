@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MBS FM Pool Dosing Calculator</title>
+  <style>
+    :root {
+      --blue: #0d5ea6;
+      --blue-dark: #0b3f6c;
+      --blue-light: #e9f2fb;
+      --line: #cfd8e3;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --good: #0f8a4b;
+      --warn: #b36b00;
+      --bad: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body { padding: 14px; }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #ffffff 0%, #f4f8fd 100%);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .brand img {
+      max-width: 250px;
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    .brand-copy h1 {
+      margin: 0 0 4px;
+      font-size: clamp(24px, 4vw, 34px);
+      line-height: 1.05;
+      color: var(--blue-dark);
+    }
+
+    .brand-copy p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .toolbar {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .card {
+      grid-column: span 12;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      color: var(--blue-dark);
+    }
+
+    @media (min-width: 860px) {
+      .span-7 { grid-column: span 7; }
+      .span-5 { grid-column: span 5; }
+      .span-6 { grid-column: span 6; }
+      .span-4 { grid-column: span 4; }
+      .span-8 { grid-column: span 8; }
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue-dark);
+    }
+
+    .field small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #c6d0db;
+      border-radius: 12px;
+      padding: 12px 12px;
+      font-size: 16px;
+      background: #fff;
+      color: var(--text);
+      min-height: 48px;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 3px solid rgba(13, 94, 166, 0.14);
+      border-color: var(--blue);
+    }
+
+    .button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      min-height: 48px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--blue);
+      color: #fff;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .button.secondary {
+      background: #e8eef6;
+      color: var(--blue-dark);
+    }
+
+    .button.ghost {
+      background: #fff;
+      color: var(--blue-dark);
+      border: 1px solid var(--line);
+    }
+
+    .button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .kpi-wrap {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 10px;
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbfe 100%);
+    }
+
+    .kpi .name {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .kpi .value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--blue-dark);
+      line-height: 1.05;
+    }
+
+    .kpi .unit {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 620px;
+      background: #fff;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e5edf6;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--blue-dark);
+      color: #fff;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #eef2f7;
+      color: var(--blue-dark);
+    }
+
+    .status-good { background: #e8f6ef; color: var(--good); }
+    .status-warn { background: #fff5e8; color: var(--warn); }
+    .status-bad { background: #fdebec; color: var(--bad); }
+
+    .import-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 860px) {
+      .import-grid {
+        grid-template-columns: 1.15fr 0.85fr;
+      }
+    }
+
+    .preview-box {
+      border: 1px dashed #b6c4d4;
+      border-radius: 16px;
+      min-height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f7fafe;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview-box img, .preview-box canvas {
+      max-width: 100%;
+      max-height: 420px;
+      display: block;
+      object-fit: contain;
+    }
+
+    .placeholder {
+      padding: 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .hint {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--blue-light);
+      border-radius: 12px;
+      color: var(--blue-dark);
+      font-size: 13px;
+    }
+
+    .summary {
+      padding: 12px;
+      background: #f7fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      white-space: pre-wrap;
+      font-size: 13px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="brand">
+        <img src="data:image/jpeg;base64,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" alt="MBS FM logo" />
+        <div class="brand-copy">
+          <h1>Pool Test Chemical Dosing Calculator</h1>
+          <p>Manual entry or Spin Touch photo import. Built for quick mobile use by staff.</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="button ghost" id="resetBtn" type="button">Reset last pool test</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="card span-7">
+        <h2>Pool selection</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="poolSelect">Selected pool</label>
+            <select id="poolSelect"></select>
+            <small>Choose a saved pool or Custom Pool.</small>
+          </div>
+          <div class="field">
+            <label for="poolVolumeAuto">Pool volume (auto)</label>
+            <input id="poolVolumeAuto" type="number" inputmode="decimal" readonly />
+            <small>Auto-filled from the pool list.</small>
+          </div>
+          <div class="field">
+            <label for="customVolume">Custom volume override</label>
+            <input id="customVolume" type="number" inputmode="decimal" min="0" step="1" placeholder="Optional" />
+            <small>Use this if you want to override the saved volume.</small>
+          </div>
+          <div class="field">
+            <label for="activeVolume">Active volume used</label>
+            <input id="activeVolume" type="number" inputmode="decimal" readonly />
+            <small>This is the volume used in all calculations.</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="card span-5">
+        <h2>Live calculation snapshot</h2>
+        <div class="kpi-wrap">
+          <div class="kpi">
+            <div class="name">Active volume</div>
+            <div class="value" id="kpiVolume">0</div>
+            <div class="unit">litres</div>
+          </div>
+          <div class="kpi">
+            <div class="name">Acid dose</div>
+            <div class="value" id="kpiAcid">0</div>
+            <div class="unit">mL</div>
+          </div>
+          <div class="kpi">
+            <div class="name">Chlorine dose</div>
+            <div class="value" id="kpiChlorine">0</div>
+            <div class="unit">mL</div>
+          </div>
+          <div class="kpi">
+            <div class="name">Bicarb dose</div>
+            <div class="value" id="kpiBicarb">0</div>
+            <div class="unit">kg</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card span-12">
+        <h2>Spin Touch photo import</h2>
+        <div class="import-grid">
+          <div>
+            <div class="actions" style="margin-bottom: 12px;">
+              <button class="button" type="button" id="takePhotoBtn">Take photo</button>
+              <button class="button secondary" type="button" id="choosePhotoBtn">Use existing photo</button>
+              <button class="button ghost" type="button" id="reReadBtn" disabled>Read photo again</button>
+            </div>
+            <div class="preview-box" id="previewBox">
+              <div class="placeholder">No Spin Touch photo selected yet.</div>
+              <img id="photoPreview" class="hidden" alt="Spin Touch preview" />
+              <canvas id="processedCanvas" class="hidden"></canvas>
+            </div>
+            <div class="hint">Best results: fill the frame with the blue Spin Touch results screen, keep the phone straight, and avoid glare.</div>
+          </div>
+          <div>
+            <div class="field" style="margin-bottom: 12px;">
+              <label for="importStatus">Import status</label>
+              <div class="summary" id="importStatus">Waiting for a photo.</div>
+            </div>
+            <div class="field" style="margin-bottom: 12px;">
+              <label for="testTime">Detected test time</label>
+              <input id="testTime" type="text" readonly placeholder="Will fill if OCR finds it" />
+            </div>
+            <div class="field">
+              <label for="ocrText">OCR text</label>
+              <textarea id="ocrText" placeholder="OCR output will appear here"></textarea>
+              <div class="actions" style="margin-top: 10px;">
+                <button class="button ghost" type="button" id="applyOcrBtn">Fill from OCR text</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <input id="cameraInput" class="hidden" type="file" accept="image/*" capture="environment" />
+        <input id="libraryInput" class="hidden" type="file" accept="image/*" />
+      </section>
+
+      <section class="card span-8">
+        <h2>Current water test results</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="ph">Current pH</label>
+            <input id="ph" type="number" inputmode="decimal" step="0.01" min="0" />
+            <small>pH</small>
+          </div>
+          <div class="field">
+            <label for="freeChlorine">Current free chlorine</label>
+            <input id="freeChlorine" type="number" inputmode="decimal" step="0.01" min="0" />
+            <small>ppm</small>
+          </div>
+          <div class="field">
+            <label for="alkalinity">Current alkalinity</label>
+            <input id="alkalinity" type="number" inputmode="decimal" step="1" min="0" />
+            <small>ppm</small>
+          </div>
+          <div class="field">
+            <label for="calciumHardness">Current calcium hardness</label>
+            <input id="calciumHardness" type="number" inputmode="decimal" step="1" min="0" />
+            <small>ppm</small>
+          </div>
+          <div class="field">
+            <label for="cyanuricAcid">Current cyanuric acid</label>
+            <input id="cyanuricAcid" type="number" inputmode="decimal" step="1" min="0" />
+            <small>ppm</small>
+          </div>
+          <div class="field">
+            <label for="salt">Current salt</label>
+            <input id="salt" type="number" inputmode="decimal" step="1" min="0" />
+            <small>ppm</small>
+          </div>
+          <div class="field">
+            <label for="copper">Current copper</label>
+            <input id="copper" type="number" inputmode="decimal" step="0.01" min="0" />
+            <small>ppm</small>
+          </div>
+          <div class="field">
+            <label for="phosphates">Current phosphates</label>
+            <input id="phosphates" type="number" inputmode="decimal" step="1" min="0" />
+            <small>ppb</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="card span-4">
+        <h2>Target levels</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="targetPh">Target pH</label>
+            <input id="targetPh" type="number" inputmode="decimal" step="0.1" min="0" value="7.2" />
+          </div>
+          <div class="field">
+            <label for="targetFreeChlorine">Target free chlorine</label>
+            <input id="targetFreeChlorine" type="number" inputmode="decimal" step="0.1" min="0" value="4" />
+          </div>
+          <div class="field">
+            <label for="targetAlkalinity">Target alkalinity</label>
+            <input id="targetAlkalinity" type="number" inputmode="decimal" step="1" min="0" value="80" />
+          </div>
+          <div class="field">
+            <label for="targetCalcium">Target calcium hardness</label>
+            <input id="targetCalcium" type="number" inputmode="decimal" step="1" min="0" value="250" />
+          </div>
+          <div class="field">
+            <label for="targetCya">Target cyanuric acid</label>
+            <input id="targetCya" type="number" inputmode="decimal" step="1" min="0" value="0" />
+          </div>
+          <div class="field">
+            <label for="targetSalt">Target salt</label>
+            <input id="targetSalt" type="number" inputmode="decimal" step="1" min="0" value="1000" />
+          </div>
+        </div>
+      </section>
+
+
+      <section class="card span-4">
+        <h2>Water balance alerts</h2>
+        <div class="field-grid" id="alertsWrap"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script>
+    const STORAGE_KEY = 'mbsfm_pool_dosing_calculator_v3';
+
+    const savedPools = [
+      { name: 'Raiders Hydrotherapy Pool', volume: 32000 },
+      { name: 'Raiders Ice Bath 1', volume: 6000 },
+      { name: 'Raiders Ice Bath 3', volume: 6000 },
+      { name: 'James Court Pool', volume: 90000 },
+      { name: 'James Court Spa', volume: 6000 },
+      { name: 'Custom Pool', volume: '' }
+    ];
+
+    const el = (id) => document.getElementById(id);
+    const inputs = {
+      poolSelect: el('poolSelect'),
+      poolVolumeAuto: el('poolVolumeAuto'),
+      customVolume: el('customVolume'),
+      activeVolume: el('activeVolume'),
+      ph: el('ph'),
+      freeChlorine: el('freeChlorine'),
+      alkalinity: el('alkalinity'),
+      calciumHardness: el('calciumHardness'),
+      cyanuricAcid: el('cyanuricAcid'),
+      salt: el('salt'),
+      copper: el('copper'),
+      phosphates: el('phosphates'),
+      targetPh: el('targetPh'),
+      targetFreeChlorine: el('targetFreeChlorine'),
+      targetAlkalinity: el('targetAlkalinity'),
+      targetCalcium: el('targetCalcium'),
+      targetCya: el('targetCya'),
+      targetSalt: el('targetSalt'),
+      testTime: el('testTime'),
+      ocrText: el('ocrText')
+    };
+
+    const photoPreview = el('photoPreview');
+    const processedCanvas = el('processedCanvas');
+    const previewBox = el('previewBox');
+    const importStatus = el('importStatus');
+    const cameraInput = el('cameraInput');
+    const libraryInput = el('libraryInput');
+    const reReadBtn = el('reReadBtn');
+
+    let currentImage = null;
+    let currentImageUrl = '';
+
+    function toNumber(value) {
+      if (value === '' || value === null || value === undefined) return null;
+      const number = Number(value);
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function formatNumber(value, decimals = 0) {
+      if (value === null || value === undefined || Number.isNaN(value)) return '';
+      return Number(value).toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function populatePools() {
+      inputs.poolSelect.innerHTML = savedPools.map(pool => `
+        <option value="${pool.name}">${pool.name}</option>
+      `).join('');
+    }
+
+    function updatePoolVolumes() {
+      const selected = savedPools.find(pool => pool.name === inputs.poolSelect.value);
+      const autoVolume = selected && selected.volume !== '' ? selected.volume : '';
+      const customVolume = toNumber(inputs.customVolume.value);
+      const activeVolume = customVolume && customVolume > 0 ? customVolume : autoVolume;
+
+      inputs.poolVolumeAuto.value = autoVolume;
+      inputs.activeVolume.value = activeVolume || '';
+      el('kpiVolume').textContent = activeVolume ? formatNumber(activeVolume, 0) : '0';
+    }
+
+    function calculateAcidMl(volume, currentPh, alkalinity, targetPh) {
+      if ([volume, currentPh, alkalinity, targetPh].some(v => v === null)) return null;
+      if (currentPh <= targetPh) return 0;
+
+      const K1 = 4.466835921509635e-7;
+      const K2 = 4.677351412871981e-11;
+      const Kw = 1e-14;
+      const HClGramsPerL = 320;
+      const HClMolarMass = 36.46094;
+
+      const taEqPerL = alkalinity / 50000;
+      const hI = Math.pow(10, -currentPh);
+      const denI = (hI * hI) + (K1 * hI) + (K1 * K2);
+      const alpha1I = (K1 * hI) / denI;
+      const alpha2I = (K1 * K2) / denI;
+      const dic = (taEqPerL - ((Kw / hI) - hI)) / (alpha1I + (2 * alpha2I));
+
+      const hT = Math.pow(10, -targetPh);
+      const denT = (hT * hT) + (K1 * hT) + (K1 * K2);
+      const alpha1T = (K1 * hT) / denT;
+      const alpha2T = (K1 * K2) / denT;
+      const taTargetEqPerL = (dic * (alpha1T + (2 * alpha2T))) + ((Kw / hT) - hT);
+      const acidL = Math.max((taEqPerL - taTargetEqPerL) * volume * (HClMolarMass / HClGramsPerL), 0);
+
+      return Math.round(acidL * 1000);
+    }
+
+    function calculateMainDoses() {
+      const volume = toNumber(inputs.activeVolume.value);
+      const currentPh = toNumber(inputs.ph.value);
+      const freeChlorine = toNumber(inputs.freeChlorine.value);
+      const alkalinity = toNumber(inputs.alkalinity.value);
+      const calciumHardness = toNumber(inputs.calciumHardness.value);
+      const cyanuricAcid = toNumber(inputs.cyanuricAcid.value);
+      const salt = toNumber(inputs.salt.value);
+      const copper = toNumber(inputs.copper.value);
+      const phosphates = toNumber(inputs.phosphates.value);
+
+      const targetPh = toNumber(inputs.targetPh.value);
+      const targetFreeChlorine = toNumber(inputs.targetFreeChlorine.value);
+      const targetAlkalinity = toNumber(inputs.targetAlkalinity.value);
+      const targetCalcium = toNumber(inputs.targetCalcium.value);
+      const targetCya = toNumber(inputs.targetCya.value);
+      const targetSalt = toNumber(inputs.targetSalt.value);
+
+      const doses = [
+        {
+          name: 'Hydrochloric Acid 32%',
+          value: calculateAcidMl(volume, currentPh, alkalinity, targetPh),
+          unit: 'mL',
+          notes: 'Estimate only - add in stages and retest.'
+        },
+        {
+          name: 'Liquid Chlorine 12.5%',
+          value: volume !== null && freeChlorine !== null && targetFreeChlorine !== null
+            ? Math.round(Math.max(((targetFreeChlorine - freeChlorine) * volume) / 125000, 0) * 1000)
+            : null,
+          unit: 'mL',
+          notes: 'Dose to reach target free chlorine.'
+        },
+        {
+          name: 'Sodium Bicarbonate',
+          value: volume !== null && alkalinity !== null && targetAlkalinity !== null
+            ? Math.max(((targetAlkalinity - alkalinity) * 18 * volume) / 10000 / 1000, 0)
+            : null,
+          unit: 'kg',
+          notes: 'Dose to reach target alkalinity.'
+        },
+        {
+          name: 'Calcium Chloride',
+          value: volume !== null && calciumHardness !== null && targetCalcium !== null
+            ? Math.max(((targetCalcium - calciumHardness) * 15 * volume) / 10000 / 1000, 0)
+            : null,
+          unit: 'kg',
+          notes: 'Dose in stages if it is a large correction.'
+        },
+        {
+          name: 'Stabiliser (Cyanuric Acid)',
+          value: volume !== null && cyanuricAcid !== null && targetCya !== null
+            ? Math.max(((targetCya - cyanuricAcid) * 10 * volume) / 10000 / 1000, 0)
+            : null,
+          unit: 'kg',
+          notes: 'Outdoor pools only - not usually needed for spas.'
+        },
+        {
+          name: 'Pool Salt',
+          value: volume !== null && salt !== null && targetSalt !== null
+            ? Math.max(((targetSalt - salt) * volume) / 1000000, 0)
+            : null,
+          unit: 'kg',
+          notes: 'Broadcast evenly and allow time to dissolve.'
+        }
+      ];
+
+      const doseRows = doses.map(row => {
+        let formattedValue = '';
+        if (row.value !== null) {
+          const isMl = row.unit === 'mL';
+          const decimals = isMl ? 0 : (row.name === 'Pool Salt' ? 1 : 2);
+          const rounded = isMl ? row.value : Number(row.value.toFixed(decimals));
+          const zeroText = rounded === 0 ? '0' : formatNumber(rounded, decimals);
+          const noteText = rounded === 0 ? `No ${row.name.toLowerCase().includes('acid') ? 'acid' : row.name.toLowerCase().includes('chlorine') ? 'chlorine' : row.name.toLowerCase().includes('bicarbonate') ? 'bicarb' : row.name.toLowerCase().includes('calcium') ? 'calcium' : row.name.toLowerCase().includes('stabiliser') ? 'stabiliser' : 'salt'} needed.` : row.notes;
+          formattedValue = zeroText;
+          return { ...row, displayValue: zeroText, roundedValue: rounded, displayNote: noteText };
+        }
+        return { ...row, displayValue: '', roundedValue: null, displayNote: '' };
+      });
+
+      const doseTableBody = el('doseTableBody');
+      if (doseTableBody) {
+        doseTableBody.innerHTML = doseRows.map(row => `
+        <tr>
+          <td>${row.name}</td>
+          <td>${row.displayValue}</td>
+          <td>${row.unit}</td>
+          <td>${row.displayNote}</td>
+        </tr>
+      `).join('');
+      }
+
+      el('kpiAcid').textContent = doseRows[0].roundedValue !== null ? formatNumber(doseRows[0].roundedValue, 0) : '0';
+      el('kpiChlorine').textContent = doseRows[1].roundedValue !== null ? formatNumber(doseRows[1].roundedValue, 0) : '0';
+      el('kpiBicarb').textContent = doseRows[2].roundedValue !== null ? formatNumber(doseRows[2].roundedValue, 2) : '0';
+
+      const alerts = [];
+      if (currentPh !== null) {
+        if (currentPh < 7.2) {
+          alerts.push({ name: 'pH', value: currentPh.toFixed(2), level: 'warn', text: 'Low - acid not needed until pH rises.' });
+        } else if (currentPh > 7.8) {
+          alerts.push({ name: 'pH', value: currentPh.toFixed(2), level: 'warn', text: 'High - review acid dose and retest.' });
+        } else {
+          alerts.push({ name: 'pH', value: currentPh.toFixed(2), level: 'good', text: 'Within normal working range.' });
+        }
+      }
+      if (freeChlorine !== null) {
+        if (freeChlorine < targetFreeChlorine) {
+          alerts.push({ name: 'Free chlorine', value: freeChlorine.toFixed(2), level: 'warn', text: 'Below target - chlorine dose shown.' });
+        } else {
+          alerts.push({ name: 'Free chlorine', value: freeChlorine.toFixed(2), level: 'good', text: 'At or above target.' });
+        }
+      }
+      if (copper !== null) {
+        alerts.push({
+          name: 'Copper',
+          value: copper.toFixed(2) + ' ppm',
+          level: copper <= 0.3 ? 'good' : 'warn',
+          text: copper <= 0.3 ? 'OK.' : 'Elevated - watch for staining risk.'
+        });
+      }
+      if (phosphates !== null) {
+        alerts.push({
+          name: 'Phosphates',
+          value: formatNumber(phosphates, 0) + ' ppb',
+          level: phosphates <= 500 ? 'good' : 'warn',
+          text: phosphates <= 500 ? 'OK.' : 'Elevated - review phosphate control.'
+        });
+      }
+
+      el('alertsWrap').innerHTML = alerts.length ? alerts.map(alert => `
+        <div class="kpi">
+          <div class="name">${alert.name}</div>
+          <div class="value" style="font-size: 22px;">${alert.value}</div>
+          <div class="status-pill status-${alert.level}" style="margin-top: 8px;">${alert.text}</div>
+        </div>
+      `).join('') : '<div class="muted">Enter results or import a Spin Touch photo to see alerts.</div>';
+
+      return doseRows;
+    }
+
+    function calculateIceBaths() {
+      return;
+    }
+
+    function saveState() {
+      const state = {
+        poolSelect: inputs.poolSelect.value,
+        customVolume: inputs.customVolume.value,
+        ph: inputs.ph.value,
+        freeChlorine: inputs.freeChlorine.value,
+        alkalinity: inputs.alkalinity.value,
+        calciumHardness: inputs.calciumHardness.value,
+        cyanuricAcid: inputs.cyanuricAcid.value,
+        salt: inputs.salt.value,
+        copper: inputs.copper.value,
+        phosphates: inputs.phosphates.value,
+        targetPh: inputs.targetPh.value,
+        targetFreeChlorine: inputs.targetFreeChlorine.value,
+        targetAlkalinity: inputs.targetAlkalinity.value,
+        targetCalcium: inputs.targetCalcium.value,
+        targetCya: inputs.targetCya.value,
+        targetSalt: inputs.targetSalt.value,
+        testTime: inputs.testTime.value,
+        ocrText: inputs.ocrText.value
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const state = JSON.parse(raw);
+        Object.entries(state).forEach(([key, value]) => {
+          if (inputs[key]) inputs[key].value = value;
+        });
+      } catch (error) {
+        console.error('Could not load saved state', error);
+      }
+    }
+
+    function resetAll() {
+      localStorage.removeItem(STORAGE_KEY);
+      [
+        'customVolume', 'ph', 'freeChlorine', 'alkalinity', 'calciumHardness',
+        'cyanuricAcid', 'salt', 'copper', 'phosphates', 'testTime', 'ocrText'
+      ].forEach(id => { el(id).value = ''; });
+      inputs.targetPh.value = '7.2';
+      inputs.targetFreeChlorine.value = '4';
+      inputs.targetAlkalinity.value = '80';
+      inputs.targetCalcium.value = '250';
+      inputs.targetCya.value = '0';
+      inputs.targetSalt.value = '1000';
+      inputs.poolSelect.value = savedPools[0].name;
+      if (currentImageUrl) URL.revokeObjectURL(currentImageUrl);
+      currentImageUrl = '';
+      currentImage = null;
+      photoPreview.src = '';
+      photoPreview.classList.add('hidden');
+      processedCanvas.classList.add('hidden');
+      previewBox.querySelector('.placeholder')?.classList.remove('hidden');
+      importStatus.textContent = 'Waiting for a photo.';
+      reReadBtn.disabled = true;
+      updateAll();
+    }
+
+    function updateAll() {
+      updatePoolVolumes();
+      calculateMainDoses();
+      calculateIceBaths();
+      saveState();
+    }
+
+    function buildSummaryText() {
+      const doseRows = calculateMainDoses();
+      const poolName = inputs.poolSelect.value || 'Pool';
+      const volume = inputs.activeVolume.value || '-';
+      const lines = [
+        `${poolName}`,
+        `Volume: ${volume} L`,
+        inputs.testTime.value ? `Test time: ${inputs.testTime.value}` : null,
+        '',
+        'Current results:',
+        `pH ${inputs.ph.value || '-'}`,
+        `Free chlorine ${inputs.freeChlorine.value || '-'} ppm`,
+        `Alkalinity ${inputs.alkalinity.value || '-'} ppm`,
+        `Calcium hardness ${inputs.calciumHardness.value || '-'} ppm`,
+        `Cyanuric acid ${inputs.cyanuricAcid.value || '-'} ppm`,
+        `Salt ${inputs.salt.value || '-'} ppm`,
+        `Copper ${inputs.copper.value || '-'} ppm`,
+        `Phosphates ${inputs.phosphates.value || '-'} ppb`,
+        '',
+        'Recommended dose:'
+      ];
+      doseRows.forEach(row => {
+        lines.push(`${row.name}: ${row.displayValue || '-'} ${row.unit}`);
+      });
+      return lines.filter(Boolean).join('\n');
+    }
+
+    async function copySummary() {
+      const summary = buildSummaryText();
+      try {
+        await navigator.clipboard.writeText(summary);
+        importStatus.textContent = 'Dose summary copied to clipboard.';
+      } catch (error) {
+        importStatus.textContent = 'Could not copy automatically. You can still select and copy the results manually.';
+      }
+    }
+
+    function setImportStatus(message) {
+      importStatus.textContent = message;
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function findSpinTouchScreenRect(image) {
+      const sampleCanvas = document.createElement('canvas');
+      const maxSide = 420;
+      const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+      const width = Math.max(1, Math.round(image.width * scale));
+      const height = Math.max(1, Math.round(image.height * scale));
+      sampleCanvas.width = width;
+      sampleCanvas.height = height;
+      const ctx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(image, 0, 0, width, height);
+
+      const imageData = ctx.getImageData(0, 0, width, height);
+      const data = imageData.data;
+      const mask = new Uint8Array(width * height);
+
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const idx = (y * width + x) * 4;
+          const r = data[idx];
+          const g = data[idx + 1];
+          const b = data[idx + 2];
+          const brightness = (r + g + b) / 3;
+          const maxRG = Math.max(r, g);
+          const isBlueDisplay = b > 70 && b > maxRG + 10 && brightness > 45;
+          if (isBlueDisplay) mask[y * width + x] = 1;
+        }
+      }
+
+      const visited = new Uint8Array(width * height);
+      const stackX = new Int32Array(width * height);
+      const stackY = new Int32Array(width * height);
+      let best = null;
+
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const index = y * width + x;
+          if (!mask[index] || visited[index]) continue;
+
+          let pointer = 0;
+          stackX[pointer] = x;
+          stackY[pointer] = y;
+          pointer += 1;
+          visited[index] = 1;
+
+          let area = 0;
+          let minX = x;
+          let maxX = x;
+          let minY = y;
+          let maxY = y;
+
+          while (pointer > 0) {
+            pointer -= 1;
+            const cx = stackX[pointer];
+            const cy = stackY[pointer];
+            area += 1;
+            if (cx < minX) minX = cx;
+            if (cx > maxX) maxX = cx;
+            if (cy < minY) minY = cy;
+            if (cy > maxY) maxY = cy;
+
+            const neighbors = [
+              [cx + 1, cy],
+              [cx - 1, cy],
+              [cx, cy + 1],
+              [cx, cy - 1]
+            ];
+
+            neighbors.forEach(([nx, ny]) => {
+              if (nx < 0 || ny < 0 || nx >= width || ny >= height) return;
+              const nIndex = ny * width + nx;
+              if (!mask[nIndex] || visited[nIndex]) return;
+              visited[nIndex] = 1;
+              stackX[pointer] = nx;
+              stackY[pointer] = ny;
+              pointer += 1;
+            });
+          }
+
+          const regionWidth = maxX - minX + 1;
+          const regionHeight = maxY - minY + 1;
+          const largeEnough = regionWidth > width * 0.3 && regionHeight > height * 0.18;
+          if (!largeEnough) continue;
+
+          if (!best || area > best.area) {
+            best = { minX, maxX, minY, maxY, area };
+          }
+        }
+      }
+
+      if (!best) {
+        return { x: 0, y: 0, width: image.width, height: image.height };
+      }
+
+      const padX = Math.round((best.maxX - best.minX + 1) * 0.04);
+      const padY = Math.round((best.maxY - best.minY + 1) * 0.06);
+      const sourceX = clamp(Math.round((best.minX - padX) / scale), 0, image.width - 1);
+      const sourceY = clamp(Math.round((best.minY - padY) / scale), 0, image.height - 1);
+      const sourceRight = clamp(Math.round((best.maxX + padX + 1) / scale), sourceX + 1, image.width);
+      const sourceBottom = clamp(Math.round((best.maxY + padY + 1) / scale), sourceY + 1, image.height);
+
+      return {
+        x: sourceX,
+        y: sourceY,
+        width: sourceRight - sourceX,
+        height: sourceBottom - sourceY
+      };
+    }
+
+    function buildOcrCanvas(image, mode = 'threshold') {
+      const rect = findSpinTouchScreenRect(image);
+      const maxWidth = 1200;
+      const targetWidth = Math.max(1, Math.round(Math.min(maxWidth, rect.width * 2.2)));
+      const targetHeight = Math.max(1, Math.round(targetWidth * (rect.height / rect.width)));
+
+      processedCanvas.width = targetWidth;
+      processedCanvas.height = targetHeight;
+      const ctx = processedCanvas.getContext('2d', { willReadFrequently: true });
+      ctx.clearRect(0, 0, targetWidth, targetHeight);
+      ctx.drawImage(image, rect.x, rect.y, rect.width, rect.height, 0, 0, targetWidth, targetHeight);
+
+      const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+      const data = imageData.data;
+
+      let minGray = 255;
+      let maxGray = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const gray = Math.round((0.2126 * data[i]) + (0.7152 * data[i + 1]) + (0.0722 * data[i + 2]));
+        if (gray < minGray) minGray = gray;
+        if (gray > maxGray) maxGray = gray;
+      }
+      const contrastRange = Math.max(1, maxGray - minGray);
+      const threshold = clamp(minGray + contrastRange * 0.68, 145, 205);
+
+      for (let i = 0; i < data.length; i += 4) {
+        const gray = Math.round((0.2126 * data[i]) + (0.7152 * data[i + 1]) + (0.0722 * data[i + 2]));
+        let normalized = ((gray - minGray) / contrastRange) * 255;
+        normalized = clamp((normalized - 120) * 1.8 + 120, 0, 255);
+
+        if (mode === 'threshold') {
+          const value = normalized >= threshold ? 0 : 255;
+          data[i] = value;
+          data[i + 1] = value;
+          data[i + 2] = value;
+        } else {
+          data[i] = normalized;
+          data[i + 1] = normalized;
+          data[i + 2] = normalized;
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      processedCanvas.classList.remove('hidden');
+      return processedCanvas;
+    }
+
+    function normalizeOcrText(text) {
+      return (text || '')
+        .replace(/[|]/g, 'I')
+        .replace(/[\[\]{}()]/g, ' ')
+        .replace(/[\u2013\u2014]/g, '-')
+        .replace(/\r/g, '\n')
+        .replace(/[ ]{2,}/g, ' ')
+        .replace(/\bFCI\b/g, 'FCL')
+        .replace(/\bFEL\b/g, 'FCL')
+        .replace(/\bFGL\b/g, 'FCL')
+        .replace(/\bFOL\b/g, 'FCL')
+        .replace(/\bFOL\b/g, 'FCL')
+        .replace(/\bAIK\b/g, 'ALK')
+        .replace(/\bALX\b/g, 'ALK')
+        .replace(/\bAX\b/g, 'ALK')
+        .replace(/\bAK\b/g, 'ALK')
+        .replace(/\bCY4\b/g, 'CYA')
+        .replace(/\bCVA\b/g, 'CYA')
+        .replace(/\bPH0S\b/g, 'PHOS')
+        .replace(/\bPHO\b/g, 'PHOS')
+        .toUpperCase();
+    }
+
+    function coerceOcrNumber(fieldName, rawValue) {
+      if (rawValue === null || rawValue === undefined) return null;
+      const text = String(rawValue).trim().replace(/,/g, '.').replace(/[^0-9.]/g, '');
+      if (!text) return null;
+
+      let value = Number(text);
+      if (!Number.isFinite(value)) return null;
+
+      if (fieldName === 'ph') {
+        if (!text.includes('.')) {
+          if (value >= 60 && value <= 89) value = value / 10;
+          else if (value >= 600 && value <= 890) value = value / 100;
+        }
+        value = Math.round(value * 100) / 100;
+        if (value < 4 || value > 10) return null;
+      }
+
+      return value;
+    }
+
+    function parseSpinTouchText(text) {
+      const cleaned = normalizeOcrText(text);
+
+      const findValue = (fieldName, ...patterns) => {
+        for (const pattern of patterns) {
+          const match = cleaned.match(pattern);
+          if (!match) continue;
+          const value = coerceOcrNumber(fieldName, match[1]);
+          if (Number.isFinite(value)) return value;
+        }
+        return null;
+      };
+
+      const testTimeMatch = cleaned.match(/TEST\s*TIME\s*[:=]?\s*([0-9: ]+[APM]{0,2}(?:\s+[0-9]{1,2}-[A-Z]{3}-[0-9]{4})?)/);
+      return {
+        testTime: testTimeMatch ? testTimeMatch[1].trim() : '',
+        freeChlorine: findValue('freeChlorine', /\bFCL\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/, /\bF\s*[CO0]?\s*L\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/),
+        ph: findValue('ph', /\bPH\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/, /\bP\s*H\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/),
+        alkalinity: findValue('alkalinity', /\bALK\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/, /(?:^|\s)A\s*[LKX]\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/),
+        calciumHardness: findValue('calciumHardness', /\bHARD\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/, /\bHAR[D0O]\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/),
+        cyanuricAcid: findValue('cyanuricAcid', /\bCYA\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/),
+        copper: findValue('copper', /\bCOPP(?:ER|FR|EF)\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/, /\bCOPPER\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/),
+        phosphates: findValue('phosphates', /\bPHOS\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/, /\bPH[O0]S\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/),
+        salt: findValue('salt', /\bSALT\b\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)/)
+      };
+    }
+
+    function countParsedFields(parsed) {
+      return ['freeChlorine', 'ph', 'alkalinity', 'calciumHardness', 'cyanuricAcid', 'copper', 'phosphates', 'salt']
+        .filter(key => parsed[key] !== null && parsed[key] !== undefined)
+        .length;
+    }
+
+    function fillImportedValues(parsed, options = {}) {
+      const { clearMissing = false } = options;
+      const mapping = {
+        freeChlorine: 'freeChlorine',
+        ph: 'ph',
+        alkalinity: 'alkalinity',
+        calciumHardness: 'calciumHardness',
+        cyanuricAcid: 'cyanuricAcid',
+        copper: 'copper',
+        phosphates: 'phosphates',
+        salt: 'salt'
+      };
+
+      let filledCount = 0;
+      Object.entries(mapping).forEach(([key, inputId]) => {
+        const input = el(inputId);
+        if (parsed[key] !== null && parsed[key] !== undefined) {
+          input.value = parsed[key];
+          filledCount += 1;
+        } else if (clearMissing) {
+          input.value = '';
+        }
+      });
+      inputs.testTime.value = parsed.testTime || '';
+      updateAll();
+      return filledCount;
+    }
+
+    function applyOcrText() {
+      const parsed = parseSpinTouchText(inputs.ocrText.value);
+      const filledCount = fillImportedValues(parsed, { clearMissing: true });
+      if (filledCount > 0) {
+        setImportStatus(`Filled ${filledCount} test result fields from OCR text${parsed.testTime ? ' and the test time' : ''}.`);
+      } else {
+        setImportStatus('No result fields were recognised from the OCR text yet.');
+      }
+    }
+
+    async function runOcrPass(canvas, modeLabel) {
+      const result = await Tesseract.recognize(canvas, 'eng', {
+        logger: (message) => {
+          if (message.status === 'recognizing text' && typeof message.progress === 'number') {
+            setImportStatus(`Reading Spin Touch photo... ${modeLabel} ${Math.round(message.progress * 100)}%`);
+          }
+        },
+        tessedit_pageseg_mode: 6,
+        tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.: -'
+      });
+      return result?.data?.text || '';
+    }
+
+    async function readSelectedPhoto() {
+      if (!currentImage) return;
+      if (!window.Tesseract) {
+        setImportStatus('OCR library did not load. Manual entry will still work.');
+        return;
+      }
+
+      try {
+        setImportStatus('Reading Spin Touch photo...');
+        const firstCanvas = buildOcrCanvas(currentImage, 'threshold');
+        let bestText = await runOcrPass(firstCanvas, 'pass 1');
+        let bestParsed = parseSpinTouchText(bestText);
+        let bestCount = countParsedFields(bestParsed);
+
+        if (bestCount < 4) {
+          const secondCanvas = buildOcrCanvas(currentImage, 'grayscale');
+          const secondText = await runOcrPass(secondCanvas, 'pass 2');
+          const combinedText = [bestText, secondText].filter(Boolean).join('\n');
+          const combinedParsed = parseSpinTouchText(combinedText);
+          const combinedCount = countParsedFields(combinedParsed);
+          if (combinedCount >= bestCount) {
+            bestText = combinedText;
+            bestParsed = combinedParsed;
+            bestCount = combinedCount;
+          }
+        }
+
+        inputs.ocrText.value = bestText.trim();
+        const filledCount = fillImportedValues(bestParsed, { clearMissing: true });
+
+        if (filledCount > 0) {
+          setImportStatus(`Photo imported. Filled ${filledCount} test result fields${bestParsed.testTime ? ' and the test time' : ''}. Check the values and adjust if needed.`);
+        } else {
+          setImportStatus('OCR ran, but no result fields were matched. Try a tighter photo of just the blue screen or tap Fill from OCR text after editing the OCR text box.');
+        }
+      } catch (error) {
+        console.error(error);
+        setImportStatus('Could not read that photo. Try another photo with less glare or enter the results manually.');
+      }
+    }
+
+    function handlePhotoFile(file) {
+      if (!file) return;
+      if (currentImageUrl) URL.revokeObjectURL(currentImageUrl);
+      currentImageUrl = URL.createObjectURL(file);
+      currentImage = new Image();
+      currentImage.onload = () => {
+        photoPreview.src = currentImageUrl;
+        photoPreview.classList.remove('hidden');
+        previewBox.querySelector('.placeholder')?.classList.add('hidden');
+        processedCanvas.classList.add('hidden');
+        reReadBtn.disabled = false;
+        setImportStatus('Photo loaded. Reading now...');
+        readSelectedPhoto();
+      };
+      currentImage.src = currentImageUrl;
+    }
+
+    function attachListeners() {
+      document.querySelectorAll('input, select, textarea').forEach(node => {
+        if (node.type !== 'file' && node.id !== 'ocrText' && node.id !== 'testTime') {
+          node.addEventListener('input', updateAll);
+          node.addEventListener('change', updateAll);
+        }
+      });
+
+      el('resetBtn').addEventListener('click', resetAll);
+      el('takePhotoBtn').addEventListener('click', () => cameraInput.click());
+      el('choosePhotoBtn').addEventListener('click', () => libraryInput.click());
+      reReadBtn.addEventListener('click', readSelectedPhoto);
+      el('applyOcrBtn').addEventListener('click', applyOcrText);
+      cameraInput.addEventListener('change', event => handlePhotoFile(event.target.files[0]));
+      libraryInput.addEventListener('change', event => handlePhotoFile(event.target.files[0]));
+    }
+
+    function init() {
+      populatePools();
+      loadState();
+      if (!inputs.poolSelect.value) inputs.poolSelect.value = savedPools[0].name;
+      attachListeners();
+      updateAll();
+      calculateMainDoses();
+      calculateIceBaths();
+    }
+
+    init();
+  </script>
+</body>
+</html>

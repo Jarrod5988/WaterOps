@@ -1272,21 +1272,63 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=1400, initial-scale=1.0, maximum-scale=5.0" />
   <title>Water Quality Testing Report</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; margin: 20px; color: #1f2937; background: #ffffff; }
-    .report-sheet { border: 1px solid #cfd8e3; border-radius: 14px; overflow: hidden; background: #fff; }
+    @page { size: A4 landscape; margin: 10mm; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: #1f2937;
+      min-width: 1400px;
+      padding: 20px;
+    }
+    .report-sheet {
+      width: 1360px;
+      margin: 0 auto;
+      border: 1px solid #cfd8e3;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+      box-sizing: border-box;
+    }
     .report-title { padding: 18px 18px 8px; font-size: 30px; font-weight: 800; color: #0b3f6c; }
     .report-top { display: grid; grid-template-columns: 1fr 1.2fr; gap: 14px; padding: 0 18px 18px; }
-    .report-company, .report-meta { border: 1px solid #cfd8e3; border-radius: 12px; padding: 14px; background: #fbfdff; font-size: 14px; line-height: 1.5; }
-    .report-meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
-    .report-meta-item { display: grid; grid-template-columns: 110px 1fr; gap: 10px; }
+    .report-company, .report-meta {
+      border: 1px solid #cfd8e3;
+      border-radius: 12px;
+      padding: 14px;
+      background: #fbfdff;
+      font-size: 14px;
+      line-height: 1.5;
+      box-sizing: border-box;
+    }
+    .report-meta-grid { display: grid; grid-template-columns: repeat(2, minmax(240px, 1fr)); gap: 10px 16px; }
+    .report-meta-item { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 10px; align-items: start; }
     .report-meta-label { font-weight: 800; color: #0b3f6c; }
     .report-band { background: #0f4573; color: #fff; font-weight: 800; font-size: 16px; text-align: center; padding: 10px 14px; }
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #2d86d5; color: #fff; font-size: 12px; padding: 10px 8px; text-transform: uppercase; }
-    td { font-size: 14px; padding: 10px 8px; border-bottom: 1px solid #dbe6f2; vertical-align: top; }
+    .report-table-wrap { overflow: visible; }
+    .report-table { width: 100%; min-width: 0; border-collapse: collapse; table-layout: fixed; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th {
+      background: #2d86d5;
+      color: #fff;
+      font-size: 12px;
+      padding: 10px 8px;
+      text-transform: uppercase;
+      word-break: break-word;
+    }
+    td {
+      font-size: 14px;
+      padding: 10px 8px;
+      border-bottom: 1px solid #dbe6f2;
+      vertical-align: top;
+      word-break: break-word;
+    }
     .report-notes { padding: 14px 18px 18px; white-space: pre-wrap; }
     .report-footer { padding: 12px 18px 18px; font-size: 13px; color: #0b3f6c; background: #f5f9fe; }
   </style>

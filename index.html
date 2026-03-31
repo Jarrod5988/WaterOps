@@ -730,6 +730,34 @@
     </div>
 
     <div class="grid">
+      <!-- Pool selection moved above Quick capture -->
+      <section class="card span-4">
+        <h2>Pool selection</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="poolSelect">Selected pool</label>
+            <select id="poolSelect"></select>
+            <small>Choose a saved pool or Custom Pool.</small>
+          </div>
+          <div class="field">
+            <label for="poolVolumeAuto">Pool volume (auto)</label>
+            <input id="poolVolumeAuto" type="number" readonly />
+            <small>Auto-filled from the pool list.</small>
+          </div>
+          <div class="field">
+            <label for="customVolume">Custom volume override</label>
+            <input id="customVolume" type="number" inputmode="decimal" min="0" step="1" placeholder="Optional" />
+            <small>Use this if you want to override the saved volume.</small>
+          </div>
+          <div class="field">
+            <label for="activeVolume">Active volume used</label>
+            <input id="activeVolume" type="number" readonly />
+            <small>This volume is used in all dose calculations.</small>
+          </div>
+        </div>
+        <!-- Note displayed for pools using special systems like Enviroswim -->
+        <small id="poolSystemNote" style="display:none; margin-top: 8px; color: var(--muted); font-size: 12px;"></small>
+      </section>
       <section class="card span-12">
         <h2>Quick capture</h2>
         <div class="field-grid" style="margin-bottom: 12px;">
@@ -789,31 +817,7 @@
         </div>
       </section>
 
-      <section class="card span-4">
-        <h2>Pool selection</h2>
-        <div class="field-grid">
-          <div class="field">
-            <label for="poolSelect">Selected pool</label>
-            <select id="poolSelect"></select>
-            <small>Choose a saved pool or Custom Pool.</small>
-          </div>
-          <div class="field">
-            <label for="poolVolumeAuto">Pool volume (auto)</label>
-            <input id="poolVolumeAuto" type="number" readonly />
-            <small>Auto-filled from the pool list.</small>
-          </div>
-          <div class="field">
-            <label for="customVolume">Custom volume override</label>
-            <input id="customVolume" type="number" inputmode="decimal" min="0" step="1" placeholder="Optional" />
-            <small>Use this if you want to override the saved volume.</small>
-          </div>
-          <div class="field">
-            <label for="activeVolume">Active volume used</label>
-            <input id="activeVolume" type="number" readonly />
-            <small>This volume is used in all dose calculations.</small>
-          </div>
-        </div>
-      </section>
+      <!-- Pool selection removed from its original location; moved above Quick capture -->
 
       <section class="card span-8">
         <h2>Current test results and targets</h2>
@@ -955,7 +959,8 @@
         site: 'Raiders',
         poolName: 'Raiders Hydrotherapy Pool',
         volume: 32000,
-        defaults: { ph: 7.4, fc: 1.5, alk: 80, calcium: 200, cya: 0, salt: 1000 }
+        defaults: { ph: 7.4, fc: 1.5, alk: 80, calcium: 200, cya: 0, salt: 1000 },
+        systemNote: 'Enviroswim system - recommended pH 7.0-7.5 (ideal 7.2), alkalinity 80-130 ppm, calcium hardness 175-250 ppm (ideal 200), copper 0.2-0.4 ppm (ideal 0.3), oxidiser around 0.5 ppm, avoid stabiliser (CYA).'
       },
       {
         key: 'raiders_ice_bath_1',
@@ -983,28 +988,32 @@
         site: 'James Court',
         poolName: 'James Court Pool',
         volume: 90000,
-        defaults: { ph: 7.4, fc: 1.5, alk: 80, calcium: 250, cya: 0, salt: 0 }
+        defaults: { ph: 7.4, fc: 1.5, alk: 80, calcium: 250, cya: 0, salt: 0 },
+        systemNote: 'Enviroswim system - recommended pH 7.0-7.5 (ideal 7.2), alkalinity 80-130 ppm, calcium hardness 175-250 ppm (ideal 200), copper 0.2-0.4 ppm (ideal 0.3), oxidiser around 0.5 ppm, avoid stabiliser (CYA).'
       },
       {
         key: 'james_court_spa',
         site: 'James Court',
         poolName: 'James Court Spa',
         volume: 6000,
-        defaults: { ph: 7.4, fc: 1.5, alk: 100, calcium: 250, cya: 0, salt: 0 }
+        defaults: { ph: 7.4, fc: 1.5, alk: 100, calcium: 250, cya: 0, salt: 0 },
+        systemNote: 'Enviroswim system - recommended pH 7.0-7.5 (ideal 7.2), alkalinity 80-130 ppm, calcium hardness 175-250 ppm (ideal 200), copper 0.2-0.4 ppm (ideal 0.3), oxidiser around 0.5 ppm, avoid stabiliser (CYA).'
       },
       {
         key: 'kamy_saeedi',
         site: 'Kamy Saeedi',
         poolName: 'Kamy Saeedi',
         volume: 90000,
-        defaults: { ph: 7.2, fc: 1.0, alk: 80, calcium: 200, cya: 0, salt: 1000 }
+        defaults: { ph: 7.2, fc: 1.0, alk: 80, calcium: 200, cya: 0, salt: 1000 },
+        systemNote: 'Enviroswim system - recommended pH 7.0-7.5 (ideal 7.2), alkalinity 80-130 ppm, calcium hardness 175-250 ppm (ideal 200), copper 0.2-0.4 ppm (ideal 0.3), oxidiser around 0.5 ppm, avoid stabiliser (CYA).'
       },
       {
         key: 'nathan_volke',
         site: 'Nathan Volke',
         poolName: "Nathan's Pool",
         volume: 50000,
-        defaults: { ph: 7.2, fc: 1.0, alk: 80, calcium: 200, cya: 0, salt: 1000 }
+        defaults: { ph: 7.2, fc: 1.0, alk: 80, calcium: 200, cya: 0, salt: 1000 },
+        systemNote: 'Enviroswim system - recommended pH 7.0-7.5 (ideal 7.2), alkalinity 80-130 ppm, calcium hardness 175-250 ppm (ideal 200), copper 0.2-0.4 ppm (ideal 0.3), oxidiser around 0.5 ppm, avoid stabiliser (CYA).'
       },
       {
         key: 'custom_pool',
@@ -1106,6 +1115,18 @@
       if (!inputs.reportPoolName.value || inputs.reportPoolName.dataset.auto === 'true') {
         inputs.reportPoolName.value = pool.poolName || '';
         inputs.reportPoolName.dataset.auto = 'true';
+      }
+
+      // Show or hide system note for selected pool
+      const noteEl = document.getElementById('poolSystemNote');
+      if (noteEl) {
+        if (pool.systemNote) {
+          noteEl.textContent = pool.systemNote;
+          noteEl.style.display = 'block';
+        } else {
+          noteEl.textContent = '';
+          noteEl.style.display = 'none';
+        }
       }
 
       updateActiveVolume();

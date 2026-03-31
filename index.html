@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2b96ff" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Pool Dosing Calculator" />
@@ -1022,6 +1025,7 @@
 
     function renderDoseChecklist(doses) {
       const checklist = qs('doseChecklist');
+      const currentDoseFields = getCurrentDoseFieldValues();
       const doseConfig = [
         { key: 'acid', unit: 'mL', decimals: 0, note: 'Acid estimate is based on pH and alkalinity. Retest after dosing.' },
         { key: 'chlorine', unit: 'mL', decimals: 0, note: 'Based on liquid chlorine 12.5%.' },
@@ -1058,8 +1062,23 @@
         checklist.appendChild(wrapper);
       });
 
-      restoreDoseFields();
+      restoreDoseFields(currentDoseFields);
       bindDoseFields();
+    }
+
+    function getCurrentDoseFieldValues() {
+      const snapshot = {};
+      ['acid', 'chlorine', 'bicarb', 'calcium', 'salt'].forEach(key => {
+        const statusField = qs(`doseStatus_${key}`);
+        const noteField = qs(`doseNote_${key}`);
+        if (statusField) snapshot[`doseStatus_${key}`] = statusField.value;
+        if (noteField) snapshot[`doseNote_${key}`] = noteField.value;
+      });
+      return snapshot;
+    }
+
+    function handleDoseFieldChange() {
+      saveState();
     }
 
     function bindDoseFields() {
@@ -1067,19 +1086,19 @@
         const statusField = qs(`doseStatus_${key}`);
         const noteField = qs(`doseNote_${key}`);
         if (statusField && !statusField.dataset.bound) {
-          statusField.addEventListener('change', handleInputChange);
+          statusField.addEventListener('change', handleDoseFieldChange);
           statusField.dataset.bound = 'true';
         }
         if (noteField && !noteField.dataset.bound) {
-          noteField.addEventListener('input', handleInputChange);
+          noteField.addEventListener('input', handleDoseFieldChange);
           noteField.dataset.bound = 'true';
         }
       });
     }
 
-    function restoreDoseFields() {
+    function restoreDoseFields(existingValues = null) {
       try {
-        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        const stored = existingValues || JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
         ['acid', 'chlorine', 'bicarb', 'calcium', 'salt'].forEach(key => {
           const statusField = qs(`doseStatus_${key}`);
           const noteField = qs(`doseNote_${key}`);
@@ -1239,7 +1258,7 @@
 
     function loadState() {
       try {
-        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        const stored = existingValues || JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
         Object.keys(inputs).forEach(key => {
           if (stored[key] != null) inputs[key].value = stored[key];
         });

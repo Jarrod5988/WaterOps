@@ -4,15 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2b96ff" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="MBS FM" />
-  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="apple-touch-icon" sizes="180x180" href="mbsfm-icon-180.png" />
+  <link rel="icon" type="image/png" sizes="180x180" href="mbsfm-icon-180.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="mbsfm-icon-512.png" />
   <link rel="manifest" href="manifest.json" />
-
   <title>MBS FM Pool Dosing Calculator</title>
   <style>
     :root {
@@ -969,6 +972,13 @@
         poolName: 'James Court Spa',
         volume: 6000,
         defaults: { ph: 7.4, fc: 1.5, alk: 100, calcium: 250, cya: 0, salt: 0 }
+      },
+      {
+        key: 'kamy_saeedi',
+        site: 'Kamy Saeedi',
+        poolName: 'Kamy Saeedi',
+        volume: 90000,
+        defaults: { ph: 7.2, fc: 1.0, alk: 80, calcium: 200, cya: 0, salt: 1000 }
       },
       {
         key: 'custom_pool',
@@ -2524,119 +2534,5 @@ async function savePdfReport() {
 
     window.addEventListener('DOMContentLoaded', init);
   </script>
-  <div id="installPrompt" class="install-prompt hidden">
-  <div class="install-card">
-    <div class="install-header">
-      <img src="apple-touch-icon.png" alt="MBS FM" class="install-logo">
-      <div>
-        <h3>Add MBS FM to Home Screen</h3>
-        <p>Only needs to be done once on each phone.</p>
-      </div>
-    </div>
-
-    <ol>
-      <li>Tap the <strong>Share</strong> button in Safari</li>
-      <li>Tap <strong>Add to Home Screen</strong></li>
-      <li>Leave <strong>Open as Web App</strong> turned on</li>
-      <li>Tap <strong>Add</strong></li>
-    </ol>
-
-    <div class="install-actions">
-      <button id="installPromptClose" type="button">Got it</button>
-    </div>
-  </div>
-</div>
-
-<style>
-  .hidden { display: none !important; }
-
-  .install-prompt {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 9999;
-  }
-
-  .install-card {
-    width: 100%;
-    max-width: 420px;
-    background: #fff;
-    border-radius: 24px;
-    padding: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.20);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
-
-  .install-header {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    margin-bottom: 14px;
-  }
-
-  .install-logo {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-  }
-
-  .install-header h3 {
-    margin: 0 0 4px;
-    font-size: 20px;
-    color: #0b5ea8;
-  }
-
-  .install-header p {
-    margin: 0;
-    font-size: 14px;
-    color: #64748b;
-  }
-
-  .install-card ol {
-    margin: 0 0 18px 20px;
-    padding: 0;
-    color: #1e293b;
-    line-height: 1.6;
-  }
-
-  .install-actions button {
-    width: 100%;
-    border: 0;
-    border-radius: 14px;
-    padding: 14px;
-    background: #0b5ea8;
-    color: #fff;
-    font-weight: 700;
-    font-size: 16px;
-  }
-</style>
-
-<script>
-  (function () {
-    const seenKey = "mbsfm_install_prompt_seen";
-    const promptEl = document.getElementById("installPrompt");
-    const closeBtn = document.getElementById("installPromptClose");
-
-    const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-    const isSafari = /safari/i.test(window.navigator.userAgent) && !/crios|fxios|edgios/i.test(window.navigator.userAgent);
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-    const hasSeen = localStorage.getItem(seenKey) === "yes";
-
-    if (isIOS && isSafari && !isStandalone && !hasSeen) {
-      setTimeout(() => {
-        promptEl.classList.remove("hidden");
-      }, 800);
-    }
-
-    closeBtn.addEventListener("click", () => {
-      localStorage.setItem(seenKey, "yes");
-      promptEl.classList.add("hidden");
-    });
-  })();
-</script>
 </body>
 </html>

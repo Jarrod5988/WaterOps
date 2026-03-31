@@ -171,30 +171,6 @@
       .span-4 { grid-column: span 4; }
     }
 
-
-    @media (max-width: 640px) {
-      .field-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .compact-time-field,
-      .compact-time-input {
-        max-width: 100%;
-      }
-
-      .button-row,
-      .actions,
-      .toolbar {
-        flex-direction: column;
-      }
-
-      .button-row > *,
-      .actions > *,
-      .toolbar > * {
-        width: 100%;
-      }
-    }
-
     .card h2 {
       margin: 0 0 14px;
       display: flex;
@@ -225,21 +201,6 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      min-width: 0;
-    }
-
-    .compact-time-field {
-      max-width: 180px;
-    }
-
-    .compact-time-input {
-      max-width: 180px;
-      font-size: 15px;
-      padding: 10px 12px;
-    }
-
-    .compact-time-input::-webkit-calendar-picker-indicator {
-      margin-left: 0;
     }
 
     .field label {
@@ -250,8 +211,6 @@
 
     input, select, textarea {
       width: 100%;
-      max-width: 100%;
-      min-width: 0;
       border: 1px solid rgba(134, 180, 226, 0.30);
       border-radius: 14px;
       padding: 12px;
@@ -771,33 +730,6 @@
     </div>
 
     <div class="grid">
-      <section class="card span-4">
-        <h2>Pool selection</h2>
-        <div class="field-grid">
-          <div class="field">
-            <label for="poolSelect">Selected pool</label>
-            <select id="poolSelect"></select>
-            <small>Choose a saved pool or Custom Pool.</small>
-          </div>
-          <div class="field">
-            <label for="poolVolumeAuto">Pool volume (auto)</label>
-            <input id="poolVolumeAuto" type="number" readonly />
-            <small>Auto-filled from the pool list.</small>
-          </div>
-          <div class="field">
-            <label for="customVolume">Custom volume override</label>
-            <input id="customVolume" type="number" inputmode="decimal" min="0" step="1" placeholder="Optional" />
-            <small>Use this if you want to override the saved volume.</small>
-          </div>
-          <div class="field">
-            <label for="activeVolume">Active volume used</label>
-            <input id="activeVolume" type="number" readonly />
-            <small>This volume is used in all dose calculations.</small>
-          </div>
-        </div>
-      </section>
-
-
       <section class="card span-12">
         <h2>Quick capture</h2>
         <div class="field-grid" style="margin-bottom: 12px;">
@@ -817,9 +749,9 @@
             <label for="reportDate">Date</label>
             <input id="reportDate" type="date" />
           </div>
-          <div class="field compact-time-field">
+          <div class="field">
             <label for="testTime">Test time</label>
-            <input id="testTime" class="compact-time-input" type="time" />
+            <input id="testTime" type="time" />
           </div>
           <div class="field">
             <label for="waterClarity">Water clarity</label>
@@ -857,6 +789,31 @@
         </div>
       </section>
 
+      <section class="card span-4">
+        <h2>Pool selection</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="poolSelect">Selected pool</label>
+            <select id="poolSelect"></select>
+            <small>Choose a saved pool or Custom Pool.</small>
+          </div>
+          <div class="field">
+            <label for="poolVolumeAuto">Pool volume (auto)</label>
+            <input id="poolVolumeAuto" type="number" readonly />
+            <small>Auto-filled from the pool list.</small>
+          </div>
+          <div class="field">
+            <label for="customVolume">Custom volume override</label>
+            <input id="customVolume" type="number" inputmode="decimal" min="0" step="1" placeholder="Optional" />
+            <small>Use this if you want to override the saved volume.</small>
+          </div>
+          <div class="field">
+            <label for="activeVolume">Active volume used</label>
+            <input id="activeVolume" type="number" readonly />
+            <small>This volume is used in all dose calculations.</small>
+          </div>
+        </div>
+      </section>
 
       <section class="card span-8">
         <h2>Current test results and targets</h2>
@@ -987,6 +944,11 @@
     const REPORT_BLUE_ACCENT = '#0059AD';
     const STORAGE_KEY = 'mbs-pool-dosing-combined-v2';
 
+    // Updated list of pools including Raiders Ice Baths 2 & 3, Kamy Saeedi and Nathan's Pool.
+    // James Court Pool and Spa have their CYA targets set to 0.  Each of the ice baths now
+    // has its own record so you can adjust the targets independently.  The salt target
+    // for the ice baths has been set to 0.  The Nathan entry uses double quotes around the
+    // pool name to avoid breaking the JavaScript string.
     const POOLS = [
       {
         key: 'raiders_hydrotherapy_pool',
@@ -1038,9 +1000,9 @@
         defaults: { ph: 7.2, fc: 1.0, alk: 80, calcium: 200, cya: 0, salt: 1000 }
       },
       {
-        key: 'nathan_volke_pool',
+        key: 'nathan_volke',
         site: 'Nathan Volke',
-        poolName: "Nathan’s Pool",
+        poolName: "Nathan's Pool",
         volume: 50000,
         defaults: { ph: 7.2, fc: 1.0, alk: 80, calcium: 200, cya: 0, salt: 1000 }
       },

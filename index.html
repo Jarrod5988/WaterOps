@@ -739,6 +739,139 @@
       color: var(--muted);
     }
 
+
+    .mode-note {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .subcard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .subcard {
+      border: 1px solid rgba(137, 183, 226, 0.18);
+      border-radius: 18px;
+      padding: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
+    }
+
+    .subcard h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      color: #1c4771;
+    }
+
+    .mini-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .mini-pill {
+      border-radius: 14px;
+      border: 1px solid rgba(137, 183, 226, 0.18);
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+    }
+
+    .mini-pill strong {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stock-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .stock-table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #d7e6f3;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .stock-table th,
+    .stock-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #e5edf6;
+      font-size: 13px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .stock-table th {
+      background: var(--blue-dark);
+      color: #fff;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .stock-table input,
+    .stock-table select {
+      min-height: 42px;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+
+    .log-table-wrap {
+      overflow-x: auto;
+      border: 1px solid rgba(141, 189, 232, 0.22);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(250,253,255,0.96) 0%, rgba(243,248,253,0.96) 100%);
+    }
+
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .qr-card {
+      border: 1px solid rgba(137, 183, 226, 0.18);
+      border-radius: 18px;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
+      text-align: center;
+    }
+
+    .qr-card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: #1c4771;
+    }
+
+    .qr-card canvas,
+    .qr-card img {
+      width: 180px;
+      height: 180px;
+      max-width: 100%;
+      display: block;
+      margin: 0 auto 8px;
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid rgba(137, 183, 226, 0.18);
+    }
+
+    .inline-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -855,7 +988,7 @@
 
       <!-- Pool selection removed from its original location; moved above Quick capture -->
 
-      <section class="card span-8">
+      <section class="card span-8" id="singleResultsCard">
         <h2>Current test results and targets</h2>
         <div class="field-grid">
           <div class="field">
@@ -917,7 +1050,51 @@
         </div>
       </section>
 
-      <section class="card span-12">
+
+      <section class="card span-12 hidden" id="groupIceBathsCard">
+        <h2>Raiders ice baths - all 3</h2>
+        <div class="mode-note">This section stays hidden unless the Raiders Ice Baths - All 3 option or QR code is used.</div>
+        <div class="subcard-grid">
+          <div class="subcard">
+            <h3>Raiders Ice Bath 1</h3>
+            <div class="field-grid">
+              <div class="field"><label for="iceBath1Clarity">Water clarity</label><select id="iceBath1Clarity"><option value="">Select</option><option>Clear</option><option>Slightly cloudy</option><option>Cloudy</option><option>Poor</option></select></div>
+              <div class="field"><label for="iceBath1Ph">Current pH</label><input id="iceBath1Ph" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath1Fc">Free chlorine</label><input id="iceBath1Fc" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath1Alk">Alkalinity</label><input id="iceBath1Alk" type="number" step="1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath1Temp">Temperature</label><input id="iceBath1Temp" type="number" step="0.1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath1Note">Note</label><input id="iceBath1Note" type="text" placeholder="Optional" /></div>
+            </div>
+            <div class="mini-summary" id="iceBath1Summary"></div>
+          </div>
+          <div class="subcard">
+            <h3>Raiders Ice Bath 2</h3>
+            <div class="field-grid">
+              <div class="field"><label for="iceBath2Clarity">Water clarity</label><select id="iceBath2Clarity"><option value="">Select</option><option>Clear</option><option>Slightly cloudy</option><option>Cloudy</option><option>Poor</option></select></div>
+              <div class="field"><label for="iceBath2Ph">Current pH</label><input id="iceBath2Ph" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath2Fc">Free chlorine</label><input id="iceBath2Fc" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath2Alk">Alkalinity</label><input id="iceBath2Alk" type="number" step="1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath2Temp">Temperature</label><input id="iceBath2Temp" type="number" step="0.1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath2Note">Note</label><input id="iceBath2Note" type="text" placeholder="Optional" /></div>
+            </div>
+            <div class="mini-summary" id="iceBath2Summary"></div>
+          </div>
+          <div class="subcard">
+            <h3>Raiders Ice Bath 3</h3>
+            <div class="field-grid">
+              <div class="field"><label for="iceBath3Clarity">Water clarity</label><select id="iceBath3Clarity"><option value="">Select</option><option>Clear</option><option>Slightly cloudy</option><option>Cloudy</option><option>Poor</option></select></div>
+              <div class="field"><label for="iceBath3Ph">Current pH</label><input id="iceBath3Ph" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath3Fc">Free chlorine</label><input id="iceBath3Fc" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath3Alk">Alkalinity</label><input id="iceBath3Alk" type="number" step="1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath3Temp">Temperature</label><input id="iceBath3Temp" type="number" step="0.1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath3Note">Note</label><input id="iceBath3Note" type="text" placeholder="Optional" /></div>
+            </div>
+            <div class="mini-summary" id="iceBath3Summary"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card span-12" id="singleCombinedCard">
         <h2>Combined water balance and dosing</h2>
         <div class="kpi-wrap">
           <div class="kpi">
@@ -965,6 +1142,19 @@
         <div class="dose-checklist" id="doseChecklist"></div>
       </section>
 
+
+      <section class="card span-12" id="stockLogCard">
+        <h2>Chemical stock log</h2>
+        <div class="mode-note">This tracks stock on this device/browser only. Ute stock is global. Onsite stock is saved against the selected pool.</div>
+        <div id="stockContent"></div>
+      </section>
+
+      <section class="card span-12" id="qrCodesCard">
+        <h2>QR codes</h2>
+        <div class="mode-note">Each QR opens this app straight to a pool, plus one QR for Raiders Ice Baths - All 3.</div>
+        <div id="qrCodesWrap" class="qr-grid"></div>
+      </section>
+
       <section class="card span-12">
         <h2>Service report</h2>
         <div class="actions" style="margin-bottom: 12px;">
@@ -979,11 +1169,15 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script>
     const REPORT_LOGO_DATA = 'data:image/png;base64,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';
     const REPORT_BLUE = '#003A75';
     const REPORT_BLUE_ACCENT = '#0059AD';
-    const STORAGE_KEY = 'mbs-pool-dosing-combined-v2';
+    const STORAGE_KEY = 'mbs-pool-dosing-combined-v3';
+    const STOCK_STORAGE_KEY = 'mbs-pool-stock-v1';
+    const DOSE_KEYS = ['acid', 'chlorine', 'bicarb', 'calcium', 'stabiliser', 'salt'];
+    const QR_SIZE = 180;
 
     // Updated list of pools including Raiders Ice Baths 2 & 3, Kamy Saeedi and Nathan's Pool.
     // James Court Pool and Spa have their CYA targets set to 0.  Each of the ice baths now
@@ -991,6 +1185,14 @@
     // for the ice baths has been set to 0.  The Nathan entry uses double quotes around the
     // pool name to avoid breaking the JavaScript string.
     const POOLS = [
+      {
+        key: 'raiders_ice_baths_all',
+        site: 'Raiders',
+        poolName: 'Raiders Ice Baths - All 3',
+        volume: 18000,
+        defaults: { ph: 7.2, fc: 3.0, alk: 80, calcium: 200, cya: 0, salt: 0 },
+        isGroup: true
+      },
       {
         key: 'raiders_hydrotherapy_pool',
         site: 'Raiders',
@@ -1091,6 +1293,15 @@
       salt: 'Pool Salt'
     };
 
+    const chemicalMeta = {
+      acid: { unit: 'mL', decimals: 0 },
+      chlorine: { unit: 'mL', decimals: 0 },
+      bicarb: { unit: 'kg', decimals: 2 },
+      calcium: { unit: 'kg', decimals: 2 },
+      stabiliser: { unit: 'kg', decimals: 2 },
+      salt: { unit: 'kg', decimals: 2 }
+    };
+
     const inputs = {};
     let photoDataUrl = '';
 
@@ -1178,7 +1389,7 @@
       // Show or hide system note for selected pool
       const noteEl = document.getElementById('poolSystemNote');
       if (noteEl) {
-        if (pool.systemNote) {
+        if (pool.systemNote && !pool.isGroup) {
           noteEl.textContent = pool.systemNote;
           noteEl.style.display = 'block';
         } else {
@@ -1188,11 +1399,295 @@
       }
 
       updateActiveVolume();
+      updateModeVisibility();
     }
 
     function updateActiveVolume() {
       inputs.activeVolume.value = getActiveVolume() || '';
     }
+
+
+    function isRaidersGroupMode() {
+      return inputs.poolSelect && inputs.poolSelect.value === 'raiders_ice_baths_all';
+    }
+
+    function getVisiblePoolsForQr() {
+      return POOLS.filter(pool => pool.key !== 'custom_pool');
+    }
+
+    function getBaseAppUrl() {
+      return `${window.location.origin}${window.location.pathname}`;
+    }
+
+    function updateModeVisibility() {
+      const groupMode = isRaidersGroupMode();
+      const singleResultsCard = qs('singleResultsCard');
+      const singleCombinedCard = qs('singleCombinedCard');
+      const groupIceBathsCard = qs('groupIceBathsCard');
+      const stockLogCard = qs('stockLogCard');
+      if (singleResultsCard) singleResultsCard.classList.toggle('hidden', groupMode);
+      if (singleCombinedCard) singleCombinedCard.classList.toggle('hidden', groupMode);
+      if (groupIceBathsCard) groupIceBathsCard.classList.toggle('hidden', !groupMode);
+      if (stockLogCard) stockLogCard.classList.toggle('hidden', groupMode);
+    }
+
+    function getIceBathPool(index) {
+      return POOLS.find(pool => pool.key === `raiders_ice_bath_${index}`);
+    }
+
+    function getIceBathValues(index) {
+      return {
+        clarity: (inputs[`iceBath${index}Clarity`] && inputs[`iceBath${index}Clarity`].value) || '',
+        ph: n(inputs[`iceBath${index}Ph`] && inputs[`iceBath${index}Ph`].value),
+        fc: n(inputs[`iceBath${index}Fc`] && inputs[`iceBath${index}Fc`].value),
+        alk: n(inputs[`iceBath${index}Alk`] && inputs[`iceBath${index}Alk`].value),
+        temp: n(inputs[`iceBath${index}Temp`] && inputs[`iceBath${index}Temp`].value),
+        note: (inputs[`iceBath${index}Note`] && inputs[`iceBath${index}Note`].value) || ''
+      };
+    }
+
+    function getIceBathRecommendations(index) {
+      const pool = getIceBathPool(index);
+      const values = getIceBathValues(index);
+      const defaults = (pool && pool.defaults) || { ph: 7.2, fc: 3.0, alk: 80 };
+      return {
+        poolName: pool ? pool.poolName : `Raiders Ice Bath ${index}`,
+        clarity: values.clarity || '-',
+        ph: values.ph,
+        fc: values.fc,
+        alk: values.alk,
+        temp: values.temp,
+        note: values.note,
+        targetPh: defaults.ph,
+        targetFc: defaults.fc,
+        targetAlk: defaults.alk,
+        acid: acidDoseMl((pool && pool.volume) || 6000, values.ph, defaults.ph, values.alk),
+        chlorine: chlorineDoseMl((pool && pool.volume) || 6000, values.fc, defaults.fc),
+        bicarb: bicarbDoseKg((pool && pool.volume) || 6000, values.alk, defaults.alk)
+      };
+    }
+
+    function renderRaidersGroupMode() {
+      updateModeVisibility();
+      if (!isRaidersGroupMode()) return;
+      if (!inputs.reportSite.value || inputs.reportSite.dataset.auto === 'true') {
+        inputs.reportSite.value = 'Raiders';
+        inputs.reportSite.dataset.auto = 'true';
+      }
+      if (!inputs.reportPoolName.value || inputs.reportPoolName.dataset.auto === 'true') {
+        inputs.reportPoolName.value = 'Raiders Ice Baths - All 3';
+        inputs.reportPoolName.dataset.auto = 'true';
+      }
+      const totalVolume = 18000;
+      qs('kpiVolume').textContent = formatNumber(totalVolume, 0);
+      qs('kpiBalance').textContent = 'Grouped';
+      qs('kpiDoseCount').textContent = '3';
+      qs('kpiReport').textContent = 'Live';
+      [1, 2, 3].forEach(index => {
+        const rec = getIceBathRecommendations(index);
+        const target = qs(`iceBath${index}Summary`);
+        if (!target) return;
+        target.innerHTML = `
+          <div class="mini-pill"><strong>Clarity</strong>${escapeHtml(rec.clarity)}</div>
+          <div class="mini-pill"><strong>Acid</strong>${formatDose(rec.acid, 'mL', 0)}</div>
+          <div class="mini-pill"><strong>Chlorine</strong>${formatDose(rec.chlorine, 'mL', 0)}</div>
+          <div class="mini-pill"><strong>Bicarb</strong>${formatDose(rec.bicarb, 'kg', 2)}</div>
+          <div class="mini-pill"><strong>Targets</strong>pH ${formatNumber(rec.targetPh, 2)} | FC ${formatNumber(rec.targetFc, 2)} | Alk ${formatNumber(rec.targetAlk, 0)}</div>
+          <div class="mini-pill"><strong>Reading</strong>pH ${rec.ph == null ? '-' : formatNumber(rec.ph, 2)} | FC ${rec.fc == null ? '-' : formatNumber(rec.fc, 2)} | Alk ${rec.alk == null ? '-' : formatNumber(rec.alk, 0)}</div>
+        `;
+      });
+    }
+
+    function getEmptyStockState() {
+      return {
+        ute: Object.fromEntries(DOSE_KEYS.map(key => [key, ''])),
+        onsite: {},
+        transactions: []
+      };
+    }
+
+    function loadStockState() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STOCK_STORAGE_KEY) || 'null');
+        return parsed && typeof parsed === 'object' ? parsed : getEmptyStockState();
+      } catch (error) {
+        console.error('Failed loading stock state', error);
+        return getEmptyStockState();
+      }
+    }
+
+    function saveStockState(state) {
+      localStorage.setItem(STOCK_STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function ensurePoolOnsiteStock(state, poolKey) {
+      if (!state.onsite[poolKey]) {
+        state.onsite[poolKey] = Object.fromEntries(DOSE_KEYS.map(key => [key, '']));
+      }
+      return state.onsite[poolKey];
+    }
+
+    function renderStockSection() {
+      const wrap = qs('stockContent');
+      if (!wrap) return;
+      if (isRaidersGroupMode()) {
+        wrap.innerHTML = '<div class="hint">Stock logging stays in the normal single-pool mode so it stays simple and tied to one pool at a time.</div>';
+        return;
+      }
+      const pool = getSelectedPool();
+      const state = loadStockState();
+      const onsite = ensurePoolOnsiteStock(state, pool.key);
+      const rows = DOSE_KEYS.map(key => `
+        <tr>
+          <td><strong>${chemicalNames[key]}</strong><div class="inline-note">${chemicalMeta[key].unit}</div></td>
+          <td><input id="stockUte_${key}" type="number" step="any" inputmode="decimal" value="${state.ute[key] ?? ''}" placeholder="0" /></td>
+          <td><input id="stockOnsite_${key}" type="number" step="any" inputmode="decimal" value="${onsite[key] ?? ''}" placeholder="0" /></td>
+        </tr>
+      `).join('');
+      const transactions = (state.transactions || []).filter(tx => tx.poolKey === pool.key).slice(-15).reverse();
+      const txRows = transactions.length ? transactions.map(tx => `
+        <tr>
+          <td>${escapeHtml(tx.date || '-')}</td>
+          <td>${escapeHtml(tx.chemicalLabel || '-')}</td>
+          <td>${escapeHtml(tx.sourceLabel || '-')}</td>
+          <td>${escapeHtml(tx.qtyText || '-')}</td>
+          <td>${escapeHtml(tx.note || '')}</td>
+        </tr>
+      `).join('') : '<tr><td colspan="5">No stock usage logged yet for this pool.</td></tr>';
+      wrap.innerHTML = `
+        <div class="stock-grid">
+          <div class="actions">
+            <button class="button secondary" id="saveStockLevelsBtn" type="button">Save stock levels</button>
+            <button class="button" id="recordDoseStockBtn" type="button">Record marked doses to stock log</button>
+          </div>
+          <div class="table-wrap">
+            <table class="stock-table">
+              <thead>
+                <tr>
+                  <th>Chemical</th>
+                  <th>Ute stock</th>
+                  <th>${escapeHtml(pool.poolName)} onsite</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+          <div class="log-table-wrap">
+            <table class="stock-table">
+              <thead>
+                <tr>
+                  <th>Date / time</th>
+                  <th>Chemical</th>
+                  <th>Source</th>
+                  <th>Qty used</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody>${txRows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+      qs('saveStockLevelsBtn').addEventListener('click', saveStockLevelsFromScreen);
+      qs('recordDoseStockBtn').addEventListener('click', recordMarkedDosesToStockLog);
+    }
+
+    function saveStockLevelsFromScreen() {
+      if (isRaidersGroupMode()) return;
+      const pool = getSelectedPool();
+      const state = loadStockState();
+      const onsite = ensurePoolOnsiteStock(state, pool.key);
+      DOSE_KEYS.forEach(key => {
+        const uteField = qs(`stockUte_${key}`);
+        const onsiteField = qs(`stockOnsite_${key}`);
+        state.ute[key] = uteField ? uteField.value : state.ute[key];
+        onsite[key] = onsiteField ? onsiteField.value : onsite[key];
+      });
+      saveStockState(state);
+      renderStockSection();
+    }
+
+    function recordMarkedDosesToStockLog() {
+      if (isRaidersGroupMode()) return;
+      const pool = getSelectedPool();
+      const { doses } = buildRecommendationRows();
+      const state = loadStockState();
+      const onsite = ensurePoolOnsiteStock(state, pool.key);
+      let recorded = 0;
+      DOSE_KEYS.forEach(key => {
+        const snapshot = getDoseFieldSnapshot(key);
+        if (snapshot.status !== 'yes' || !snapshot.source) return;
+        const recommended = doses[key] || 0;
+        const qty = snapshot.actualQty != null && snapshot.actualQty > 0 ? snapshot.actualQty : recommended;
+        if (!(Number.isFinite(qty) && qty > 0)) return;
+        if (snapshot.source === 'ute') {
+          const current = n(state.ute[key]);
+          state.ute[key] = current == null ? '' : round(current - qty, chemicalMeta[key].decimals);
+        } else if (snapshot.source === 'onsite') {
+          const current = n(onsite[key]);
+          onsite[key] = current == null ? '' : round(current - qty, chemicalMeta[key].decimals);
+        }
+        const now = new Date();
+        state.transactions.push({
+          ts: now.toISOString(),
+          date: `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+          poolKey: pool.key,
+          poolName: pool.poolName,
+          chemical: key,
+          chemicalLabel: chemicalNames[key],
+          source: snapshot.source,
+          sourceLabel: snapshot.source === 'ute' ? 'Ute stock' : 'Stock onsite',
+          qty,
+          qtyText: `${formatNumber(qty, chemicalMeta[key].decimals)} ${chemicalMeta[key].unit}`,
+          note: snapshot.note || ''
+        });
+        recorded += 1;
+      });
+      saveStockState(state);
+      renderStockSection();
+      if (!recorded) alert('No marked doses with a stock source were found to record.');
+    }
+
+    async function renderQrSection() {
+      const wrap = qs('qrCodesWrap');
+      if (!wrap) return;
+      const baseUrl = getBaseAppUrl();
+      const pools = getVisiblePoolsForQr();
+      wrap.innerHTML = pools.map(pool => `
+        <div class="qr-card">
+          <h3>${escapeHtml(pool.poolName)}</h3>
+          <div id="qr_${pool.key}"></div>
+          <div class="inline-note">${escapeHtml(pool.key === 'raiders_ice_baths_all' ? 'Grouped report' : 'Single pool report')}</div>
+        </div>
+      `).join('');
+      if (!window.QRCode) {
+        Array.from(wrap.querySelectorAll('[id^="qr_"]')).forEach(el => { el.textContent = 'QR generator unavailable'; });
+        return;
+      }
+      for (const pool of pools) {
+        const target = qs(`qr_${pool.key}`);
+        if (!target) continue;
+        const url = `${baseUrl}?pool=${encodeURIComponent(pool.key)}`;
+        try {
+          const canvas = document.createElement('canvas');
+          await QRCode.toCanvas(canvas, url, { width: QR_SIZE, margin: 1 });
+          target.innerHTML = '';
+          target.appendChild(canvas);
+        } catch (error) {
+          target.textContent = 'QR failed';
+        }
+      }
+    }
+
+    function applyUrlSelection() {
+      const params = new URLSearchParams(window.location.search);
+      const poolKey = params.get('pool');
+      if (!poolKey) return;
+      if (POOLS.some(pool => pool.key === poolKey)) {
+        inputs.poolSelect.value = poolKey;
+      }
+    }
+
 
     function acidDoseMl(volumeL, currentPh, targetPh, alkalinity) {
       if (!volumeL || currentPh == null || targetPh == null || currentPh <= targetPh) return 0;
@@ -1518,6 +2013,11 @@
     }
 
     function renderCombinedTable() {
+      updateModeVisibility();
+      if (isRaidersGroupMode()) {
+        renderRaidersGroupMode();
+        return;
+      }
       const { rows, doses, volume } = buildRecommendationRows();
       const tbody = qs('combinedTableBody');
       tbody.innerHTML = '';
@@ -1580,6 +2080,18 @@
               </select>
             </div>
             <div class="field">
+              <label for="doseSource_${item.key}">Stock source</label>
+              <select id="doseSource_${item.key}">
+                <option value="">Select</option>
+                <option value="ute">Ute stock</option>
+                <option value="onsite">Stock onsite</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="doseActual_${item.key}">Actual qty used</label>
+              <input id="doseActual_${item.key}" type="number" step="any" inputmode="decimal" placeholder="Optional override" />
+            </div>
+            <div class="field">
               <label for="doseNote_${item.key}">Dose note</label>
               <input id="doseNote_${item.key}" type="text" placeholder="Optional note" />
             </div>
@@ -1595,10 +2107,14 @@
 
     function getCurrentDoseFieldValues() {
       const snapshot = {};
-      ['acid', 'chlorine', 'bicarb', 'calcium', 'stabiliser', 'salt'].forEach(key => {
+      DOSE_KEYS.forEach(key => {
         const statusField = qs(`doseStatus_${key}`);
+        const sourceField = qs(`doseSource_${key}`);
+        const actualField = qs(`doseActual_${key}`);
         const noteField = qs(`doseNote_${key}`);
         if (statusField) snapshot[`doseStatus_${key}`] = statusField.value;
+        if (sourceField) snapshot[`doseSource_${key}`] = sourceField.value;
+        if (actualField) snapshot[`doseActual_${key}`] = actualField.value;
         if (noteField) snapshot[`doseNote_${key}`] = noteField.value;
       });
       return snapshot;
@@ -1609,27 +2125,37 @@
     }
 
     function bindDoseFields() {
-      ['acid', 'chlorine', 'bicarb', 'calcium', 'stabiliser', 'salt'].forEach(key => {
+      DOSE_KEYS.forEach(key => {
         const statusField = qs(`doseStatus_${key}`);
+        const sourceField = qs(`doseSource_${key}`);
+        const actualField = qs(`doseActual_${key}`);
         const noteField = qs(`doseNote_${key}`);
-        if (statusField && !statusField.dataset.bound) {
-          statusField.addEventListener('change', handleDoseFieldChange);
-          statusField.dataset.bound = 'true';
-        }
-        if (noteField && !noteField.dataset.bound) {
-          noteField.addEventListener('input', handleDoseFieldChange);
-          noteField.dataset.bound = 'true';
-        }
+        [statusField, sourceField].forEach(field => {
+          if (field && !field.dataset.bound) {
+            field.addEventListener('change', handleDoseFieldChange);
+            field.dataset.bound = 'true';
+          }
+        });
+        [actualField, noteField].forEach(field => {
+          if (field && !field.dataset.bound) {
+            field.addEventListener('input', handleDoseFieldChange);
+            field.dataset.bound = 'true';
+          }
+        });
       });
     }
 
     function restoreDoseFields(existingValues = null) {
       try {
         const stored = existingValues || JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        ['acid', 'chlorine', 'bicarb', 'calcium', 'stabiliser', 'salt'].forEach(key => {
+        DOSE_KEYS.forEach(key => {
           const statusField = qs(`doseStatus_${key}`);
+          const sourceField = qs(`doseSource_${key}`);
+          const actualField = qs(`doseActual_${key}`);
           const noteField = qs(`doseNote_${key}`);
           if (statusField && stored[`doseStatus_${key}`]) statusField.value = stored[`doseStatus_${key}`];
+          if (sourceField && stored[`doseSource_${key}`]) sourceField.value = stored[`doseSource_${key}`];
+          if (actualField && stored[`doseActual_${key}`] != null) actualField.value = stored[`doseActual_${key}`];
           if (noteField && stored[`doseNote_${key}`]) noteField.value = stored[`doseNote_${key}`];
         });
       } catch (error) {
@@ -1662,9 +2188,13 @@
 
     function getDoseFieldSnapshot(key) {
       const statusField = qs(`doseStatus_${key}`);
+      const sourceField = qs(`doseSource_${key}`);
+      const actualField = qs(`doseActual_${key}`);
       const noteField = qs(`doseNote_${key}`);
       return {
         status: ((statusField && statusField.value) || 'No').toLowerCase(),
+        source: sourceField && sourceField.value ? sourceField.value : '',
+        actualQty: actualField && actualField.value !== '' ? n(actualField.value) : null,
         note: noteField && noteField.value ? noteField.value.trim() : ''
       };
     }
@@ -1954,8 +2484,75 @@ function buildReportHtml() {
       `;
     }
 
+    function buildRaidersGroupReportModel() {
+      const baths = [1, 2, 3].map(index => getIceBathRecommendations(index));
+      return {
+        title: 'Raiders Ice Baths - Combined Water Quality Testing Report',
+        site: inputs.reportSite.value || 'Raiders',
+        poolName: 'Raiders Ice Baths - All 3',
+        technician: inputs.reportTechnician.value || '-',
+        date: formatDateDisplay(inputs.reportDate.value || ''),
+        testTime: formatTimeDisplay(inputs.testTime.value || ''),
+        notes: (inputs.serviceNotes.value || '').trim(),
+        baths
+      };
+    }
+
+    function buildRaidersGroupReportHtml() {
+      const model = buildRaidersGroupReportModel();
+      return `
+        <div class="report-sheet">
+          <div class="report-sheet-header">
+            <div class="report-brand-card">
+              <div class="report-brand-top">
+                <img class="report-logo" src="${REPORT_LOGO_DATA}" alt="MBS FM logo" />
+                <div class="report-company"><strong>MBS Facility Maintenance</strong>63 Tennant Street<br>Fyshwick ACT 2609<br>(02) 6162 0216<br>info@mbsfm.com.au</div>
+              </div>
+              <div class="report-brand-strip"><div class="report-title">${escapeHtml(model.title)}</div></div>
+            </div>
+            <div class="report-meta-card">
+              <div class="report-meta-head">Test details</div>
+              <div class="report-meta-body">
+                <div class="report-meta-grid">
+                  <div class="report-meta-item"><span class="label">Site</span><span class="value">${escapeHtml(model.site)}</span></div>
+                  <div class="report-meta-item"><span class="label">Technician</span><span class="value">${escapeHtml(model.technician)}</span></div>
+                  <div class="report-meta-item full"><span class="label">Report</span><span class="value">${escapeHtml(model.poolName)}</span></div>
+                  <div class="report-meta-item"><span class="label">Date</span><span class="value">${escapeHtml(model.date)}</span></div>
+                  <div class="report-meta-item"><span class="label">Test time</span><span class="value">${escapeHtml(model.testTime)}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="report-section-bar">Ice bath results</div>
+          <table class="report-table">
+            <thead><tr><th>Bath</th><th>Clarity</th><th>pH</th><th>FC</th><th>Alk</th><th>Temp</th><th>Acid</th><th>Chlorine</th><th>Bicarb</th><th>Note</th></tr></thead>
+            <tbody>
+              ${model.baths.map(bath => `
+                <tr>
+                  <td>${escapeHtml(bath.poolName)}</td>
+                  <td>${escapeHtml(bath.clarity)}</td>
+                  <td>${bath.ph == null ? '-' : formatNumber(bath.ph, 2)}</td>
+                  <td>${bath.fc == null ? '-' : formatNumber(bath.fc, 2)}</td>
+                  <td>${bath.alk == null ? '-' : formatNumber(bath.alk, 0)}</td>
+                  <td>${bath.temp == null ? '-' : formatNumber(bath.temp, 1)}</td>
+                  <td>${formatDose(bath.acid, 'mL', 0)}</td>
+                  <td>${formatDose(bath.chlorine, 'mL', 0)}</td>
+                  <td>${formatDose(bath.bicarb, 'kg', 2)}</td>
+                  <td>${escapeHtml(bath.note || '')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="report-section-block" style="margin-top:12px;">
+            <div class="report-section-block-title">Technician notes</div>
+            <div class="report-paragraph">${escapeHtml(model.notes || 'No extra technician notes.')}</div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderReport() {
-      qs('reportOutput').innerHTML = buildReportHtml();
+      qs('reportOutput').innerHTML = isRaidersGroupMode() ? buildRaidersGroupReportHtml() : buildReportHtml();
       qs('kpiReport').textContent = 'Ready';
     }
 
@@ -2689,12 +3286,17 @@ async function savePdfReport() {
     function saveState() {
       const payload = {};
       Object.keys(inputs).forEach(key => {
+        if (!inputs[key]) return;
         payload[key] = inputs[key].value;
       });
-      ['acid', 'chlorine', 'bicarb', 'calcium', 'stabiliser', 'salt'].forEach(key => {
+      DOSE_KEYS.forEach(key => {
         const statusField = qs(`doseStatus_${key}`);
+        const sourceField = qs(`doseSource_${key}`);
+        const actualField = qs(`doseActual_${key}`);
         const noteField = qs(`doseNote_${key}`);
         if (statusField) payload[`doseStatus_${key}`] = statusField.value;
+        if (sourceField) payload[`doseSource_${key}`] = sourceField.value;
+        if (actualField) payload[`doseActual_${key}`] = actualField.value;
         if (noteField) payload[`doseNote_${key}`] = noteField.value;
       });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -2704,6 +3306,7 @@ async function savePdfReport() {
       try {
         const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
         Object.keys(inputs).forEach(key => {
+          if (!inputs[key]) return;
           if (stored[key] != null) inputs[key].value = stored[key];
         });
       } catch (error) {
@@ -2728,6 +3331,8 @@ async function savePdfReport() {
       setDefaultDateTime();
       loadPoolDefaults();
       renderCombinedTable();
+      renderStockSection();
+      renderQrSection();
       qs('reportOutput').textContent = 'Tap Generate report to build the service report.';
     }
 
@@ -2737,6 +3342,8 @@ async function savePdfReport() {
       updateActiveVolume();
       saveState();
       renderCombinedTable();
+      renderStockSection();
+      renderQrSection();
     }
 
     function handlePhotoUpload(event) {
@@ -2758,7 +3365,10 @@ async function savePdfReport() {
         'serviceNotes', 'poolSelect', 'poolVolumeAuto', 'customVolume', 'activeVolume',
         'ph', 'targetPh', 'freeChlorine', 'targetFreeChlorine', 'alkalinity', 'targetAlkalinity',
         'calciumHardness', 'targetCalcium', 'cyanuricAcid', 'targetCya', 'salt', 'targetSalt',
-        'temperature', 'phosphates'
+        'temperature', 'phosphates',
+        'iceBath1Clarity', 'iceBath1Ph', 'iceBath1Fc', 'iceBath1Alk', 'iceBath1Temp', 'iceBath1Note',
+        'iceBath2Clarity', 'iceBath2Ph', 'iceBath2Fc', 'iceBath2Alk', 'iceBath2Temp', 'iceBath2Note',
+        'iceBath3Clarity', 'iceBath3Ph', 'iceBath3Fc', 'iceBath3Alk', 'iceBath3Temp', 'iceBath3Note'
       ].forEach(id => {
         inputs[id] = qs(id);
       });
@@ -2767,11 +3377,15 @@ async function savePdfReport() {
       setDefaultDateTime();
       inputs.poolSelect.value = POOLS[0].key;
       loadState();
+      applyUrlSelection();
       if (!inputs.poolSelect.value) inputs.poolSelect.value = POOLS[0].key;
       loadPoolDefaults();
       renderCombinedTable();
+      renderStockSection();
+      renderQrSection();
 
       Object.values(inputs).forEach(input => {
+        if (!input) return;
         if (input.id === 'poolVolumeAuto' || input.id === 'activeVolume') return;
         input.addEventListener('input', handleInputChange);
         input.addEventListener('change', handleInputChange);

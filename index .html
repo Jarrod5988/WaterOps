@@ -1,0 +1,3419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2b96ff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="MBS FM" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="apple-touch-icon" sizes="180x180" href="mbsfm-icon-180.png" />
+  <link rel="icon" type="image/png" sizes="180x180" href="mbsfm-icon-180.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="mbsfm-icon-512.png" />
+  <link rel="manifest" href="manifest.json" />
+  <title>MBS FM Pool Dosing Calculator</title>
+  <style>
+    :root {
+      --brand: #49b9ff;
+      --blue: #2b96ff;
+      --blue-dark: #153e69;
+      --blue-light: rgba(43, 150, 255, 0.10);
+      --line: rgba(103, 156, 214, 0.20);
+      --text: #17324d;
+      --muted: #627b96;
+      --bg: #edf5fc;
+      --card: rgba(255, 255, 255, 0.90);
+      --good: #15945e;
+      --warn: #b8750d;
+      --bad: #c94b4b;
+      --shadow: 0 12px 28px rgba(72, 109, 149, 0.08);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(43, 150, 255, 0.12), transparent 34%),
+        radial-gradient(circle at top right, rgba(77, 228, 255, 0.09), transparent 30%),
+        linear-gradient(180deg, #f4f9ff 0%, #edf4fb 48%, #f8fbff 100%);
+      color: var(--text);
+    }
+
+    body {
+      position: relative;
+      min-height: 100vh;
+      padding: 12px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(45, 110, 176, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(45, 110, 176, 0.04) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.35), transparent 78%);
+      opacity: 0.24;
+    }
+
+    .app {
+      max-width: 1180px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header,
+    .card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(247,251,255,0.92) 100%);
+      border: 1px solid rgba(133, 184, 232, 0.20);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .header {
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .header::after,
+    .card::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      bottom: -110px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(72, 189, 255, 0.13), transparent 68%);
+      filter: blur(8px);
+      pointer-events: none;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .logo-badge img {
+      display: block;
+      width: min(360px, 76vw);
+      height: auto;
+      max-height: 84px;
+      object-fit: contain;
+    }
+
+    .brand-copy h1 {
+      margin: 0 0 4px;
+      font-size: clamp(24px, 4vw, 34px);
+      line-height: 1.05;
+      color: #15406c;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-copy p,
+    .muted,
+    .field small,
+    .kpi .name,
+    .kpi .unit,
+    .photo-note {
+      color: var(--muted);
+    }
+
+    .toolbar {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .card {
+      grid-column: span 12;
+      padding: 14px;
+    }
+
+    @media (min-width: 860px) {
+      .span-12 { grid-column: span 12; }
+      .span-8 { grid-column: span 8; }
+      .span-7 { grid-column: span 7; }
+      .span-6 { grid-column: span 6; }
+      .span-5 { grid-column: span 5; }
+      .span-4 { grid-column: span 4; }
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 19px;
+      color: #19456f;
+      letter-spacing: -0.02em;
+    }
+
+    .card h2::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+      background: radial-gradient(circle, #93f3ff 0%, #2aa8ff 68%, #1d5ebd 100%);
+      box-shadow: 0 0 16px rgba(93, 212, 255, 0.22);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .quick-capture-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    @media (max-width: 480px) {
+      .quick-capture-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-capture-grid input,
+      .quick-capture-grid select {
+        min-width: 0;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue-dark);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid rgba(134, 180, 226, 0.30);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(246,250,255,0.98) 100%);
+      color: var(--text);
+      min-height: 48px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.82);
+    }
+
+    input[readonly] {
+      background: linear-gradient(180deg, rgba(241,247,255,0.95) 0%, rgba(236,244,252,0.95) 100%);
+      color: #355476;
+    }
+
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(94, 122, 148, 0.78);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 3px solid rgba(70, 177, 255, 0.12);
+      border-color: rgba(85, 173, 243, 0.75);
+      box-shadow:
+        0 0 0 1px rgba(106, 204, 255, 0.18),
+        0 0 18px rgba(35, 162, 255, 0.08);
+    }
+
+    .button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      min-height: 48px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(135deg, #2b96ff 0%, #2a6bff 100%);
+      box-shadow: 0 10px 20px rgba(33, 111, 214, 0.18);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .button.secondary {
+      background: linear-gradient(135deg, rgba(92, 197, 255, 0.15) 0%, rgba(76, 129, 255, 0.12) 100%);
+      color: #1f5b93;
+      border: 1px solid rgba(120, 186, 239, 0.28);
+      box-shadow: none;
+    }
+
+    .button.ghost {
+      background: rgba(255,255,255,0.82);
+      color: #1e4f81;
+      border: 1px solid rgba(133, 184, 232, 0.28);
+      box-shadow: none;
+    }
+
+    .button-row,
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    #resetBtn {
+      background: linear-gradient(135deg, #e6f4ec 0%, #d4eadf 100%);
+      color: #1f5b45;
+      border: 1px solid rgba(90, 140, 112, 0.32);
+      box-shadow: 0 6px 14px rgba(72, 109, 149, 0.08);
+      font-weight: 700;
+    }
+
+    #resetBtn:hover,
+    #resetBtn:focus {
+      background: linear-gradient(135deg, #dcefe4 0%, #c7e2d3 100%);
+      box-shadow: 0 8px 18px rgba(72, 109, 149, 0.12);
+      color: #184c39;
+    }
+
+
+    .preview-box,
+    .table-wrap,
+    .summary,
+    .hint,
+    .report-output {
+      background: linear-gradient(180deg, rgba(250,253,255,0.96) 0%, rgba(243,248,253,0.96) 100%);
+      border: 1px solid rgba(141, 189, 232, 0.22);
+      border-radius: 16px;
+    }
+
+    .preview-box {
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .preview-box img {
+      max-width: 100%;
+      max-height: 360px;
+      object-fit: contain;
+      display: block;
+      border-radius: 12px;
+    }
+
+    .placeholder {
+      text-align: center;
+      font-size: 14px;
+      color: var(--muted);
+      padding: 18px;
+    }
+
+    .hint,
+    .summary,
+    .report-output {
+      padding: 12px;
+      color: #29557f;
+    }
+
+    .report-output {
+      overflow: auto;
+    }
+
+    .report-sheet {
+      background: #ffffff;
+      color: #0f172a;
+      border: 1px solid #c8d7e6;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+      min-width: 1020px;
+    }
+
+    .report-sheet * {
+      box-sizing: border-box;
+    }
+
+    .report-sheet-header {
+      display: grid;
+      grid-template-columns: 1.45fr 0.9fr;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 14px;
+    }
+
+    .report-brand-card,
+    .report-meta-card {
+      border: 1px solid #a8bfd8;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .report-brand-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 16px 12px;
+      min-height: 98px;
+      background:
+        linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      border-bottom: 1px solid #d7e3ef;
+    }
+
+    .report-logo {
+      display: block;
+      width: min(380px, 64%);
+      max-width: 400px;
+      max-height: 74px;
+      object-fit: contain;
+      flex: 0 0 auto;
+      filter: saturate(1.04) contrast(1.03);
+    }
+
+    .report-company {
+      font-size: 13px;
+      line-height: 1.45;
+      color: #334155;
+      text-align: right;
+      padding-left: 10px;
+      border-left: 1px solid #d7e3ef;
+    }
+
+    .report-company strong {
+      display: block;
+      font-size: 15px;
+      color: #003a75;
+      margin-bottom: 3px;
+    }
+
+    .report-brand-strip {
+      background: linear-gradient(90deg, #003a75 0%, #00498f 45%, #0059ad 100%);
+      padding: 12px 16px 13px;
+      border-top: 1px solid rgba(255, 255, 255, 0.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .report-title {
+      font-size: 25px;
+      font-weight: 800;
+      line-height: 1.1;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .report-meta-head {
+      background: linear-gradient(180deg, #003a75 0%, #0059ad 100%);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 11px 14px;
+      border-bottom: 1px solid #d7e6f3;
+    }
+
+    .report-meta-body {
+      padding: 14px;
+    }
+
+    .report-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 14px;
+    }
+
+    .report-meta-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .report-meta-item .label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #003a75;
+      margin-bottom: 4px;
+    }
+
+    .report-meta-item .value {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .report-section-bar {
+      margin: 14px 0 0;
+      padding: 8px 12px 9px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      background: linear-gradient(90deg, #003a75 0%, #00498f 45%, #0059ad 100%);
+      border-radius: 10px 10px 0 0;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .report-table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      margin: 0 0 14px;
+      background: #ffffff;
+      border: 1px solid #a9c0d7;
+      border-top: 0;
+    }
+
+    .report-table th,
+    .report-table td {
+      border: 1px solid #c8d8e7;
+      padding: 7px 8px;
+      font-size: 12px;
+      vertical-align: top;
+      text-align: left;
+      color: #0f172a;
+    }
+
+    .report-table th {
+      background: #003a75;
+      color: #ffffff;
+      font-weight: 800;
+      white-space: nowrap;
+      border-color: #7aa7d3;
+    }
+
+    .report-table tbody tr:nth-child(even) td {
+      background: #f7fbff;
+    }
+
+    .report-table.tight th,
+    .report-table.tight td {
+      padding: 6px 6px;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .report-table.tight td:first-child,
+    .report-table.tight th:first-child {
+      text-align: left;
+    }
+
+    .report-sections-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .report-section-block {
+      border: 1px solid #a8bfd8;
+      border-radius: 12px;
+      background: #ffffff;
+      overflow: hidden;
+      margin-top: 0;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .report-section-block-title {
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      color: #ffffff;
+      background: linear-gradient(180deg, #003a75 0%, #0059ad 100%);
+      border-bottom: 1px solid #d7e6f3;
+    }
+
+    .report-paragraph {
+      font-size: 13px;
+      line-height: 1.55;
+      color: #1f2937;
+      white-space: pre-wrap;
+      padding: 12px;
+      min-height: 88px;
+    }
+
+    .report-footer {
+      margin-top: 10px;
+      padding-top: 8px;
+      font-size: 11px;
+      color: #64748b;
+      text-align: right;
+      border-top: 1px solid #d7e6f3;
+    }
+
+    .kpi-wrap {
+
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .kpi {
+      border: 1px solid rgba(132, 179, 225, 0.20);
+      border-radius: 16px;
+      padding: 12px;
+      background:
+        radial-gradient(circle at top right, rgba(70, 190, 255, 0.10), transparent 36%),
+        linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.94) 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.80);
+    }
+
+    .kpi .name {
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .kpi .value {
+      font-size: 26px;
+      font-weight: 800;
+      color: #18436d;
+      line-height: 1.05;
+    }
+
+    .kpi .unit {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 800px;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e5edf6;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--blue-dark);
+      color: #fff;
+      font-size: 12px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(222, 234, 246, 0.75);
+      color: #1d4f80;
+      white-space: nowrap;
+    }
+
+    .status-good {
+      background: rgba(53, 217, 138, 0.12);
+      color: #168956;
+    }
+
+    .status-warn {
+      background: rgba(255, 191, 91, 0.14);
+      color: #a56a0e;
+    }
+
+    .status-bad {
+      background: rgba(255, 122, 122, 0.14);
+      color: #ba4747;
+    }
+
+    .dose-checklist {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .dose-row {
+      border: 1px solid rgba(137, 183, 226, 0.18);
+      border-radius: 20px;
+      padding: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(244,249,255,0.92) 100%);
+      display: grid;
+      gap: 10px;
+    }
+
+    .dose-row-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .dose-row-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: #1c4771;
+    }
+
+    .dose-row-amount {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .dose-row-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .subtle {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .report-output {
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      min-height: 220px;
+    }
+
+    .footer-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+
+    .mode-note {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .subcard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .subcard {
+      border: 1px solid rgba(137, 183, 226, 0.18);
+      border-radius: 18px;
+      padding: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
+    }
+
+    .subcard h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      color: #1c4771;
+    }
+
+    .mini-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .mini-pill {
+      border-radius: 14px;
+      border: 1px solid rgba(137, 183, 226, 0.18);
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+    }
+
+    .mini-pill strong {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stock-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .stock-table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #d7e6f3;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .stock-table th,
+    .stock-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #e5edf6;
+      font-size: 13px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .stock-table th {
+      background: var(--blue-dark);
+      color: #fff;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .stock-table input,
+    .stock-table select {
+      min-height: 42px;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+
+    .log-table-wrap {
+      overflow-x: auto;
+      border: 1px solid rgba(141, 189, 232, 0.22);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(250,253,255,0.96) 0%, rgba(243,248,253,0.96) 100%);
+    }
+
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .qr-card {
+      border: 1px solid rgba(137, 183, 226, 0.18);
+      border-radius: 18px;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
+      text-align: center;
+    }
+
+    .qr-card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: #1c4771;
+    }
+
+    .qr-card canvas,
+    .qr-card img {
+      width: 180px;
+      height: 180px;
+      max-width: 100%;
+      display: block;
+      margin: 0 auto 8px;
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid rgba(137, 183, 226, 0.18);
+    }
+
+    .inline-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="brand">
+        <div class="logo-badge"><img src="data:image/png;base64,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" alt="MBS FM logo" /></div>
+        <div class="brand-copy">
+          <h1>Pool Test Chemical Dosing Calculator</h1>
+          <p>Combined water balance and dosing version for quick mobile use.</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="button ghost" id="resetBtn" type="button">Reset last pool test</button>
+        <button class="button secondary" id="loadDefaultsBtn" type="button">Reload pool defaults</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Pool selection moved above Quick capture -->
+      <section class="card span-4">
+        <h2>Pool selection</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="poolSelect">Selected pool</label>
+            <select id="poolSelect"></select>
+            <small>Choose a saved pool or Custom Pool.</small>
+          </div>
+          <div class="field">
+            <label for="poolVolumeAuto">Pool volume (auto)</label>
+            <input id="poolVolumeAuto" type="number" readonly />
+            <small>Auto-filled from the pool list.</small>
+          </div>
+          <div class="field">
+            <label for="customVolume">Custom volume override</label>
+            <input id="customVolume" type="number" inputmode="decimal" min="0" step="1" placeholder="Optional" />
+            <small>Use this if you want to override the saved volume.</small>
+          </div>
+          <div class="field">
+            <label for="activeVolume">Active volume used</label>
+            <input id="activeVolume" type="number" readonly />
+            <small>This volume is used in all dose calculations.</small>
+          </div>
+        </div>
+        <!-- Note displayed for pools using special systems like Enviroswim -->
+        <small id="poolSystemNote" style="display:none; margin-top: 8px; color: var(--muted); font-size: 12px;"></small>
+      </section>
+      <section class="card span-12">
+        <h2>Quick capture</h2>
+        <div class="field-grid quick-capture-grid" style="margin-bottom: 12px;">
+          <div class="field">
+            <label for="reportSite">Site</label>
+            <input id="reportSite" type="text" placeholder="Enter site" />
+          </div>
+          <div class="field">
+            <label for="reportPoolName">Pool / body of water</label>
+            <input id="reportPoolName" type="text" placeholder="Auto-filled from pool selection" />
+          </div>
+          <div class="field">
+            <label for="reportTechnician">Technician</label>
+            <select id="reportTechnician">
+              <option value="">Select technician</option>
+              <option value="Jarrod Strange">Jarrod Strange</option>
+              <option value="Mark Seebohm">Mark Seebohm</option>
+              <option value="Daniel Searle">Daniel Searle</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="reportDate">Date</label>
+            <input id="reportDate" type="date" />
+          </div>
+          <div class="field">
+            <label for="testTime">Test time</label>
+            <input id="testTime" type="time" />
+          </div>
+          <div class="field">
+            <label for="waterClarity">Water clarity</label>
+            <select id="waterClarity">
+              <option value="">Select</option>
+              <option value="Clear">Clear</option>
+              <option value="Slightly cloudy">Slightly cloudy</option>
+              <option value="Cloudy">Cloudy</option>
+              <option value="Poor">Poor</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid" style="gap: 12px;">
+          <div class="span-6" style="grid-column: span 12;">
+            <div class="button-row" style="margin-bottom: 10px; flex-wrap: wrap;">
+              <label class="button secondary" for="photoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                Add Spin Touch photo
+              </label>
+              <button class="button secondary" type="button" id="scanPhotoBtn">Read results from photo</button>
+              <button class="button ghost" type="button" id="clearPhotoBtn">Clear photo</button>
+              <input id="photoInput" type="file" accept="image/*" class="hidden" />
+            </div>
+            <div class="preview-box" id="photoPreviewBox">
+              <div class="placeholder">No photo attached. Add a photo and the app will try to fill the test results automatically.</div>
+            </div>
+            <div class="photo-note" id="photoOcrStatus" style="margin-top: 8px; font-size: 12px;">Upload a Spin Touch photo and the app will try to fill free chlorine, pH, alkalinity, calcium hardness, CYA, salt, temperature and phosphates automatically.</div>
+          </div>
+          <div class="span-6" style="grid-column: span 12;">
+            <div class="field">
+              <label for="serviceNotes">Service notes</label>
+              <textarea id="serviceNotes" placeholder="Optional notes"></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pool selection removed from its original location; moved above Quick capture -->
+
+      <section class="card span-8" id="singleResultsCard">
+        <h2>Current test results and targets</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="ph">Current pH</label>
+            <input id="ph" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 7.8" />
+          </div>
+          <div class="field">
+            <label for="targetPh">Target pH</label>
+            <input id="targetPh" type="number" inputmode="decimal" step="0.01" placeholder="7.2" />
+          </div>
+          <div class="field">
+            <label for="freeChlorine">Current free chlorine</label>
+            <input id="freeChlorine" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="targetFreeChlorine">Target free chlorine</label>
+            <input id="targetFreeChlorine" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="alkalinity">Current alkalinity</label>
+            <input id="alkalinity" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="targetAlkalinity">Target alkalinity</label>
+            <input id="targetAlkalinity" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="calciumHardness">Current calcium hardness</label>
+            <input id="calciumHardness" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="targetCalcium">Target calcium hardness</label>
+            <input id="targetCalcium" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="cyanuricAcid">Current CYA</label>
+            <input id="cyanuricAcid" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="targetCya">Target CYA</label>
+            <input id="targetCya" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="salt">Current salt</label>
+            <input id="salt" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="targetSalt">Target salt</label>
+            <input id="targetSalt" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="temperature">Water temperature</label>
+            <input id="temperature" type="number" inputmode="decimal" step="0.1" placeholder="°C" />
+          </div>
+          <div class="field">
+            <label for="phosphates">Phosphates</label>
+            <input id="phosphates" type="number" inputmode="decimal" step="1" placeholder="ppb" />
+          </div>
+        </div>
+      </section>
+
+
+      <section class="card span-12 hidden" id="groupIceBathsCard">
+        <h2>Raiders ice baths - all 3</h2>
+        <div class="mode-note">This section stays hidden unless the Raiders Ice Baths - All 3 option or QR code is used.</div>
+        <div class="subcard-grid">
+          <div class="subcard">
+            <h3>Raiders Ice Bath 1</h3>
+            <div class="field-grid">
+              <div class="field"><label for="iceBath1Clarity">Water clarity</label><select id="iceBath1Clarity"><option value="">Select</option><option>Clear</option><option>Slightly cloudy</option><option>Cloudy</option><option>Poor</option></select></div>
+              <div class="field"><label for="iceBath1Ph">Current pH</label><input id="iceBath1Ph" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath1Fc">Free chlorine</label><input id="iceBath1Fc" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath1Alk">Alkalinity</label><input id="iceBath1Alk" type="number" step="1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath1Temp">Temperature</label><input id="iceBath1Temp" type="number" step="0.1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath1Note">Note</label><input id="iceBath1Note" type="text" placeholder="Optional" /></div>
+            </div>
+            <div class="mini-summary" id="iceBath1Summary"></div>
+          </div>
+          <div class="subcard">
+            <h3>Raiders Ice Bath 2</h3>
+            <div class="field-grid">
+              <div class="field"><label for="iceBath2Clarity">Water clarity</label><select id="iceBath2Clarity"><option value="">Select</option><option>Clear</option><option>Slightly cloudy</option><option>Cloudy</option><option>Poor</option></select></div>
+              <div class="field"><label for="iceBath2Ph">Current pH</label><input id="iceBath2Ph" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath2Fc">Free chlorine</label><input id="iceBath2Fc" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath2Alk">Alkalinity</label><input id="iceBath2Alk" type="number" step="1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath2Temp">Temperature</label><input id="iceBath2Temp" type="number" step="0.1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath2Note">Note</label><input id="iceBath2Note" type="text" placeholder="Optional" /></div>
+            </div>
+            <div class="mini-summary" id="iceBath2Summary"></div>
+          </div>
+          <div class="subcard">
+            <h3>Raiders Ice Bath 3</h3>
+            <div class="field-grid">
+              <div class="field"><label for="iceBath3Clarity">Water clarity</label><select id="iceBath3Clarity"><option value="">Select</option><option>Clear</option><option>Slightly cloudy</option><option>Cloudy</option><option>Poor</option></select></div>
+              <div class="field"><label for="iceBath3Ph">Current pH</label><input id="iceBath3Ph" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath3Fc">Free chlorine</label><input id="iceBath3Fc" type="number" step="0.01" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath3Alk">Alkalinity</label><input id="iceBath3Alk" type="number" step="1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath3Temp">Temperature</label><input id="iceBath3Temp" type="number" step="0.1" inputmode="decimal" /></div>
+              <div class="field"><label for="iceBath3Note">Note</label><input id="iceBath3Note" type="text" placeholder="Optional" /></div>
+            </div>
+            <div class="mini-summary" id="iceBath3Summary"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card span-12" id="singleCombinedCard">
+        <h2>Combined water balance and dosing</h2>
+        <div class="kpi-wrap">
+          <div class="kpi">
+            <div class="name">Active volume</div>
+            <div class="value" id="kpiVolume">0</div>
+            <div class="unit">litres</div>
+          </div>
+          <div class="kpi">
+            <div class="name">Water balance</div>
+            <div class="value" id="kpiBalance">Ready</div>
+            <div class="unit">overall status</div>
+          </div>
+          <div class="kpi">
+            <div class="name">Dose items</div>
+            <div class="value" id="kpiDoseCount">0</div>
+            <div class="unit">chemicals recommended</div>
+          </div>
+          <div class="kpi">
+            <div class="name">Report state</div>
+            <div class="value" id="kpiReport">Draft</div>
+            <div class="unit">updates live</div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Current</th>
+                <th>Target</th>
+                <th>Normal range</th>
+                <th>Status</th>
+                <th>Recommended action / dose</th>
+              </tr>
+            </thead>
+            <tbody id="combinedTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="hint" style="margin-top: 12px;">
+          This combines the water balance check and dosing into one section, and now shows the acceptable range as well as the ideal target.
+        </div>
+
+        <div class="dose-checklist" id="doseChecklist"></div>
+      </section>
+
+
+      <section class="card span-12" id="stockLogCard">
+        <h2>Chemical stock log</h2>
+        <div class="mode-note">This tracks stock on this device/browser only. Ute stock is global. Onsite stock is saved against the selected pool.</div>
+        <div id="stockContent"></div>
+      </section>
+
+      <section class="card span-12" id="qrCodesCard">
+        <h2>QR codes</h2>
+        <div class="mode-note">Each QR opens this app straight to a pool, plus one QR for Raiders Ice Baths - All 3.</div>
+        <div id="qrCodesWrap" class="qr-grid"></div>
+      </section>
+
+      <section class="card span-12">
+        <h2>Service report</h2>
+        <div class="actions" style="margin-bottom: 12px;">
+          <button class="button" id="generateReportBtn" type="button">Generate report</button>
+          <button class="button secondary" id="saveReportBtn" type="button">Generate and save PDF</button>
+        </div>
+        <div class="report-output" id="reportOutput">Tap Generate report to build the service report.</div>
+        <div class="footer-note">PDF export is set to landscape.</div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script>
+    const REPORT_LOGO_DATA = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAAChCAYAAAAx4k16AAAh90lEQVR4nO2dUZKbyLJAz7x4/5e7gsErGGYFxisYOUJf/WO8gu5eQbdXYHkFjX/0pQjLKzBegXkrMLOC4a7gvo9EFiBASFVQgPJEdLSEqKoUgsrKrKwsUBRFURRl9vzmqN0VEACvi/cB4AFZ6e//gARIR5RLURRFUZQz+MAL8A/w3wv+fgLPiMJXFEVRFMURPqLIL1HiTX//IIpdURRFUZQaQ7vcI+Ajdq3rFHiPuuIVZe74xV+A9BH/Kl63kQF/F69TIC/9V5SbZ0iF/oIo9CHIgUcgHqj+a3gGnq4s+55pfZch+Il03tfwBomnuIYQ+HZl2bFJSq+/c1RYyempsyRA4mdec1TiNsiR6/S9+J8iyt8d6+035N67Zd6wu0tOjppdm1fs7rLrRZo4662H9JXeNcX/16YsJYZU5iBf9qV4HQ/Yzli8Yxnfo42Q65X5LRG2vIajYv8O7McQxhIBcn+vGO4e8JDrFZaOZcj1+sq8rpfSzRNiAC2VCIOB7v9YE+PIUMo851TpvSAdxdwJWfZo/t61AAsgAB6AL0g8yQvd7mnXRMCP4u+B8Qd0fiHDFyQG5wvL6CtunVVhxS4Vo77StkKPGM4y95AO7LF2/IVlWH/vXAswED7akdrG46gwp+baXSEuw6kNOFYcB0MfWUafcYt4yABxeay3KwzvS5sK3UcelCEJgN+pulw8ju73OROxzE5GrfNhCRGl/gW3948/ETnO4SEK4Scia+hQFuU6lmr8GPeVNhW67Wj2Nh6Q+cR96VjIsHP2YxG5FsAyHsv7TlNlhVjsK4dthw7aNmGFDEKm5uVQuvFZbyPXQlhlvfWxcA/aUugB43YkHxHXe146dm2E+ZS4Z1kJdFYs6/tMHQ+xOof2lJX5WLTpjdimbULm4V1QjizN82dFf9lS6GNf3BB58PalYz7zn6v1mP93KLOEQdYceWCcaagXljWfueKYmVKZNgHrbehaCCtIkN/KRlW2FPrKUj2XcA98qh1bwtzKUpRgiFo7LokYVqkPvTTVJU+IYg8cy6F0s4T+HgyXqpWxodBXuHG3rRCXe1Y7Nnd8lvE9ljIwmTMRw1ibS1bmB3yOS+6UaRIVc89zx5qH24ZCDyzUcS0rTpNGhKNLYZ+5zw/5LON3WAJP2P0tHli+Mlfmw7z7SgtL1crYUOivz58yGO+QbVbLBA7ksE3IvN3Vap1PC1tBawHjBty5JgE2jmVQuolmnmjG6oBkiExxYxI0HPNGlmEo5qoUPZYxZbAkPMwVsYcMDG6FnGWnGF0KHnP1GK23AZY9mTYUemihDuWUiHkOTiLmKffSiTDz+jwYlp8bj7je4EXpy1zd7tblHmpzljFx6fIfmgfmt4Rmrg9XGx8Y/jcIOaY2fs1wg+RrN7bwGfd3TanmmAhHbBskLiceuc06ieP2bZCP1I7Pertid7cfqT1zZJogsl2tDYWe49YiCxy2PTT3zEuhr7gtK84WSfF/X/z3kGv5hN3rGSEDlOzCck8M94wnyI5oKeeVmIc8737xZ3sbVpiKq31398a1CDPjnnntqvcwRKU2XO6phTpMCBy3PyQe85ofWpp17oocsRBfcZoR0ZTowvM97MdE5MjA4hWy1/2GfhZpXpwXIwPdN8C/gT+R67S3INt7xrMsFXuExZz0XBhkDb0NhZ5bqMMmmWsBLDMXJemj8RRDsEEUVmqpvks7kgi7FvAGUeTP2HtW06Let4iCf891yn1/ZTllGsyjr5Q89P4QVdtQ6PVlY65JXQtgmYB5KMq5RuXPgQyxRjMLdflc1pnYsiRy5DvY9jg0tRMjyv0V4gno017OFFztiglzSTQzWIY7Gwp9b6EOW2QsT6HD9EeeHrpUbWhyREnlFupa9TzPx86UVo4o88RCXZeQIZ6APlMX6mpfBpFrAToZYKlaGVtz6JmFemyQuBZgIFZMO9jsAV2qNgYpp/sXXMMfPc8LLbSVI8o8tVCXiQwb2i32PdMyTJTrmbrxM6h8thLLfLZUjyk2OrupMmWX9lI2SZgDz5gPoIOe59lYEvqB6XjNco4We1w6pq725eBNdq/0gZaqlbGl0GPcu6sSptNxDMGKaVrBEdP2HiwR04FrYPm8NjKmmTo1R5T4G+xNYyjTYarGz8PQDdhS6BnureMPjtsfGo9pzg+pdT4+8UjtBIblp/5MJix3mu6W8Se6V/rg0wE2c7lvcDeXvuE2HsypzQ8FzCMCf2nkmHujwjOf+4b1g85LK+6YlpUu0wDe0M3YVOg54r4am5TpWwK28JmWlT61AcYtkQxcv29YPkFd2Yo7woktYRulr7S921rKuAEmObe33GQqLm6PaQ0ubo3/uBbgDN9dC6DcPNOw0sX9H4zR1BDbp8aMo9Rz3C+HcUHINNzcD64FuHES1wIoysRZTWSv9NGMsKH2Q48Z1nJOuU1lfmAKVvoUZFCmS+JaAOXm8XBteIjbPxqruaEUOohSH0Lpbgaqd05EuF0q5rp9Ra+/ovTBteERjdnYUAo9RBI4rJCtETNL9SbI3OFDUX9kqd45Ejls2/VDopgr9MyCDF0EA9evKH3wHSeaGTVw2MZ+6E2EDBOQEFKdP04Yb03u1LhHvBX5yO0GTGMO/9bpm761jcyGEB38PnD9itKXe1zoiZGWqpUZ0uWuDIuHmw1RdKnaNAgMyqaWZOhiNUIbitKHwFGimdH7SlXo82bsZRk+tz3NMRVCzFzuaY9zEoP6QeQLDetQFFuMO0044lK1MkMp9Hygel21M1V8xrWEohHbUtox7Zy+9jwvM2zno2F5RbHF2HulO4kzGkqhb5D9h4ciR5bFuchMNzXGdOuou909AeYDq6TnealhOwGulw0pypFx+q+Rl6qVGdLlvgH+xH7wTUJ1+8NbJ2ScJUwR09zt7dZ4MSwf09+zZSPb20d0Pl2ZBtFIiWacGT5Dz6GniFLfW6ovRtag55bqWwpjzKWrde6eF8zn5T5fcG5i2NaBF3Q+XXGPx9CW8wh7nncxRlBcjrjGY8N69oybJ35sMoOyEcNazyFmiiSzIsVt84IdV3tywfkpdn47D/iG5I5QFBMyw/JDGyYrzPri3KTxMaPc33O9Us9YtjKHyyynJh5sCNGCSYBHjm6jaYKHHWUO1+1KaHpflnkCfqDWunI9GWbGoc96u7IiSTMm3tIEw7iVsZetPXLdCOsWdlTbYPYdhxp5+pgpk09Mf2ewqRIiCjCyUNeG61zosYW2ywSItX74Xp7l+pXl88mw/DB9pSxV8w1qMB48j63Qcy7/MTJuY6OHHDNL1mOYuRvTOmMLMtwSHnLNfyCKz7dQZ8r1q04yhvkNA8Tz8A9Hd3w4QDvK0tjdpZjphJD1NrAiSxWTgULG7i42FWCo1K9dJBeeb9PlN3U+YKZAh0hxaHKTxsx//vx3hlU0h7r/QJR3YLn+FAkkNcH0vjxHSDVddFb8pcDfxf+c296QSanyGbPn8h6b07iyVG1lUIMVPedCoacXnp8MIMNUyZDvG15ZPijKJhZkAXOX6BIGYxHzTaiTYmdVSIYo9bEyE/q0Z5rLSn9/l14nQwulTIjdXcx6+8T1HqyI9fYDu7vMkkSmbvyNDSFcKPTgwvO9AWSYMh8wH3kmViQxD/BI7IihXEGMuNlzS/VtkOBI31J91+J3yJAWf9+Rey8bXpyBWG+fXYvQi93ds8PWP2GWjTDCxsoL86VqMbu73FgO5qHQX3NbUdIJ0hH5V5ZfFWUzQzlCAxlgGdb5XPmA/SViObL89Iflem0SUM2klyL34Z75Kfex92m4lmeHbcfIdfKuLH+PHflXBjLAdatPGnGxOctfF54fDSHExDH9gW10BmYBHhoM54IMSeT0PFD9KcOmdLZNgFhwP5HAu5VLYRTLiFW7N6jBs7RXupkn057b34lCfwv8xvk87Elx3r+HFmiC7DFzla4wGzH6TCDAQ+lNjgwCXzF84NiGeQ7WQuALotxXTiVRbOLW+JE17b5BDaZL8Cq43D41MPx8yeSYdZoe5tHyJmwMyyv9iRnWKm/CJEmUa3xEsX/jtvuYZSDWbWJQg2+4V7rpUrW9QfkTXCr0P8587nF7AXFlXCVP8DAN8Fh+EqCpkAH/56jtOSt1OCbteXArhmIBN1a6LFULDdq1Nnd+YMoWet9zlkqGaYrD6xTziokEeChn8anOEUcjt/+eec2pN/ERsdg9x3Io17K7SzALegyv3CvdxF2fM0CwtyuF7tNv3iEcVIrpYzoXfU0OdtOlaplBeeV6QiTz2k/GfW42yFr3bMQ2bbNCBkSeWzEUA8a10mWp2sqgPWtL1cq4Uuhhz/NeDynEDEgwC3IKuaxzD5lQgIdyFT6inD4ynoJKkHn8zUjtDUGAKvU5s8c0kPiyvdIjzO6VQfpKVwq979K1cEghZoLpD3+JlW66VG1vUF6xywPjBn7liPv9FfOdWw+Qa6bMDbF2TfpKj8viKUz6yr3NpWplpm6hX3ruEokx3yvd73Gej5kLSefOp0fA+NHcGTK3PlfFHiBTF8r8iA3L9zN+JrZUrYwLhb7iMlfFpYlolojpXHrU4xyTEWeOWudTxcPerm2XkCGK/d/F//3I7ZsQcZsJreaNWL2xQQ1+z0QzJn1lWgTxDYKL1K+XKugV84+kNWWDWbDaPd37rXvoUrU2EiQ3+FD8i6MFHTDMHK6HRHLb2KjlUnLk/ogLOVZIbEzAtFexfESDPOfIZ4bcsdJ8qdqgcUZjK3SPyy+2j90dxOZIjtxk0ZXlPaQjjVs+j5hggMdE+M64SVs85H5/jfnvUiZABoUuB8c5R+UO8t0CjgOZ16VjrvEQpX4uo6UyJXZ3CettyvX3UMB6G3ZY0WZL1Szsed7F2Ar94cpy77hthQ6iNCOD8k+0K3SzAA+1YmySI9d0jyjfCPntfAt1PwBfmc6zlNO+K5/PcX94DzfKfoU7Y8J0D/tb5hNmcRDN+sZ8qdrghs/YCv1axRFhdyvIOZJitle6j9yM+9rxFRMN8FCAo0X7ETtZzZ6YjkLvIqN9n3Ofo7L/A/Plll24uV4DzrMunuH2Sn/AzGMWG5TtxZhBcQ+YXYwHK1LMmyHSwZoFeMxDOSyBRyS4zJSQ+a8cyZD7bsMxov4VstIis9xWyPyv1y1iGkjc1C9ek6jrQDzUUrUyYyl0D/MtPe/RpA97TFMcVketPhMO8FBOiLGj1E06pqmSIbEOr5BrlFus23SzImV8Noblo0qiGYl+9w3qG6WvHEuhm2xCf8BD3I63jumN8dTy+lJy5rnOeO7EmC8Bi1j24DjG7jr4Fcu+XstDEs3EBjV4VGOWTAbBCbu71KB8b8ZQ6CH23OUR6v6KMbM+Io472a0M6lHr3B02LNCVuRiTJsfu5jErS/Uo42FninK9DTDTO6bu/94MrdA97GddeuG2R8s55hbaA+ZW2sZQBuV6csw7q1tJ2LTBzr16K9drOYhVnBjU4BdZ4Uz3PI8Nyl/E0Ar9BfvRpz6amtE0zeo9ZjdpzG2vOJgCG8x+g9CKFPPgEbNNjuC2rteSsGGlRw7bv4ghFfoLw7mpVty2Us8ws9I9ZhDgoXSSY34PBBbkmAumrneP27pey2B3t8c8kPhackaOMxpKob8wfC7kiNtW6q6UaoK5taPY4ath+cCGEDMhwfy+9Y2lUFzgqq/cD7HneRe2FbqHbAQRWa63jQjJUe2N1N6USHCToW20AA/lLIlhed+CDHPC9N4NbAihjE6MmynC0XegtKnQV8BPxp9rWgE/HLQ7Bca+YTJ0qdqUyA3L/2FDiBmRGpb/3YYQysiYL2G7hmSMRDJ1bCj0ELHKXVrKfiHDN25LsceMO/LUufPpkRiU9SzJMBcSw/K+BRkUN4zdd41uncN1Ct1DrOKPiEU+JSUaIvL8QJZmBQ5lGYuxbtQctc4VRZkjYi3vR2otc5WL/5rNWf6xLoV9AqrK/Dc3YoxCjHla3T7s0aVqiqLMl0+MkyDIiXUO427OogxDxjiWs7ObVOkkcC2AoswCsZqzgVvJGc8TcIIq9GUwdOT5Ht3zfKp4rgVQlBkxtGHyaeylamVUoS+DhGG3MdVguGkSuhZgZgSG5TMLMigukTSs+YAtxAPWfRZV6MthKCs9Q/c8nyqm+cW/X3i+b9iea0LD8n/bEEJxzlAGyih7nnehCn05xAxjQejc+XRZjdhWhKxqmXN2RtMBUG5DCMU58UD1Ok+6dY1C/22Gf7eC7Rsqx2GAh9JJhLnFnPQ8L+CoyCNkWWhg2PbY+Jhb6KmxFIp7xIqOLdeaulqqVqZr2VrE/F1sXWQsb131BtkdyLNU3yfUKpkqNpYqZj3OCZDcDk3HPjCfbXQ/WqgjtVCHMg0+YTdF+STijNoUesi8XWuXELsWwCI5YlFHluqLLdWj2OUZ88F2znmF7tGeAdJDlOQ7ZCezxFCeIYkwn57I0MHtctjdpay3CXYCS0fd87yLW59D910LMAC25rxjNKp3ioTYsc6TM597iBXunzkvKM576XGuCwLsWOeJhTqUaWFritL53PmBW1foSyTDTuczmZtU+UWAWMw2OLf16guXzZNHHIPm/Kskss8KGWx4Fuq6dEWAMnXEqs4s1LSxUIcVVKEvE9P5nBS1SKbGCnvKCbqDHV+43kUdcdzj4do6TPEQq9zmhlF7S/Uo08LUcIldJpKpowp9mewxG3lOIsBDAUQhvWBfOeUtnz1gJwYjRGT+B7MBwiX4SHzBT+R72GKPzp8vlQ1mv+2k+so2hZ6PKYRDEtcCDMi1c+kZGgw3BVaIIvwHu9G40N4JRdiZby7jFfV+Af6LWO7PiML3LNQfIMr7C6LInyzVW0ann5aKWNf7K0sn7O5Sa7JYoC3KPQX+ZNl5onOWvQxlj3TO3oXltPOq8jvjpFgNkN/qden1ECQ0D2QDxlnZElIN7MtKf4dMbElL2QC5Lr9jZ115HzLU3b50PnDdoHlS1jmcKvRnpEO5NT6xvIc2B/7tWogFEGHfQnZJk+cm4HSt+Vj4nAbRjbEdcF80U+LSkUQzi0hAVlboEdN6kMYkZCE/qKJ0sKfZ+n3Hsr1x15Ki00/KjCjPofuuhFAUZXByJAFME48dn90yek2UWaFR7opyG7yne+XDBnjD7QTEnuMDyw6aVRaIKnRFWT4b+sWIJEgwbDKcKLMgQeKJFGVWqEJXlGUTc5nrOEMs9VsNBkuBt66FUJRrUIWuKMslRlzt1/AMvOK2rPUUnXZQZowqdEVZJjHXK/MDGaLg3rN8JZeiylyZOarQFWV5PGKuzMvEiLX+gWUqvA0SO5C7FUNRzFCFrijLIUOszM0Adecc3fBLUewZcr10eZqyCFShK8oy2DBOhHpOVbFnA7c3BDkiu0b0K4tCFbqizJsYUa6PjGs15xwV+1vmkTo5RxT5K0T23KEsimKdts1ZFEWZLjmiyD8xDQt5X/x5yC5xf+FuL/Qm9sBXNI2rsnDKCj11JcQEyF0LoChnSBH38Hemaw3niNKMi/dh8feacXZGO5BRvVb5iG0rijPKCn2PuO08J5K4JZlIHUslMSyfGZadY5KUHFHih/9zJKH62wfFn48oea94fy05cm0yZOvVhONWrK75jAwolFNMrk1mUY4pYnTf6A5jiqJMgYD+xkSKWt2KoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKotwqv7kWQFFmy3r7DDxdVXZ35+7ZW29D4FurLOvtNyAs3n1gd/dc+/yZ4/dO2N29sdr+VKnLDW/Z3e0vKP8T8It3l183RTnD/7oWQFGUhSEK/0DC7i5xJMnQ3AP7XmfKYMAfThTlplhvI6qDwwRUoSuKYp+61yJxIcQIhKy3Pru7rMe590MLo9wU7zh60aB4xlShK4o9YuBv10L0IAM+GJRPanWN3f6UeALed56x3vrAagRZlBtHFbqi2OPzLNzLYlE+G5RPMLG6TdufFhHr7SO7u7zjHLXOlVH4H9cCKIqizJyH1k/WWw+IRpJDuXHUQlcU14hLNgJe1z7JgO/A/owFeKjjHghOyu/u4tq5AfDx1/vLo9QjZA4PIGV399hw/MA71tvXtfP6ty91/gV4xZEc+Mq5a3JUpH/VPslouiZm3NPucVhxlP08194LTddUAvHecQyeyoFPZ71Ip9f8wHcgPhszIO3el8pnHLxXsoLiwCO7u7SljlUhg186+rVoP28p85Hj/f8ZCViMqN4DGXIN0qKM13JOP2+bXPd3VJ+7tGgjM5DzO7A5+a7HZ6zc3uEZU4WuKE6RB/Sl44wI+Mh6+6aj8/tIu5UYsd7eA+9L5T2qATWX4reUbzrucxrdfb596ShfqHZcB1bAE+vt28ZrItf0I+2KNGK9fUIUyr5Tjn54rLdRyyCh/7LG9faBslI+JaL9e3uUr+l6+0KzZ2DFertH7oe81n5A+zWnqP+J9Xbza3BWp73diPU2pvq7ew3lPeALzffHof3HlmsdlMrltN8DEevtIe6h65yY3V17fET7dw2BB9bb0yWfzXI+cfqMhMA96+372j3q0/GMqctdUVwhlkyXMj/gAd8K661exwtdLl8hKMoHF0jnDunUv9GuWEA6sNPvdLym3plWfOBLYQna4HSeXOr2e5UWubuU+QEf+d7emfOijs9WNA80vtB9zQ881JYmCjKw7Gq367MD5RwITXjASzFo62JF9z3wwvn7JGr8ntClzMs8FdekixXt94iHfNe2z09QC11R7BGw3p47J/1lGYkL8j1HpR5TjZIvu0s95OHf/PpULLropH4JWPORjtHrIbcdxBp5Zr39b+lom5XSRd1qShAXJIgrOixee4gSelU6t65Yy2X/RbUDjQ0t9KQkS8B6G9bctGVZcsSVGzTWJPfCI0elHtN9L0SU74Vm8kLGnFMF98B6W3cLv+VooWeIO/jAH1Qj9d9RnmaQAcZDS/vQ514U5RmUjpRlKP/uIF6r81NRx+chpH2w0iXnfeGROLYjg6+oVj4G/gP8XvvsgfX2aw/3fZucHuWVFMdnrDH501Ghm2S9UpRlYJq9q4+F9YZyhPjuLma9TYGgYa57A/zg2JH/RbUTryuvauYy6WQPHXSze3pqnAaRnbo9q9aRX1OkQenMpt/zsRgI/dHpTu3HZ6pK5p7DbytWVfmzT5zOi1fZ3W1YbxP63Quv6VboGfDml8KWwULd6xEiiujQfsp6+wZRzE3zt88cdYRPlaD2Pi3az4uyPuc9AOX4i2p5qeOB4zPmcX5QUx1MNk9v1eX0qF4nr3idlMrUB2qvanJ+pppR8B3dq0LOyRl2lK2gLndFcc3uLm2cE5ROImssI65mv3Tkw4m1KeXfA3/OQpkLYe1903r1+vxtuYxXep01trC721hQ5of649L7Vck9WjeOYvrQ/17wztT0WLG+pfzb2jl+Yzu7u+cWyzepvBNLta2u6hy9yNKee6D5fq7KsLvbUL0GXQOk9MQzJNc1rp33WJMzb5DTq71fnZEzoZpBMOyQM+shp99RvkLZ5Z70LaQoCyVz2rp0al7taP39gaD2Pm4867xLcmoEpdc5YoH7DedlNHd0KccONCrKfi/qSn+dY++6fKLqUXgqrOFV6ZhEhp+fjjlSVZYHvAvkSk6OXCKDXDe/djToKFE9t2kAubvbd7RfbytvuQZ56bXXIU/Scrya+KnJFX4qZ8BBQTfHsYQN7eSl16dljpy2L1yVoOqo0E2TRSiK8ubixDKixJ+4PJOYX3nXL/3o3PCoui778ImqRRTSZCFJpPej8XUTN3VSamOFdMZe6azP9OG49CzsPrGXXPnFZY7z4OUlZ2MR1N5f+rvX+Y9h+Tb82vs+02xdWM0sqS53RXGFdODf0LSg9pBphz5pZVf0ixbvQ1lhe1Td7f02pzneC6EFea7lCyK751AGxQCNclcUd9SjuTNO3f4Bt9vB5hzd5F1klXe7u+dizXM50U7YUM6nX7R4NxLY2LSWGPpa56dLqFKqblsY8l6QQKywdCTn9Np79FvWZoOkxznpwDL0IeX0d3KGKnRFcYFYhmHpyGMR9FM/r81qS2vnBTMKfOvPtasOxJV+mvxE5ju/cFSM56LF+/KZ00C4rFdGOpmXDUpHLr0XbFDOUpZSjzCX9kNMXOHd66kTqtfv7UTjP9La+9NgVIeoy11R3BDU3scXlk9r75uXnK63QUvQzlRJSq+9VtnbXOXrrcd6+9z6ubi/00obdthwaqn1tc79yrsmZT48Xun11xZl6jUcO5BW3jUnfll1lM9q75vKH37fLjmG5XS1QT218JELEsLYQhW6orghq70/Da6RedWwsbRYoEnpyIr19qXS2R0tqm89Mmu18ceV5Q7866KzReFmpSNfTpS6vP/Bevuj9n095Ps+Id95dVK/lA1KR/KL5GtDOvp97eimZ+mqDLLOntqxgPHm19+1KKN6nv4yee39x8r1lzXk7XlOTu/np5N7VmQ63M9BhyxDsy+9Ps0mJ4OOL8g9Go4gz69nVF3uiuICWUKUcbTOouLhz0pnhWdq+VA7JyrqaTr3hfU2v8I9uCoyv12SdCfj+L0eis78kvKfqCYQ+VYk38k5zQ3/DcltnlFNXBIgg4Gco/XoceoZ+dpTpj48crTK894uY4mUz2i/FzyGn7v+yvFe8oGfRfT+gYAuC10y3WVUs9l9uWipXvV+9pB79gm5Dh7Va/CNrv0NhuWwVNEr3j8h+yUcZAlL535D8rHHA8pzeEbVQlcUh9TneH2Oy6zCs6XFmu2bICWl/7JUUyXX19XcjLic49rRALkmfu14ztE6fKQ5kCukOfVnbLWjlaQsSfFXl+McXfdCYCpaD2JOr11Y+vN61NG8YUtf5H7e1I76NF+DDFd5I5rjMzyan9ucYYL3Gp8xVeiK4gqxlt/S7vbNOddpiUJ603FejgTu/HmBxbjBJFBMMl/FV5eXOt4jFlveckaOfK9j8JZkWfuzKJd11H4oayNbnB3O3wsZQyowuYbVtMSn7M/Usaf9O+T0GXzKLm7v6f6uG5qC9sbk+NylHWftGSpLo7S/qR9Wl7uiXE9MtQNML65BOsF9Md8YlD7JkA7Bp7oXeFMdCfCqmFdc1eRJGjq+FOmMuuR6ZL39RHUv7QMxx+/dJtN71tsPLeXPty91PBc5zENO95tu+l7HcrKBRcCpddlvXXgzKVW50wvLP9L1W7bfCynHDXfaytdla6N8TlZrPwfeNFy3HLkXc8TdXG6zimRZS6hugpNxHAyc313wkPpUph3CmrxdG7KUr2/Wck5MP09V+3U6IPfRn63Xqz1pkR05T59RfussoCiKoig2kIHKl9KRyzMrKp2oQlcURVHsIEr7CVlLn5SO+0iEuv/r2O5O9Y9l1OWuKIqimFPdXvVb4Xr/juwRvqI69RGPJ9jtoApdURRFMUNyANSTrIQ0r9bIMY2IVxrRKHdFURTFjH5R8hSf919xoVzE/wMQgd/Dl8hLSAAAAABJRU5ErkJggg==';
+    const REPORT_BLUE = '#003A75';
+    const REPORT_BLUE_ACCENT = '#0059AD';
+    const STORAGE_KEY = 'mbs-pool-dosing-combined-v3';
+    const STOCK_STORAGE_KEY = 'mbs-pool-stock-v1';
+    const DOSE_KEYS = ['acid', 'chlorine', 'bicarb', 'calcium', 'stabiliser', 'salt'];
+    const QR_SIZE = 180;
+
+    // Updated list of pools including Raiders Ice Baths 2 & 3, Kamy Saeedi and Nathan's Pool.
+    // James Court Pool and Spa have their CYA targets set to 0.  Each of the ice baths now
+    // has its own record so you can adjust the targets independently.  The salt target
+    // for the ice baths has been set to 0.  The Nathan entry uses double quotes around the
+    // pool name to avoid breaking the JavaScript string.
+    const POOLS = [
+      {
+        key: 'raiders_ice_baths_all',
+        site: 'Raiders',
+        poolName: 'Raiders Ice Baths - All 3',
+        volume: 18000,
+        defaults: { ph: 7.2, fc: 3.0, alk: 80, calcium: 200, cya: 0, salt: 0 },
+        isGroup: true
+      },
+      {
+        key: 'raiders_hydrotherapy_pool',
+        site: 'Raiders',
+        poolName: 'Raiders Hydrotherapy Pool',
+        volume: 32000,
+        defaults: { ph: 7.4, fc: 1.5, alk: 80, calcium: 200, cya: 0, salt: 1000 },
+        systemNote: 'Enviroswim system - recommended pH 7.0-7.5 (ideal 7.2), alkalinity 80-130 ppm, calcium hardness 175-250 ppm (ideal 200), copper 0.2-0.4 ppm (ideal 0.3), oxidiser around 0.5 ppm, avoid stabiliser (CYA).'
+      },
+      {
+        key: 'raiders_ice_bath_1',
+        site: 'Raiders',
+        poolName: 'Raiders Ice Bath 1',
+        volume: 6000,
+        defaults: { ph: 7.2, fc: 3.0, alk: 80, calcium: 200, cya: 0, salt: 0 }
+      },
+      {
+        key: 'raiders_ice_bath_2',
+        site: 'Raiders',
+        poolName: 'Raiders Ice Bath 2',
+        volume: 6000,
+        defaults: { ph: 7.2, fc: 3.0, alk: 80, calcium: 200, cya: 0, salt: 0 }
+      },
+      {
+        key: 'raiders_ice_bath_3',
+        site: 'Raiders',
+        poolName: 'Raiders Ice Bath 3',
+        volume: 6000,
+        defaults: { ph: 7.2, fc: 3.0, alk: 80, calcium: 200, cya: 0, salt: 0 }
+      },
+      {
+        key: 'james_court_pool',
+        site: 'James Court',
+        poolName: 'James Court Pool',
+        volume: 90000,
+        defaults: { ph: 7.4, fc: 1.5, alk: 80, calcium: 250, cya: 0, salt: 0 },
+        systemNote: 'Enviroswim system - recommended pH 7.0-7.5 (ideal 7.2), alkalinity 80-130 ppm, calcium hardness 175-250 ppm (ideal 200), copper 0.2-0.4 ppm (ideal 0.3), oxidiser around 0.5 ppm, avoid stabiliser (CYA).'
+      },
+      {
+        key: 'james_court_spa',
+        site: 'James Court',
+        poolName: 'James Court Spa',
+        volume: 6000,
+        defaults: { ph: 7.4, fc: 1.5, alk: 100, calcium: 250, cya: 0, salt: 0 },
+        systemNote: 'Enviroswim system - recommended pH 7.0-7.5 (ideal 7.2), alkalinity 80-130 ppm, calcium hardness 175-250 ppm (ideal 200), copper 0.2-0.4 ppm (ideal 0.3), oxidiser around 0.5 ppm, avoid stabiliser (CYA).'
+      },
+      {
+        key: 'kamy_saeedi',
+        site: 'Kamy Saeedi',
+        poolName: 'Kamy Saeedi',
+        volume: 90000,
+        defaults: { ph: 7.2, fc: 1.0, alk: 80, calcium: 200, cya: 0, salt: 1000 },
+        systemNote: 'Enviroswim system - recommended pH 7.0-7.5 (ideal 7.2), alkalinity 80-130 ppm, calcium hardness 175-250 ppm (ideal 200), copper 0.2-0.4 ppm (ideal 0.3), oxidiser around 0.5 ppm, avoid stabiliser (CYA).'
+      },
+      {
+        key: 'nathan_volke',
+        site: 'Nathan Volke',
+        poolName: "Nathan's Pool",
+        volume: 50000,
+        defaults: { ph: 7.2, fc: 1.0, alk: 80, calcium: 200, cya: 0, salt: 1000 },
+        systemNote: 'Enviroswim system - recommended pH 7.0-7.5 (ideal 7.2), alkalinity 80-130 ppm, calcium hardness 175-250 ppm (ideal 200), copper 0.2-0.4 ppm (ideal 0.3), oxidiser around 0.5 ppm, avoid stabiliser (CYA).'
+      },
+      {
+        key: 'csu_barton_pond',
+        site: 'CSU Barton',
+        poolName: 'CSU Pond',
+        volume: 4500,
+        defaults: { ph: 7.2, fc: 0.5, alk: 80, calcium: 200, cya: 0, salt: 1000 }
+      },
+      {
+        key: 'marco_monarch_pool',
+        site: 'Marco (Monarch)',
+        poolName: "Marco's Pool",
+        volume: 87000,
+        defaults: { ph: 7.2, fc: 0.5, alk: 80, calcium: 200, cya: 0, salt: 1000 }
+      },
+      {
+        key: 'mirko_milic_pool',
+        site: 'Mirko Milic',
+        poolName: "Mirko's Pool",
+        volume: 15000,
+        defaults: { ph: 7.2, fc: 0.5, alk: 80, calcium: 200, cya: 0, salt: 1000 }
+      },
+      {
+        key: 'custom_pool',
+        site: '',
+        poolName: 'Custom Pool',
+        volume: 0,
+        defaults: { ph: 7.2, fc: 2.0, alk: 80, calcium: 200, cya: 0, salt: 0 }
+      }
+    ];
+
+    const chemicalNames = {
+      acid: 'Hydrochloric Acid 32%',
+      chlorine: 'Liquid Chlorine 12.5%',
+      bicarb: 'Sodium Bicarbonate',
+      calcium: 'Calcium Chloride',
+      stabiliser: 'Stabiliser (Cyanuric Acid)',
+      salt: 'Pool Salt'
+    };
+
+    const chemicalMeta = {
+      acid: { unit: 'mL', decimals: 0 },
+      chlorine: { unit: 'mL', decimals: 0 },
+      bicarb: { unit: 'kg', decimals: 2 },
+      calcium: { unit: 'kg', decimals: 2 },
+      stabiliser: { unit: 'kg', decimals: 2 },
+      salt: { unit: 'kg', decimals: 2 }
+    };
+
+    const inputs = {};
+    let photoDataUrl = '';
+
+    function qs(id) {
+      return document.getElementById(id);
+    }
+
+    function n(value) {
+      const parsed = parseFloat(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function round(value, decimals = 0) {
+      const factor = Math.pow(10, decimals);
+      return Math.round((value + Number.EPSILON) * factor) / factor;
+    }
+
+    function formatNumber(value, decimals = 0) {
+      if (!Number.isFinite(value)) return '-';
+      return value.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function formatDose(value, unit, decimals = 0) {
+      if (!Number.isFinite(value) || value <= 0) return 'No dose';
+      return `${formatNumber(value, decimals)} ${unit}`;
+    }
+
+    function getSelectedPool() {
+      return POOLS.find(pool => pool.key === inputs.poolSelect.value) || POOLS[0];
+    }
+
+    function getActiveVolume() {
+      const custom = n(inputs.customVolume.value);
+      const auto = n(inputs.poolVolumeAuto.value);
+      return custom && custom > 0 ? custom : (auto || 0);
+    }
+
+    function setDefaultDateTime() {
+      const now = new Date();
+      if (!inputs.reportDate.value) {
+        inputs.reportDate.value = now.toISOString().slice(0, 10);
+      }
+      if (!inputs.testTime.value) {
+        inputs.testTime.value = now.toTimeString().slice(0, 5);
+      }
+    }
+
+    function populatePoolSelect() {
+      inputs.poolSelect.innerHTML = '';
+      POOLS.forEach(pool => {
+        const option = document.createElement('option');
+        option.value = pool.key;
+        option.textContent = pool.poolName;
+        inputs.poolSelect.appendChild(option);
+      });
+    }
+
+    function loadPoolDefaults() {
+      const pool = getSelectedPool();
+      inputs.poolVolumeAuto.value = pool.volume || '';
+      inputs.activeVolume.value = pool.volume || '';
+      inputs.targetPh.value = pool.defaults.ph ?? '';
+      inputs.targetFreeChlorine.value = pool.defaults.fc ?? '';
+      inputs.targetAlkalinity.value = pool.defaults.alk ?? '';
+      inputs.targetCalcium.value = pool.defaults.calcium ?? '';
+      inputs.targetCya.value = pool.defaults.cya ?? '';
+      inputs.targetSalt.value = pool.defaults.salt ?? '';
+
+      if (!inputs.reportSite.value || inputs.reportSite.dataset.auto === 'true') {
+        inputs.reportSite.value = pool.site || '';
+        inputs.reportSite.dataset.auto = 'true';
+      }
+      if (!inputs.reportPoolName.value || inputs.reportPoolName.dataset.auto === 'true') {
+        inputs.reportPoolName.value = pool.poolName || '';
+        inputs.reportPoolName.dataset.auto = 'true';
+      }
+
+      // Show or hide system note for selected pool
+      const noteEl = document.getElementById('poolSystemNote');
+      if (noteEl) {
+        if (pool.systemNote && !pool.isGroup) {
+          noteEl.textContent = pool.systemNote;
+          noteEl.style.display = 'block';
+        } else {
+          noteEl.textContent = '';
+          noteEl.style.display = 'none';
+        }
+      }
+
+      updateActiveVolume();
+      updateModeVisibility();
+    }
+
+    function updateActiveVolume() {
+      inputs.activeVolume.value = getActiveVolume() || '';
+    }
+
+
+    function isRaidersGroupMode() {
+      return inputs.poolSelect && inputs.poolSelect.value === 'raiders_ice_baths_all';
+    }
+
+    function getVisiblePoolsForQr() {
+      return POOLS.filter(pool => pool.key !== 'custom_pool');
+    }
+
+    function getBaseAppUrl() {
+      return `${window.location.origin}${window.location.pathname}`;
+    }
+
+    function updateModeVisibility() {
+      const groupMode = isRaidersGroupMode();
+      const singleResultsCard = qs('singleResultsCard');
+      const singleCombinedCard = qs('singleCombinedCard');
+      const groupIceBathsCard = qs('groupIceBathsCard');
+      const stockLogCard = qs('stockLogCard');
+      if (singleResultsCard) singleResultsCard.classList.toggle('hidden', groupMode);
+      if (singleCombinedCard) singleCombinedCard.classList.toggle('hidden', groupMode);
+      if (groupIceBathsCard) groupIceBathsCard.classList.toggle('hidden', !groupMode);
+      if (stockLogCard) stockLogCard.classList.toggle('hidden', groupMode);
+    }
+
+    function getIceBathPool(index) {
+      return POOLS.find(pool => pool.key === `raiders_ice_bath_${index}`);
+    }
+
+    function getIceBathValues(index) {
+      return {
+        clarity: (inputs[`iceBath${index}Clarity`] && inputs[`iceBath${index}Clarity`].value) || '',
+        ph: n(inputs[`iceBath${index}Ph`] && inputs[`iceBath${index}Ph`].value),
+        fc: n(inputs[`iceBath${index}Fc`] && inputs[`iceBath${index}Fc`].value),
+        alk: n(inputs[`iceBath${index}Alk`] && inputs[`iceBath${index}Alk`].value),
+        temp: n(inputs[`iceBath${index}Temp`] && inputs[`iceBath${index}Temp`].value),
+        note: (inputs[`iceBath${index}Note`] && inputs[`iceBath${index}Note`].value) || ''
+      };
+    }
+
+    function getIceBathRecommendations(index) {
+      const pool = getIceBathPool(index);
+      const values = getIceBathValues(index);
+      const defaults = (pool && pool.defaults) || { ph: 7.2, fc: 3.0, alk: 80 };
+      return {
+        poolName: pool ? pool.poolName : `Raiders Ice Bath ${index}`,
+        clarity: values.clarity || '-',
+        ph: values.ph,
+        fc: values.fc,
+        alk: values.alk,
+        temp: values.temp,
+        note: values.note,
+        targetPh: defaults.ph,
+        targetFc: defaults.fc,
+        targetAlk: defaults.alk,
+        acid: acidDoseMl((pool && pool.volume) || 6000, values.ph, defaults.ph, values.alk),
+        chlorine: chlorineDoseMl((pool && pool.volume) || 6000, values.fc, defaults.fc),
+        bicarb: bicarbDoseKg((pool && pool.volume) || 6000, values.alk, defaults.alk)
+      };
+    }
+
+    function renderRaidersGroupMode() {
+      updateModeVisibility();
+      if (!isRaidersGroupMode()) return;
+      if (!inputs.reportSite.value || inputs.reportSite.dataset.auto === 'true') {
+        inputs.reportSite.value = 'Raiders';
+        inputs.reportSite.dataset.auto = 'true';
+      }
+      if (!inputs.reportPoolName.value || inputs.reportPoolName.dataset.auto === 'true') {
+        inputs.reportPoolName.value = 'Raiders Ice Baths - All 3';
+        inputs.reportPoolName.dataset.auto = 'true';
+      }
+      const totalVolume = 18000;
+      qs('kpiVolume').textContent = formatNumber(totalVolume, 0);
+      qs('kpiBalance').textContent = 'Grouped';
+      qs('kpiDoseCount').textContent = '3';
+      qs('kpiReport').textContent = 'Live';
+      [1, 2, 3].forEach(index => {
+        const rec = getIceBathRecommendations(index);
+        const target = qs(`iceBath${index}Summary`);
+        if (!target) return;
+        target.innerHTML = `
+          <div class="mini-pill"><strong>Clarity</strong>${escapeHtml(rec.clarity)}</div>
+          <div class="mini-pill"><strong>Acid</strong>${formatDose(rec.acid, 'mL', 0)}</div>
+          <div class="mini-pill"><strong>Chlorine</strong>${formatDose(rec.chlorine, 'mL', 0)}</div>
+          <div class="mini-pill"><strong>Bicarb</strong>${formatDose(rec.bicarb, 'kg', 2)}</div>
+          <div class="mini-pill"><strong>Targets</strong>pH ${formatNumber(rec.targetPh, 2)} | FC ${formatNumber(rec.targetFc, 2)} | Alk ${formatNumber(rec.targetAlk, 0)}</div>
+          <div class="mini-pill"><strong>Reading</strong>pH ${rec.ph == null ? '-' : formatNumber(rec.ph, 2)} | FC ${rec.fc == null ? '-' : formatNumber(rec.fc, 2)} | Alk ${rec.alk == null ? '-' : formatNumber(rec.alk, 0)}</div>
+        `;
+      });
+    }
+
+    function getEmptyStockState() {
+      return {
+        ute: Object.fromEntries(DOSE_KEYS.map(key => [key, ''])),
+        onsite: {},
+        transactions: []
+      };
+    }
+
+    function loadStockState() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STOCK_STORAGE_KEY) || 'null');
+        return parsed && typeof parsed === 'object' ? parsed : getEmptyStockState();
+      } catch (error) {
+        console.error('Failed loading stock state', error);
+        return getEmptyStockState();
+      }
+    }
+
+    function saveStockState(state) {
+      localStorage.setItem(STOCK_STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function ensurePoolOnsiteStock(state, poolKey) {
+      if (!state.onsite[poolKey]) {
+        state.onsite[poolKey] = Object.fromEntries(DOSE_KEYS.map(key => [key, '']));
+      }
+      return state.onsite[poolKey];
+    }
+
+    function renderStockSection() {
+      const wrap = qs('stockContent');
+      if (!wrap) return;
+      if (isRaidersGroupMode()) {
+        wrap.innerHTML = '<div class="hint">Stock logging stays in the normal single-pool mode so it stays simple and tied to one pool at a time.</div>';
+        return;
+      }
+      const pool = getSelectedPool();
+      const state = loadStockState();
+      const onsite = ensurePoolOnsiteStock(state, pool.key);
+      const rows = DOSE_KEYS.map(key => `
+        <tr>
+          <td><strong>${chemicalNames[key]}</strong><div class="inline-note">${chemicalMeta[key].unit}</div></td>
+          <td><input id="stockUte_${key}" type="number" step="any" inputmode="decimal" value="${state.ute[key] ?? ''}" placeholder="0" /></td>
+          <td><input id="stockOnsite_${key}" type="number" step="any" inputmode="decimal" value="${onsite[key] ?? ''}" placeholder="0" /></td>
+        </tr>
+      `).join('');
+      const transactions = (state.transactions || []).filter(tx => tx.poolKey === pool.key).slice(-15).reverse();
+      const txRows = transactions.length ? transactions.map(tx => `
+        <tr>
+          <td>${escapeHtml(tx.date || '-')}</td>
+          <td>${escapeHtml(tx.chemicalLabel || '-')}</td>
+          <td>${escapeHtml(tx.sourceLabel || '-')}</td>
+          <td>${escapeHtml(tx.qtyText || '-')}</td>
+          <td>${escapeHtml(tx.note || '')}</td>
+        </tr>
+      `).join('') : '<tr><td colspan="5">No stock usage logged yet for this pool.</td></tr>';
+      wrap.innerHTML = `
+        <div class="stock-grid">
+          <div class="actions">
+            <button class="button secondary" id="saveStockLevelsBtn" type="button">Save stock levels</button>
+            <button class="button" id="recordDoseStockBtn" type="button">Record marked doses to stock log</button>
+          </div>
+          <div class="table-wrap">
+            <table class="stock-table">
+              <thead>
+                <tr>
+                  <th>Chemical</th>
+                  <th>Ute stock</th>
+                  <th>${escapeHtml(pool.poolName)} onsite</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+          <div class="log-table-wrap">
+            <table class="stock-table">
+              <thead>
+                <tr>
+                  <th>Date / time</th>
+                  <th>Chemical</th>
+                  <th>Source</th>
+                  <th>Qty used</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody>${txRows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+      qs('saveStockLevelsBtn').addEventListener('click', saveStockLevelsFromScreen);
+      qs('recordDoseStockBtn').addEventListener('click', recordMarkedDosesToStockLog);
+    }
+
+    function saveStockLevelsFromScreen() {
+      if (isRaidersGroupMode()) return;
+      const pool = getSelectedPool();
+      const state = loadStockState();
+      const onsite = ensurePoolOnsiteStock(state, pool.key);
+      DOSE_KEYS.forEach(key => {
+        const uteField = qs(`stockUte_${key}`);
+        const onsiteField = qs(`stockOnsite_${key}`);
+        state.ute[key] = uteField ? uteField.value : state.ute[key];
+        onsite[key] = onsiteField ? onsiteField.value : onsite[key];
+      });
+      saveStockState(state);
+      renderStockSection();
+    }
+
+    function recordMarkedDosesToStockLog() {
+      if (isRaidersGroupMode()) return;
+      const pool = getSelectedPool();
+      const { doses } = buildRecommendationRows();
+      const state = loadStockState();
+      const onsite = ensurePoolOnsiteStock(state, pool.key);
+      let recorded = 0;
+      DOSE_KEYS.forEach(key => {
+        const snapshot = getDoseFieldSnapshot(key);
+        if (snapshot.status !== 'yes' || !snapshot.source) return;
+        const recommended = doses[key] || 0;
+        const qty = snapshot.actualQty != null && snapshot.actualQty > 0 ? snapshot.actualQty : recommended;
+        if (!(Number.isFinite(qty) && qty > 0)) return;
+        if (snapshot.source === 'ute') {
+          const current = n(state.ute[key]);
+          state.ute[key] = current == null ? '' : round(current - qty, chemicalMeta[key].decimals);
+        } else if (snapshot.source === 'onsite') {
+          const current = n(onsite[key]);
+          onsite[key] = current == null ? '' : round(current - qty, chemicalMeta[key].decimals);
+        }
+        const now = new Date();
+        state.transactions.push({
+          ts: now.toISOString(),
+          date: `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+          poolKey: pool.key,
+          poolName: pool.poolName,
+          chemical: key,
+          chemicalLabel: chemicalNames[key],
+          source: snapshot.source,
+          sourceLabel: snapshot.source === 'ute' ? 'Ute stock' : 'Stock onsite',
+          qty,
+          qtyText: `${formatNumber(qty, chemicalMeta[key].decimals)} ${chemicalMeta[key].unit}`,
+          note: snapshot.note || ''
+        });
+        recorded += 1;
+      });
+      saveStockState(state);
+      renderStockSection();
+      if (!recorded) alert('No marked doses with a stock source were found to record.');
+    }
+
+    async function renderQrSection() {
+      const wrap = qs('qrCodesWrap');
+      if (!wrap) return;
+      const baseUrl = getBaseAppUrl();
+      const pools = getVisiblePoolsForQr();
+      wrap.innerHTML = pools.map(pool => `
+        <div class="qr-card">
+          <h3>${escapeHtml(pool.poolName)}</h3>
+          <div id="qr_${pool.key}"></div>
+          <div class="inline-note">${escapeHtml(pool.key === 'raiders_ice_baths_all' ? 'Grouped report' : 'Single pool report')}</div>
+        </div>
+      `).join('');
+      if (!window.QRCode) {
+        Array.from(wrap.querySelectorAll('[id^="qr_"]')).forEach(el => { el.textContent = 'QR generator unavailable'; });
+        return;
+      }
+      for (const pool of pools) {
+        const target = qs(`qr_${pool.key}`);
+        if (!target) continue;
+        const url = `${baseUrl}?pool=${encodeURIComponent(pool.key)}`;
+        try {
+          const canvas = document.createElement('canvas');
+          await QRCode.toCanvas(canvas, url, { width: QR_SIZE, margin: 1 });
+          target.innerHTML = '';
+          target.appendChild(canvas);
+        } catch (error) {
+          target.textContent = 'QR failed';
+        }
+      }
+    }
+
+    function applyUrlSelection() {
+      const params = new URLSearchParams(window.location.search);
+      const poolKey = params.get('pool');
+      if (!poolKey) return;
+      if (POOLS.some(pool => pool.key === poolKey)) {
+        inputs.poolSelect.value = poolKey;
+      }
+    }
+
+
+    function acidDoseMl(volumeL, currentPh, targetPh, alkalinity) {
+      if (!volumeL || currentPh == null || targetPh == null || currentPh <= targetPh) return 0;
+      const delta = currentPh - targetPh;
+      const taFactor = clamp((alkalinity || 80) / 80, 0.6, 2.0);
+      return Math.max(0, Math.round((volumeL / 10000) * delta * 600 * taFactor));
+    }
+
+    function chlorineDoseMl(volumeL, currentFc, targetFc) {
+      if (!volumeL || currentFc == null || targetFc == null || currentFc >= targetFc) return 0;
+      const delta = targetFc - currentFc;
+      return Math.max(0, Math.round((delta * volumeL) / 125));
+    }
+
+    function bicarbDoseKg(volumeL, currentAlk, targetAlk) {
+      if (!volumeL || currentAlk == null || targetAlk == null || currentAlk >= targetAlk) return 0;
+      const delta = targetAlk - currentAlk;
+      return Math.max(0, round((delta * (volumeL / 10000) * 18) / 1000, 2));
+    }
+
+    function calciumDoseKg(volumeL, currentCalcium, targetCalcium) {
+      if (!volumeL || currentCalcium == null || targetCalcium == null || currentCalcium >= targetCalcium) return 0;
+      const delta = targetCalcium - currentCalcium;
+      return Math.max(0, round((delta * (volumeL / 10000) * 15) / 1000, 2));
+    }
+
+    function stabiliserDoseKg(volumeL, currentCya, targetCya) {
+      if (!volumeL || currentCya == null || targetCya == null || targetCya === 0 || currentCya >= targetCya) return 0;
+      const delta = targetCya - currentCya;
+      return Math.max(0, round((delta * volumeL) / 100000, 2));
+    }
+
+    function saltDoseKg(volumeL, currentSalt, targetSalt) {
+      if (!volumeL || currentSalt == null || targetSalt == null || currentSalt >= targetSalt) return 0;
+      const delta = targetSalt - currentSalt;
+      return Math.max(0, round((delta * volumeL) / 1000000, 2));
+    }
+
+    function getRangeStatus(value, range) {
+      if (value == null || !range) {
+        return { label: 'Missing', className: 'status-pill' };
+      }
+      if (value < range.min) {
+        return { label: 'Low', className: 'status-pill status-warn' };
+      }
+      if (value > range.max) {
+        return { label: 'High', className: 'status-pill status-bad' };
+      }
+      return { label: 'In range', className: 'status-pill status-good' };
+    }
+
+    function getRecommendedRange(key, target) {
+      if (target == null) return null;
+
+      if (key === 'ph') {
+        return { min: 7.2, max: 7.8, decimals: 2, label: '7.20 - 7.80' };
+      }
+
+      if (key === 'fc') {
+        const min = Math.max(0, target - 0.5);
+        const max = target + 1.0;
+        return { min, max, decimals: 2, label: `${formatNumber(min, 2)} - ${formatNumber(max, 2)}` };
+      }
+
+      if (key === 'alk') {
+        const min = Math.max(0, target - 20);
+        const max = target + 20;
+        return { min, max, decimals: 0, label: `${formatNumber(min, 0)} - ${formatNumber(max, 0)}` };
+      }
+
+      if (key === 'calcium') {
+        const min = Math.max(0, target - 50);
+        const max = target + 50;
+        return { min, max, decimals: 0, label: `${formatNumber(min, 0)} - ${formatNumber(max, 0)}` };
+      }
+
+      if (key === 'cya') {
+        if (target === 0) {
+          return { min: 0, max: 10, decimals: 0, label: '0 - 10' };
+        }
+        const min = Math.max(0, target - 15);
+        const max = target + 15;
+        return { min, max, decimals: 0, label: `${formatNumber(min, 0)} - ${formatNumber(max, 0)}` };
+      }
+
+      if (key === 'salt') {
+        if (target === 0) {
+          return { min: 0, max: 200, decimals: 0, label: '0 - 200' };
+        }
+        const min = Math.max(0, target - 200);
+        const max = target + 200;
+        return { min, max, decimals: 0, label: `${formatNumber(min, 0)} - ${formatNumber(max, 0)}` };
+      }
+
+      return null;
+    }
+
+    function isWithinRange(value, range) {
+      return value != null && range && value >= range.min && value <= range.max;
+    }
+
+    function buildDoseGuidance({ current, target, range, dose, unit, doseDecimals = 0, targetDecimals = 0, chemicalLabel, increaseVerb, decreaseVerb, noDoseText, lowText, highText, zeroTargetText }) {
+      if (current == null || target == null || !range) {
+        return 'Enter current and target values.';
+      }
+
+      const withinRange = isWithinRange(current, range);
+      const rangeText = `normal range ${range.label}`;
+
+      if (dose > 0) {
+        const doseText = `add ${formatDose(dose, unit, doseDecimals)} of ${chemicalLabel}`;
+        if (withinRange) {
+          if (decreaseVerb) {
+            return `Within ${rangeText}. Optional: ${doseText} to ${decreaseVerb} back to the target of ${formatNumber(target, targetDecimals)}.`;
+          }
+          return `Within ${rangeText}. Optional: ${doseText} to ${increaseVerb} to the target of ${formatNumber(target, targetDecimals)}.`;
+        }
+        if (current < range.min) {
+          return `${lowText || `Below ${rangeText}.`} ${doseText.charAt(0).toUpperCase() + doseText.slice(1)} to ${increaseVerb} to the target of ${formatNumber(target, targetDecimals)}.`;
+        }
+        return `${highText || `Above ${rangeText}.`} ${doseText.charAt(0).toUpperCase() + doseText.slice(1)} to ${decreaseVerb || increaseVerb} to the target of ${formatNumber(target, targetDecimals)}.`;
+      }
+
+      if (target === 0 && zeroTargetText) {
+        if (withinRange) return `Within ${rangeText}. ${zeroTargetText}`;
+        return `${highText || `Above ${rangeText}.`} ${zeroTargetText}`;
+      }
+
+      if (current < range.min) {
+        return lowText || `Below ${rangeText}. ${noDoseText}`;
+      }
+      if (current > range.max) {
+        return highText || `Above ${rangeText}. ${noDoseText}`;
+      }
+      if (Math.abs(current - target) > 0.0001) {
+        return `Within ${rangeText}. No immediate dose needed, but the ideal target is ${formatNumber(target, targetDecimals)}.`;
+      }
+      return `At target and within ${rangeText}. No dose needed.`;
+    }
+
+    function buildRecommendationRows() {
+      const volume = getActiveVolume();
+      const current = {
+        ph: n(inputs.ph.value),
+        fc: n(inputs.freeChlorine.value),
+        alk: n(inputs.alkalinity.value),
+        calcium: n(inputs.calciumHardness.value),
+        cya: n(inputs.cyanuricAcid.value),
+        salt: n(inputs.salt.value)
+      };
+      const target = {
+        ph: n(inputs.targetPh.value),
+        fc: n(inputs.targetFreeChlorine.value),
+        alk: n(inputs.targetAlkalinity.value),
+        calcium: n(inputs.targetCalcium.value),
+        cya: n(inputs.targetCya.value),
+        salt: n(inputs.targetSalt.value)
+      };
+
+      const doses = {
+        acid: acidDoseMl(volume, current.ph, target.ph, current.alk),
+        chlorine: chlorineDoseMl(volume, current.fc, target.fc),
+        bicarb: bicarbDoseKg(volume, current.alk, target.alk),
+        calcium: calciumDoseKg(volume, current.calcium, target.calcium),
+        stabiliser: stabiliserDoseKg(volume, current.cya, target.cya),
+        salt: saltDoseKg(volume, current.salt, target.salt)
+      };
+
+      const ranges = {
+        ph: getRecommendedRange('ph', target.ph),
+        fc: getRecommendedRange('fc', target.fc),
+        alk: getRecommendedRange('alk', target.alk),
+        calcium: getRecommendedRange('calcium', target.calcium),
+        cya: getRecommendedRange('cya', target.cya),
+        salt: getRecommendedRange('salt', target.salt)
+      };
+
+      const rows = [
+        {
+          key: 'acid',
+          parameter: 'pH',
+          current: current.ph,
+          target: target.ph,
+          range: ranges.ph,
+          rangeLabel: ranges.ph ? ranges.ph.label : '-',
+          decimals: 2,
+          status: getRangeStatus(current.ph, ranges.ph),
+          action: buildDoseGuidance({
+            current: current.ph,
+            target: target.ph,
+            range: ranges.ph,
+            dose: doses.acid,
+            unit: 'mL',
+            doseDecimals: 0,
+            targetDecimals: 2,
+            chemicalLabel: 'hydrochloric acid 32%',
+            increaseVerb: 'raise pH',
+            decreaseVerb: 'lower pH',
+            noDoseText: 'No acid dose needed.',
+            lowText: ranges.ph ? `Below normal range ${ranges.ph.label}. No acid dose needed - raise pH by your normal method if required.` : 'No acid dose needed.',
+            highText: ranges.ph ? `Above normal range ${ranges.ph.label}.` : 'High.'
+          })
+        },
+        {
+          key: 'chlorine',
+          parameter: 'Free chlorine',
+          current: current.fc,
+          target: target.fc,
+          range: ranges.fc,
+          rangeLabel: ranges.fc ? ranges.fc.label : '-',
+          decimals: 2,
+          status: getRangeStatus(current.fc, ranges.fc),
+          action: buildDoseGuidance({
+            current: current.fc,
+            target: target.fc,
+            range: ranges.fc,
+            dose: doses.chlorine,
+            unit: 'mL',
+            doseDecimals: 0,
+            targetDecimals: 2,
+            chemicalLabel: 'liquid chlorine 12.5%',
+            increaseVerb: 'raise free chlorine',
+            noDoseText: 'No chlorine increase needed.',
+            highText: ranges.fc ? `Above normal range ${ranges.fc.label}. No chlorine increase needed right now.` : 'No chlorine increase needed.'
+          })
+        },
+        {
+          key: 'bicarb',
+          parameter: 'Alkalinity',
+          current: current.alk,
+          target: target.alk,
+          range: ranges.alk,
+          rangeLabel: ranges.alk ? ranges.alk.label : '-',
+          decimals: 0,
+          status: getRangeStatus(current.alk, ranges.alk),
+          action: buildDoseGuidance({
+            current: current.alk,
+            target: target.alk,
+            range: ranges.alk,
+            dose: doses.bicarb,
+            unit: 'kg',
+            doseDecimals: 2,
+            targetDecimals: 0,
+            chemicalLabel: 'sodium bicarbonate',
+            increaseVerb: 'raise alkalinity',
+            noDoseText: 'No bicarb dose needed.',
+            highText: ranges.alk ? `Above normal range ${ranges.alk.label}. No bicarb dose needed.` : 'No bicarb dose needed.'
+          })
+        },
+        {
+          key: 'calcium',
+          parameter: 'Calcium hardness',
+          current: current.calcium,
+          target: target.calcium,
+          range: ranges.calcium,
+          rangeLabel: ranges.calcium ? ranges.calcium.label : '-',
+          decimals: 0,
+          status: getRangeStatus(current.calcium, ranges.calcium),
+          action: buildDoseGuidance({
+            current: current.calcium,
+            target: target.calcium,
+            range: ranges.calcium,
+            dose: doses.calcium,
+            unit: 'kg',
+            doseDecimals: 2,
+            targetDecimals: 0,
+            chemicalLabel: 'calcium chloride',
+            increaseVerb: 'raise calcium hardness',
+            noDoseText: 'No calcium dose needed.',
+            highText: ranges.calcium ? `Above normal range ${ranges.calcium.label}. No calcium dose needed.` : 'No calcium dose needed.'
+          })
+        },
+        {
+          key: 'stabiliser',
+          parameter: 'CYA',
+          current: current.cya,
+          target: target.cya,
+          range: ranges.cya,
+          rangeLabel: ranges.cya ? ranges.cya.label : '-',
+          decimals: 0,
+          status: getRangeStatus(current.cya, ranges.cya),
+          action: buildDoseGuidance({
+            current: current.cya,
+            target: target.cya,
+            range: ranges.cya,
+            dose: doses.stabiliser,
+            unit: 'kg',
+            doseDecimals: 2,
+            targetDecimals: 0,
+            chemicalLabel: 'stabiliser',
+            increaseVerb: 'raise CYA',
+            noDoseText: 'No stabiliser dose needed.',
+            zeroTargetText: 'Target is effectively zero, so keep stabiliser out unless specifically required.'
+          })
+        },
+        {
+          key: 'salt',
+          parameter: 'Salt',
+          current: current.salt,
+          target: target.salt,
+          range: ranges.salt,
+          rangeLabel: ranges.salt ? ranges.salt.label : '-',
+          decimals: 0,
+          status: getRangeStatus(current.salt, ranges.salt),
+          action: buildDoseGuidance({
+            current: current.salt,
+            target: target.salt,
+            range: ranges.salt,
+            dose: doses.salt,
+            unit: 'kg',
+            doseDecimals: 2,
+            targetDecimals: 0,
+            chemicalLabel: 'pool salt',
+            increaseVerb: 'raise salt',
+            noDoseText: 'No salt dose needed.',
+            zeroTargetText: 'Salt is not required for this setup.',
+            highText: ranges.salt ? `Above normal range ${ranges.salt.label}. No extra salt needed.` : 'No extra salt needed.'
+          })
+        }
+      ];
+
+      return { rows, doses, volume };
+    }
+
+    function renderCombinedTable() {
+      updateModeVisibility();
+      if (isRaidersGroupMode()) {
+        renderRaidersGroupMode();
+        return;
+      }
+      const { rows, doses, volume } = buildRecommendationRows();
+      const tbody = qs('combinedTableBody');
+      tbody.innerHTML = '';
+
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${row.parameter}</strong></td>
+          <td>${row.current == null ? '-' : formatNumber(row.current, row.decimals)}</td>
+          <td>${row.target == null ? '-' : formatNumber(row.target, row.decimals)}</td>
+          <td>${row.rangeLabel || '-'}</td>
+          <td><span class="${row.status.className}">${row.status.label}</span></td>
+          <td>${row.action}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const statuses = rows.map(row => row.status.label);
+      const hasBad = statuses.includes('High');
+      const hasWarn = statuses.includes('Low');
+      const balanceLabel = hasBad ? 'Attention' : hasWarn ? 'Adjust' : 'Balanced';
+      const doseCount = Object.values(doses).filter(value => Number.isFinite(value) && value > 0).length;
+
+      qs('kpiVolume').textContent = formatNumber(volume, 0);
+      qs('kpiBalance').textContent = balanceLabel;
+      qs('kpiDoseCount').textContent = String(doseCount);
+      qs('kpiReport').textContent = 'Live';
+
+      renderDoseChecklist(doses);
+    }
+
+    function renderDoseChecklist(doses) {
+      const checklist = qs('doseChecklist');
+      const currentDoseFields = getCurrentDoseFieldValues();
+      const doseConfig = [
+        { key: 'acid', unit: 'mL', decimals: 0, note: 'Acid estimate is based on pH and alkalinity. Retest after dosing.' },
+        { key: 'chlorine', unit: 'mL', decimals: 0, note: 'Based on liquid chlorine 12.5%.' },
+        { key: 'bicarb', unit: 'kg', decimals: 2, note: 'Dose in portions if the adjustment is large.' },
+        { key: 'calcium', unit: 'kg', decimals: 2, note: 'Pre-dissolve if required by your normal procedure.' },
+        { key: 'stabiliser', unit: 'kg', decimals: 2, note: 'Add by your normal stabiliser method if needed.' },
+        { key: 'salt', unit: 'kg', decimals: 2, note: 'Brush to help dissolve if needed.' }
+      ];
+
+      checklist.innerHTML = '';
+      doseConfig.forEach(item => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'dose-row';
+        const amount = doses[item.key] || 0;
+        wrapper.innerHTML = `
+          <div class="dose-row-top">
+            <div class="dose-row-name">${chemicalNames[item.key]}</div>
+            <div class="dose-row-amount">${formatDose(amount, item.unit, item.decimals)}</div>
+          </div>
+          <div class="dose-row-grid">
+            <div class="field">
+              <label for="doseStatus_${item.key}">Dosed?</label>
+              <select id="doseStatus_${item.key}">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="doseSource_${item.key}">Stock source</label>
+              <select id="doseSource_${item.key}">
+                <option value="">Select</option>
+                <option value="ute">Ute stock</option>
+                <option value="onsite">Stock onsite</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="doseActual_${item.key}">Actual qty used</label>
+              <input id="doseActual_${item.key}" type="number" step="any" inputmode="decimal" placeholder="Optional override" />
+            </div>
+            <div class="field">
+              <label for="doseNote_${item.key}">Dose note</label>
+              <input id="doseNote_${item.key}" type="text" placeholder="Optional note" />
+            </div>
+          </div>
+          <div class="subtle">${item.note}</div>
+        `;
+        checklist.appendChild(wrapper);
+      });
+
+      restoreDoseFields(currentDoseFields);
+      bindDoseFields();
+    }
+
+    function getCurrentDoseFieldValues() {
+      const snapshot = {};
+      DOSE_KEYS.forEach(key => {
+        const statusField = qs(`doseStatus_${key}`);
+        const sourceField = qs(`doseSource_${key}`);
+        const actualField = qs(`doseActual_${key}`);
+        const noteField = qs(`doseNote_${key}`);
+        if (statusField) snapshot[`doseStatus_${key}`] = statusField.value;
+        if (sourceField) snapshot[`doseSource_${key}`] = sourceField.value;
+        if (actualField) snapshot[`doseActual_${key}`] = actualField.value;
+        if (noteField) snapshot[`doseNote_${key}`] = noteField.value;
+      });
+      return snapshot;
+    }
+
+    function handleDoseFieldChange() {
+      saveState();
+    }
+
+    function bindDoseFields() {
+      DOSE_KEYS.forEach(key => {
+        const statusField = qs(`doseStatus_${key}`);
+        const sourceField = qs(`doseSource_${key}`);
+        const actualField = qs(`doseActual_${key}`);
+        const noteField = qs(`doseNote_${key}`);
+        [statusField, sourceField].forEach(field => {
+          if (field && !field.dataset.bound) {
+            field.addEventListener('change', handleDoseFieldChange);
+            field.dataset.bound = 'true';
+          }
+        });
+        [actualField, noteField].forEach(field => {
+          if (field && !field.dataset.bound) {
+            field.addEventListener('input', handleDoseFieldChange);
+            field.dataset.bound = 'true';
+          }
+        });
+      });
+    }
+
+    function restoreDoseFields(existingValues = null) {
+      try {
+        const stored = existingValues || JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        DOSE_KEYS.forEach(key => {
+          const statusField = qs(`doseStatus_${key}`);
+          const sourceField = qs(`doseSource_${key}`);
+          const actualField = qs(`doseActual_${key}`);
+          const noteField = qs(`doseNote_${key}`);
+          if (statusField && stored[`doseStatus_${key}`]) statusField.value = stored[`doseStatus_${key}`];
+          if (sourceField && stored[`doseSource_${key}`]) sourceField.value = stored[`doseSource_${key}`];
+          if (actualField && stored[`doseActual_${key}`] != null) actualField.value = stored[`doseActual_${key}`];
+          if (noteField && stored[`doseNote_${key}`]) noteField.value = stored[`doseNote_${key}`];
+        });
+      } catch (error) {
+        console.error('Failed restoring dose fields', error);
+      }
+    }
+
+    function getReportDoseItems(doses) {
+      return [
+        { key: 'acid', label: 'Hydrochloric Acid 32%', value: doses.acid, unit: 'mL', decimals: 0 },
+        { key: 'chlorine', label: 'Liquid Chlorine 12.5%', value: doses.chlorine, unit: 'mL', decimals: 0 },
+        { key: 'bicarb', label: 'Sodium Bicarbonate', value: doses.bicarb, unit: 'kg', decimals: 2 },
+        { key: 'calcium', label: 'Calcium Chloride', value: doses.calcium, unit: 'kg', decimals: 2 },
+        { key: 'stabiliser', label: 'Stabiliser (Cyanuric Acid)', value: doses.stabiliser, unit: 'kg', decimals: 2 },
+        { key: 'salt', label: 'Pool Salt', value: doses.salt, unit: 'kg', decimals: 2 }
+      ];
+    }
+
+    function getAssetLabel(poolName = '') {
+      const name = String(poolName || '').toLowerCase();
+      if (name.includes('spa')) return 'Spa';
+      if (name.includes('ice bath')) return 'Ice Bath';
+      return 'Pool';
+    }
+
+    function getServiceTypeLabel(poolName = '') {
+      const asset = getAssetLabel(poolName).toLowerCase();
+      return `Routine ${asset} maintenance`;
+    }
+
+    function getDoseFieldSnapshot(key) {
+      const statusField = qs(`doseStatus_${key}`);
+      const sourceField = qs(`doseSource_${key}`);
+      const actualField = qs(`doseActual_${key}`);
+      const noteField = qs(`doseNote_${key}`);
+      return {
+        status: ((statusField && statusField.value) || 'No').toLowerCase(),
+        source: sourceField && sourceField.value ? sourceField.value : '',
+        actualQty: actualField && actualField.value !== '' ? n(actualField.value) : null,
+        note: noteField && noteField.value ? noteField.value.trim() : ''
+      };
+    }
+
+    function buildChemicalSentence(key, amount, unit, decimals, outcomeText) {
+      const { status, note } = getDoseFieldSnapshot(key);
+      const chemicalName = chemicalNames[key];
+      let sentence = '';
+
+      if (Number.isFinite(amount) && amount > 0) {
+        const lead = status === 'yes' ? 'Added' : 'Recommended';
+        sentence = `${lead} ${formatDose(amount, unit, decimals)} of ${chemicalName}`;
+        if (outcomeText) sentence += ` ${outcomeText}`;
+        sentence += '.';
+      } else if (status === 'yes') {
+        sentence = `${chemicalName} was marked as dosed.`;
+      }
+
+      if (note) {
+        sentence += `${sentence ? ' ' : ''}Note: ${note}.`;
+      }
+
+      return sentence;
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatDateDisplay(value) {
+      if (!value) return '-';
+      const parts = String(value).split('-');
+      if (parts.length !== 3) return value;
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    function formatTimeDisplay(value) {
+      return value || '-';
+    }
+
+    function getReportReasonText(key, value, rowsMap) {
+      const row = rowsMap[key];
+      if (row && Number.isFinite(value) && value > 0) {
+        if (key === 'acid') return `Lower pH to ${formatNumber(row.target, 2)}`;
+        if (key === 'chlorine') return `Raise free chlorine to ${formatNumber(row.target, 2)}`;
+        if (key === 'bicarb') return `Raise alkalinity to ${formatNumber(row.target, 0)}`;
+        if (key === 'calcium') return `Raise calcium to ${formatNumber(row.target, 0)}`;
+        if (key === 'stabiliser') return `Raise CYA to ${formatNumber(row.target, 0)}`;
+        if (key === 'salt') return `Raise salt to ${formatNumber(row.target, 0)}`;
+      }
+
+      const emptyReasons = {
+        acid: 'No acid needed.',
+        chlorine: 'No chlorine needed.',
+        bicarb: 'No bicarb needed.',
+        calcium: 'No calcium needed.',
+        stabiliser: 'No stabiliser needed.',
+        salt: 'No salt needed.'
+      };
+      return emptyReasons[key] || 'No dose needed.';
+    }
+
+    function getDefaultDoseNote(key, value) {
+      if (!(Number.isFinite(value) && value > 0)) return '';
+      const defaults = {
+        acid: 'Estimate only - add in stages and retest.',
+        chlorine: 'Dose to reach target free chlorine.',
+        bicarb: 'Add in portions and brush if needed.',
+        calcium: 'Pre-dissolve or add as per site procedure.',
+        stabiliser: 'Add by normal stabiliser method.',
+        salt: 'Broadcast evenly and allow time to dissolve.'
+      };
+      return defaults[key] || '';
+    }
+
+    function buildCorrectiveSentence(item, reason) {
+      if (!(Number.isFinite(item.value) && item.value > 0)) return '';
+      const prefix = `Add ${formatDose(item.value, item.unit, item.decimals)} ${item.label}`;
+      if (item.key === 'acid') return `${prefix} to lower pH to ${reason.replace('Lower pH to ', '')}.`;
+      if (item.key === 'chlorine') return `${prefix} to raise free chlorine to ${reason.replace('Raise free chlorine to ', '')}.`;
+      if (item.key === 'bicarb') return `${prefix} to raise alkalinity to ${reason.replace('Raise alkalinity to ', '')}.`;
+      if (item.key === 'calcium') return `${prefix} to raise calcium to ${reason.replace('Raise calcium to ', '')}.`;
+      if (item.key === 'stabiliser') return `${prefix} to raise CYA to ${reason.replace('Raise CYA to ', '')}.`;
+      if (item.key === 'salt') return `${prefix} to raise salt to ${reason.replace('Raise salt to ', '')}.`;
+      return `${prefix}.`;
+    }
+
+    function buildReportModel() {
+      const { rows, doses, volume } = buildRecommendationRows();
+      const rowsMap = {
+        acid: rows.find(row => row.parameter === 'pH'),
+        chlorine: rows.find(row => row.parameter === 'Free chlorine'),
+        bicarb: rows.find(row => row.parameter === 'Alkalinity'),
+        calcium: rows.find(row => row.parameter === 'Calcium hardness'),
+        stabiliser: rows.find(row => row.parameter === 'CYA'),
+        salt: rows.find(row => row.parameter === 'Salt')
+      };
+
+      const summaryItems = [
+        { label: 'Water Clarity', value: inputs.waterClarity.value || '-' },
+        { label: 'Free Chlorine', value: rowsMap.chlorine && rowsMap.chlorine.current != null ? formatNumber(rowsMap.chlorine.current, 2) : '-' },
+        { label: 'Target FC', value: rowsMap.chlorine && rowsMap.chlorine.target != null ? formatNumber(rowsMap.chlorine.target, 2) : '-' },
+        { label: 'pH', value: rowsMap.acid && rowsMap.acid.current != null ? formatNumber(rowsMap.acid.current, 2) : '-' },
+        { label: 'Target pH', value: rowsMap.acid && rowsMap.acid.target != null ? formatNumber(rowsMap.acid.target, 2) : '-' },
+        { label: 'Alkalinity', value: rowsMap.bicarb && rowsMap.bicarb.current != null ? formatNumber(rowsMap.bicarb.current, 0) : '-' },
+        { label: 'Target Alk', value: rowsMap.bicarb && rowsMap.bicarb.target != null ? formatNumber(rowsMap.bicarb.target, 0) : '-' },
+        { label: 'Volume (L)', value: formatNumber(volume, 0) },
+        { label: 'Calcium', value: rowsMap.calcium && rowsMap.calcium.current != null ? formatNumber(rowsMap.calcium.current, 0) : '-' },
+        { label: 'CYA', value: rowsMap.stabiliser && rowsMap.stabiliser.current != null ? formatNumber(rowsMap.stabiliser.current, 0) : '-' },
+        { label: 'Copper', value: '-' },
+        { label: 'Salt', value: rowsMap.salt && rowsMap.salt.current != null ? formatNumber(rowsMap.salt.current, 0) : '-' }
+      ];
+
+      const chemicalRows = getReportDoseItems(doses).map(item => {
+        const snapshot = getDoseFieldSnapshot(item.key);
+        const reason = getReportReasonText(item.key, item.value, rowsMap);
+        return {
+          name: item.label,
+          qty: Number.isFinite(item.value) && item.value > 0 ? formatNumber(item.value, item.decimals) : '',
+          unit: item.unit,
+          reason,
+          dosed: snapshot.status === 'yes' ? 'Yes' : 'No',
+          notes: snapshot.note || getDefaultDoseNote(item.key, item.value),
+          key: item.key,
+          value: item.value,
+          decimals: item.decimals
+        };
+      });
+
+      const chemicalsAdded = chemicalRows
+        .filter(row => row.dosed === 'Yes' && Number.isFinite(row.value) && row.value > 0)
+        .map(row => buildCorrectiveSentence({ key: row.key, label: row.name, value: row.value, unit: row.unit, decimals: row.decimals }, row.reason));
+
+      const correctiveActions = chemicalRows
+        .map(row => buildCorrectiveSentence({ key: row.key, label: row.name, value: row.value, unit: row.unit, decimals: row.decimals }, row.reason))
+        .filter(Boolean);
+
+      const serviceNotes = (inputs.serviceNotes.value || '').trim();
+      if (serviceNotes) correctiveActions.push(serviceNotes);
+
+      return {
+        title: 'Water Quality Testing Report',
+        companyName: 'MBS Facility Maintenance',
+        companyLines: ['63 Tennant Street', 'Fyshwick ACT 2609', '(02) 6162 0216', 'info@mbsfm.com.au'],
+        site: inputs.reportSite.value || '-',
+        poolName: inputs.reportPoolName.value || '-',
+        technician: inputs.reportTechnician.value || '-',
+        date: formatDateDisplay(inputs.reportDate.value || ''),
+        testTime: formatTimeDisplay(inputs.testTime.value || ''),
+        summaryItems,
+        chemicalRows,
+        chemicalsAddedText: chemicalsAdded.length ? chemicalsAdded.join(' ') : 'No chemicals were marked as added.',
+        correctiveActionsText: correctiveActions.length ? correctiveActions.join(' ') : 'No corrective dosing required based on the entered results.',
+        footerText: 'Generated from the calculator   Page 1 of 1'
+      };
+    }
+
+    function buildReportText() {
+      const model = buildReportModel();
+      const lines = [];
+      lines.push(model.title);
+      lines.push(model.companyName);
+      model.companyLines.forEach(line => lines.push(line));
+      lines.push(`Site: ${model.site}`);
+      lines.push(`Pool / Spa: ${model.poolName}`);
+      lines.push(`Technician: ${model.technician}`);
+      lines.push(`Date: ${model.date}`);
+      lines.push(`Test time: ${model.testTime}`);
+      lines.push('');
+      lines.push('Water Summary');
+      lines.push(model.summaryItems.map(item => `${item.label}: ${item.value}`).join(' | '));
+      lines.push('');
+      lines.push('Water Test Results');
+      model.chemicalRows.forEach(row => lines.push(`${row.name} | ${row.qty} ${row.unit} | ${row.reason} | Dosed: ${row.dosed}${row.notes ? ` | ${row.notes}` : ''}`));
+      lines.push('');
+      lines.push('Chemicals Added');
+      lines.push(model.chemicalsAddedText);
+      lines.push('');
+      lines.push('Corrective Action / Technician Notes');
+      lines.push(model.correctiveActionsText);
+      return lines.join('\n');
+    }
+
+    
+function buildReportHtml() {
+      const model = buildReportModel();
+      return `
+        <div class="report-sheet">
+          <div class="report-sheet-header">
+            <div class="report-brand-card">
+              <div class="report-brand-top">
+                <img class="report-logo" src="${REPORT_LOGO_DATA}" alt="MBS FM logo" />
+                <div class="report-company">
+                  <strong>${escapeHtml(model.companyName)}</strong>
+                  ${model.companyLines.map(line => escapeHtml(line)).join('<br>')}
+                </div>
+              </div>
+              <div class="report-brand-strip">
+                <div class="report-title">${escapeHtml(model.title)}</div>
+              </div>
+            </div>
+
+            <div class="report-meta-card">
+              <div class="report-meta-head">Test details</div>
+              <div class="report-meta-body">
+                <div class="report-meta-grid">
+                  <div class="report-meta-item">
+                    <span class="label">Site</span>
+                    <span class="value">${escapeHtml(model.site)}</span>
+                  </div>
+                  <div class="report-meta-item">
+                    <span class="label">Technician</span>
+                    <span class="value">${escapeHtml(model.technician)}</span>
+                  </div>
+                  <div class="report-meta-item full">
+                    <span class="label">Pool / Spa</span>
+                    <span class="value">${escapeHtml(model.poolName)}</span>
+                  </div>
+                  <div class="report-meta-item">
+                    <span class="label">Date</span>
+                    <span class="value">${escapeHtml(model.date)}</span>
+                  </div>
+                  <div class="report-meta-item">
+                    <span class="label">Test time</span>
+                    <span class="value">${escapeHtml(model.testTime)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="report-section-bar">Water Summary</div>
+          <table class="report-table tight">
+            <thead>
+              <tr>${model.summaryItems.map(item => `<th>${escapeHtml(item.label)}</th>`).join('')}</tr>
+            </thead>
+            <tbody>
+              <tr>${model.summaryItems.map(item => `<td>${escapeHtml(item.value)}</td>`).join('')}</tr>
+            </tbody>
+          </table>
+
+          <div class="report-section-bar">Water Test Results</div>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th style="width: 22%;">Chemical used</th>
+                <th style="width: 8%;">Qty</th>
+                <th style="width: 8%;">Unit</th>
+                <th style="width: 24%;">Reason</th>
+                <th style="width: 8%;">Dosed?</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${model.chemicalRows.map(row => `
+                <tr>
+                  <td>${escapeHtml(row.name)}</td>
+                  <td>${escapeHtml(row.qty)}</td>
+                  <td>${escapeHtml(row.unit)}</td>
+                  <td>${escapeHtml(row.reason)}</td>
+                  <td>${escapeHtml(row.dosed)}</td>
+                  <td>${escapeHtml(row.notes)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="report-sections-grid">
+            <div class="report-section-block">
+              <div class="report-section-block-title">Chemicals Added</div>
+              <div class="report-paragraph">${escapeHtml(model.chemicalsAddedText)}</div>
+            </div>
+
+            <div class="report-section-block">
+              <div class="report-section-block-title">Corrective Action / Technician Notes</div>
+              <div class="report-paragraph">${escapeHtml(model.correctiveActionsText)}</div>
+            </div>
+          </div>
+
+          <div class="report-footer">${escapeHtml(model.footerText)}</div>
+        </div>
+      `;
+    }
+
+    function buildRaidersGroupReportModel() {
+      const baths = [1, 2, 3].map(index => getIceBathRecommendations(index));
+      return {
+        title: 'Raiders Ice Baths - Combined Water Quality Testing Report',
+        site: inputs.reportSite.value || 'Raiders',
+        poolName: 'Raiders Ice Baths - All 3',
+        technician: inputs.reportTechnician.value || '-',
+        date: formatDateDisplay(inputs.reportDate.value || ''),
+        testTime: formatTimeDisplay(inputs.testTime.value || ''),
+        notes: (inputs.serviceNotes.value || '').trim(),
+        baths
+      };
+    }
+
+    function buildRaidersGroupReportHtml() {
+      const model = buildRaidersGroupReportModel();
+      return `
+        <div class="report-sheet">
+          <div class="report-sheet-header">
+            <div class="report-brand-card">
+              <div class="report-brand-top">
+                <img class="report-logo" src="${REPORT_LOGO_DATA}" alt="MBS FM logo" />
+                <div class="report-company"><strong>MBS Facility Maintenance</strong>63 Tennant Street<br>Fyshwick ACT 2609<br>(02) 6162 0216<br>info@mbsfm.com.au</div>
+              </div>
+              <div class="report-brand-strip"><div class="report-title">${escapeHtml(model.title)}</div></div>
+            </div>
+            <div class="report-meta-card">
+              <div class="report-meta-head">Test details</div>
+              <div class="report-meta-body">
+                <div class="report-meta-grid">
+                  <div class="report-meta-item"><span class="label">Site</span><span class="value">${escapeHtml(model.site)}</span></div>
+                  <div class="report-meta-item"><span class="label">Technician</span><span class="value">${escapeHtml(model.technician)}</span></div>
+                  <div class="report-meta-item full"><span class="label">Report</span><span class="value">${escapeHtml(model.poolName)}</span></div>
+                  <div class="report-meta-item"><span class="label">Date</span><span class="value">${escapeHtml(model.date)}</span></div>
+                  <div class="report-meta-item"><span class="label">Test time</span><span class="value">${escapeHtml(model.testTime)}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="report-section-bar">Ice bath results</div>
+          <table class="report-table">
+            <thead><tr><th>Bath</th><th>Clarity</th><th>pH</th><th>FC</th><th>Alk</th><th>Temp</th><th>Acid</th><th>Chlorine</th><th>Bicarb</th><th>Note</th></tr></thead>
+            <tbody>
+              ${model.baths.map(bath => `
+                <tr>
+                  <td>${escapeHtml(bath.poolName)}</td>
+                  <td>${escapeHtml(bath.clarity)}</td>
+                  <td>${bath.ph == null ? '-' : formatNumber(bath.ph, 2)}</td>
+                  <td>${bath.fc == null ? '-' : formatNumber(bath.fc, 2)}</td>
+                  <td>${bath.alk == null ? '-' : formatNumber(bath.alk, 0)}</td>
+                  <td>${bath.temp == null ? '-' : formatNumber(bath.temp, 1)}</td>
+                  <td>${formatDose(bath.acid, 'mL', 0)}</td>
+                  <td>${formatDose(bath.chlorine, 'mL', 0)}</td>
+                  <td>${formatDose(bath.bicarb, 'kg', 2)}</td>
+                  <td>${escapeHtml(bath.note || '')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="report-section-block" style="margin-top:12px;">
+            <div class="report-section-block-title">Technician notes</div>
+            <div class="report-paragraph">${escapeHtml(model.notes || 'No extra technician notes.')}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderReport() {
+      qs('reportOutput').innerHTML = isRaidersGroupMode() ? buildRaidersGroupReportHtml() : buildReportHtml();
+      qs('kpiReport').textContent = 'Ready';
+    }
+
+    async function saveBlob(blob, filename, mimeType) {
+      if (navigator.share && window.File) {
+        const file = new File([blob], filename, { type: mimeType });
+        try {
+          if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'Water Quality Testing Report',
+              text: 'Pool service report',
+              files: [file]
+            });
+            return true;
+          }
+        } catch (error) {
+          if (error && error.name === 'AbortError') return true;
+        }
+      }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      return true;
+    }
+
+    
+function drawTable(doc, startX, startY, columnWidths, headers, rows, options = {}) {
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const marginBottom = options.marginBottom || 12;
+      const baseFontSize = options.fontSize || 8.5;
+      const headerFontSize = options.headerFontSize || 8.5;
+      let y = startY;
+
+      const ensureSpace = needed => {
+        if (y + needed > pageHeight - marginBottom) {
+          doc.addPage('a4', 'landscape');
+          y = 14;
+        }
+      };
+
+      const drawRow = (cells, isHeader = false, rowIndex = 0) => {
+        doc.setFont('helvetica', isHeader ? 'bold' : 'normal');
+        doc.setFontSize(isHeader ? headerFontSize : baseFontSize);
+
+        const splitCells = cells.map((cell, idx) => {
+          const text = String(cell == null ? '' : cell);
+          const width = Math.max(8, columnWidths[idx] - 3);
+          return doc.splitTextToSize(text, width);
+        });
+        const rowHeight = Math.max(7, ...splitCells.map(lines => (lines.length * 3.6) + 3));
+        ensureSpace(rowHeight);
+
+        let x = startX;
+        splitCells.forEach((lines, idx) => {
+          const isStriped = !isHeader && options.striped && rowIndex % 2 === 1;
+          if (isHeader) {
+            doc.setDrawColor(142, 184, 223);
+            doc.setFillColor(0, 84, 166);
+            doc.setTextColor(255, 255, 255);
+          } else if (isStriped) {
+            doc.setDrawColor(200, 216, 231);
+            doc.setFillColor(247, 251, 255);
+            doc.setTextColor(15, 23, 42);
+          } else {
+            doc.setDrawColor(200, 216, 231);
+            doc.setFillColor(255, 255, 255);
+            doc.setTextColor(15, 23, 42);
+          }
+          doc.rect(x, y, columnWidths[idx], rowHeight, 'FD');
+          doc.text(lines, x + 1.5, y + 4);
+          x += columnWidths[idx];
+        });
+        y += rowHeight;
+        doc.setTextColor(0, 0, 0);
+      };
+
+      drawRow(headers, true);
+      rows.forEach((row, idx) => drawRow(row, false, idx));
+      return y;
+    }
+
+    
+async function savePdfReport() {
+      renderReport();
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF library did not load. Please refresh and try again.');
+        return;
+      }
+
+      const model = buildReportModel();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 10;
+      const blue = [0, 58, 117];
+      const blueAccent = [0, 89, 173];
+      const lightBlue = [233, 241, 250];
+      const borderBlue = [168, 191, 216];
+
+      const addWrappedText = (text, x, y, width, fontSize = 8.5, weight = 'normal') => {
+        doc.setFont('helvetica', weight);
+        doc.setFontSize(fontSize);
+        const lines = doc.splitTextToSize(String(text || ''), width);
+        doc.text(lines, x, y);
+        return y + (lines.length * (fontSize * 0.45)) + 2;
+      };
+
+      const drawSectionBar = (title, yPos) => {
+        doc.setFillColor(...blue);
+        doc.roundedRect(margin, yPos, pageWidth - (margin * 2), 7.5, 2.2, 2.2, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10.5);
+        doc.setTextColor(255, 255, 255);
+        doc.text(title, margin + 3, yPos + 5);
+        doc.setTextColor(0, 0, 0);
+        return yPos + 8.5;
+      };
+
+      doc.setDrawColor(...borderBlue);
+      doc.roundedRect(6, 6, pageWidth - 12, pageHeight - 12, 4, 4, 'S');
+
+      const metaW = 78;
+      const gap = 8;
+      const brandX = margin;
+      const brandY = 10;
+      const brandW = pageWidth - (margin * 2) - metaW - gap;
+      const brandH = 36;
+
+      doc.setDrawColor(...borderBlue);
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(brandX, brandY, brandW, brandH, 3, 3, 'FD');
+
+      try {
+        doc.addImage(REPORT_LOGO_DATA, 'PNG', brandX + 4.5, brandY + 3.7, 58, 18.65);
+      } catch (error) {
+        console.warn('Report logo failed to load for PDF', error);
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...blue);
+      doc.setFontSize(9.4);
+      doc.text(model.companyName, brandX + brandW - 5, brandY + 7, { align: 'right' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(51, 65, 85);
+      doc.setFontSize(7.7);
+      let companyY = brandY + 11.5;
+      model.companyLines.forEach(line => {
+        doc.text(line, brandX + brandW - 5, companyY, { align: 'right' });
+        companyY += 3.8;
+      });
+
+      doc.setFillColor(...blue);
+      doc.roundedRect(brandX, brandY + brandH - 12, brandW, 12, 0, 0, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16.5);
+      doc.text(model.title, brandX + 5, brandY + brandH - 4);
+      doc.setTextColor(0, 0, 0);
+
+      const cardX = brandX + brandW + gap;
+      const cardY = brandY;
+      const cardH = brandH;
+      doc.setDrawColor(...borderBlue);
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(cardX, cardY, metaW, cardH, 3, 3, 'FD');
+      doc.setFillColor(...blue);
+      doc.roundedRect(cardX, cardY, metaW, 7, 3, 3, 'F');
+      doc.rect(cardX, cardY + 4, metaW, 3, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.6);
+      doc.setTextColor(255, 255, 255);
+      doc.text('TEST DETAILS', cardX + 4, cardY + 4.7);
+
+      const metaItems = [
+        ['Site', model.site, cardX + 4, cardY + 12],
+        ['Technician', model.technician, cardX + 41, cardY + 12],
+        ['Pool / Spa', model.poolName, cardX + 4, cardY + 22],
+        ['Date', model.date, cardX + 41, cardY + 22],
+        ['Test time', model.testTime, cardX + 4, cardY + 30.5]
+      ];
+      metaItems.forEach(([label, value, x, y]) => {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...blue);
+        doc.setFontSize(6.6);
+        doc.text(label, x, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(17, 24, 39);
+        doc.setFontSize(7.7);
+        doc.text(doc.splitTextToSize(String(value || '-'), label === 'Pool / Spa' ? 32 : 28), x, y + 3.2);
+      });
+      doc.setTextColor(0, 0, 0);
+
+      let y = 51;
+      y = drawSectionBar('Water Summary', y);
+      const summaryWidths = Array(12).fill((pageWidth - (margin * 2)) / 12);
+      y = drawTable(
+        doc,
+        margin,
+        y,
+        summaryWidths,
+        model.summaryItems.map(item => item.label),
+        [model.summaryItems.map(item => item.value)],
+        { fontSize: 7.3, headerFontSize: 7.3, striped: false }
+      );
+
+      y += 4;
+      y = drawSectionBar('Water Test Results', y);
+      const chemicalRows = model.chemicalRows.map(row => [row.name, row.qty, row.unit, row.reason, row.dosed, row.notes]);
+      y = drawTable(
+        doc,
+        margin,
+        y,
+        [60, 18, 16, 54, 18, pageWidth - (margin * 2) - 60 - 18 - 16 - 54 - 18],
+        ['Chemical used', 'Qty', 'Unit', 'Reason', 'Dosed?', 'Notes'],
+        chemicalRows,
+        { fontSize: 7.8, headerFontSize: 7.8, striped: true }
+      );
+
+      const blockGap = 6;
+      const blockY = y + 6;
+      const blockW = ((pageWidth - (margin * 2)) - blockGap) / 2;
+      const leftBlockX = margin;
+      const rightBlockX = margin + blockW + blockGap;
+
+      const drawTextBlock = (x, yPos, w, title, body) => {
+        doc.setDrawColor(...borderBlue);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(x, yPos, w, 30, 2.5, 2.5, 'FD');
+        doc.setFillColor(...blue);
+        doc.roundedRect(x, yPos, w, 7.5, 2.5, 2.5, 'F');
+        doc.rect(x, yPos + 4.5, w, 3, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8.6);
+        doc.text(title, x + 3, yPos + 5);
+        doc.setTextColor(31, 41, 55);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.2);
+        const lines = doc.splitTextToSize(String(body || ''), w - 6);
+        doc.text(lines, x + 3, yPos + 12);
+      };
+
+      drawTextBlock(leftBlockX, blockY, blockW, 'Chemicals Added', model.chemicalsAddedText);
+      drawTextBlock(rightBlockX, blockY, blockW, 'Corrective Action / Technician Notes', model.correctiveActionsText);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text(model.footerText, pageWidth - margin, pageHeight - 10, { align: 'right' });
+      doc.setTextColor(0, 0, 0);
+
+      const filenameBase = (inputs.reportPoolName.value || 'water-quality-report').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const filename = `${filenameBase || 'water-quality-report'}-${inputs.reportDate.value || 'report'}.pdf`;
+      const blob = doc.output('blob');
+      await saveBlob(blob, filename, 'application/pdf');
+    }
+
+
+
+    const OCR_LABELS = {
+      freeChlorine: ['free chlorine', 'fcl', 'fci', 'fel', 'fol', 'fck'],
+      ph: ['p h', 'ph'],
+      alkalinity: ['total alkalinity', 'alkalinity', 'alk'],
+      calciumHardness: ['calcium hardness', 'hardness', 'hard', 'hard.'],
+      cyanuricAcid: ['cyanuric acid', 'cya', 'cva', 'stabiliser', 'stabilizer'],
+      salt: ['salt', 'sodium chloride'],
+      temperature: ['temperature', 'temp'],
+      phosphates: ['phosphates', 'phosphate', 'phos']
+    };
+
+    function setPhotoStatus(message, tone = 'info') {
+      const el = qs('photoOcrStatus');
+      if (!el) return;
+      el.textContent = message;
+      el.style.color = tone === 'error' ? '#b91c1c' : tone === 'success' ? '#166534' : '#475569';
+    }
+
+    function normaliseOcrText(text) {
+      return String(text || '')
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, '"')
+        .replace(/[\u2013\u2014]/g, '-')
+        .replace(/[\u00A0]/g, ' ')
+        .replace(/[,]/g, '.')
+        .replace(/\r/g, '\n')
+        .replace(/[ \t]+/g, ' ');
+    }
+
+    function normaliseNumericToken(raw) {
+      const cleaned = String(raw || '')
+        .replace(/[OoQq]/g, '0')
+        .replace(/[lI|]/g, '1')
+        .replace(/[^0-9.\-]/g, '');
+      if (!cleaned) return null;
+      const valueString = cleaned.startsWith('.') ? `0${cleaned}` : cleaned;
+      const value = Number(valueString);
+      return Number.isFinite(value) ? value : null;
+    }
+
+    function extractNumbersFromText(text) {
+      const matches = [...String(text || '').matchAll(/(?:\d*\.\d+|\d+)/g)];
+      return matches
+        .map(match => normaliseNumericToken(match[0]))
+        .filter(value => Number.isFinite(value));
+    }
+
+    function chooseBestValue(key, values) {
+      if (!values || !values.length) return null;
+
+      const adjusted = values.map(value => {
+        if (key === 'ph') {
+          if (value >= 5 && value <= 10) return round(value, 2);
+          if (value >= 50 && value <= 100) return round(value / 10, 2);
+          if (value >= 500 && value <= 1000) return round(value / 100, 2);
+        }
+        if (key === 'freeChlorine') {
+          if (value >= 0 && value <= 20) return round(value, 2);
+          if (value > 20 && value <= 200) return round(value / 10, 2);
+          if (value > 200 && value <= 2000) return round(value / 100, 2);
+        }
+        if (key === 'alkalinity') {
+          if (value >= 0 && value <= 400) return Math.round(value);
+          if (value > 0 && value < 1) return Math.round(value * 100);
+          if (value >= 1 && value < 10) return Math.round(value * 10);
+        }
+        if (key === 'calciumHardness') {
+          if (value >= 0 && value <= 1500) return Math.round(value);
+          if (value > 0 && value < 1) return Math.round(value * 100);
+          if (value >= 1 && value < 10) return Math.round(value * 10);
+        }
+        if (key === 'cyanuricAcid') {
+          if (value >= 0 && value <= 300) return Math.round(value);
+          if (value > 0 && value < 1) return Math.round(value * 10);
+          if (value >= 1 && value < 10) return Math.round(value);
+        }
+        if (key === 'salt') {
+          if (value >= 100 && value <= 10000) return Math.round(value);
+          if (value > 10 && value < 100) return Math.round(value * 100);
+        }
+        if (key === 'temperature') {
+          if (value >= 0 && value <= 60) return round(value, 1);
+          if (value > 60 && value <= 600) return round(value / 10, 1);
+        }
+        if (key === 'phosphates') {
+          if (value >= 0 && value <= 10000) return Math.round(value);
+          if (value > 0 && value < 1) return Math.round(value * 1000);
+        }
+        return value;
+      }).filter(value => Number.isFinite(value));
+
+      if (!adjusted.length) return null;
+
+      if (key === 'ph') {
+        return adjusted.find(value => value >= 5 && value <= 10) ?? adjusted[0];
+      }
+      if (key === 'freeChlorine') {
+        return adjusted.find(value => value >= 0 && value <= 20) ?? adjusted[0];
+      }
+      if (key === 'alkalinity') {
+        return adjusted.find(value => value >= 0 && value <= 400) ?? adjusted[0];
+      }
+      if (key === 'calciumHardness') {
+        return adjusted.find(value => value >= 0 && value <= 1500) ?? adjusted[0];
+      }
+      if (key === 'cyanuricAcid') {
+        return adjusted.find(value => value >= 0 && value <= 300) ?? adjusted[0];
+      }
+      if (key === 'salt') {
+        return adjusted.find(value => value >= 100 && value <= 10000) ?? adjusted[0];
+      }
+      if (key === 'temperature') {
+        return adjusted.find(value => value >= 0 && value <= 60) ?? adjusted[0];
+      }
+      if (key === 'phosphates') {
+        return adjusted.find(value => value >= 0 && value <= 10000) ?? adjusted[0];
+      }
+      return adjusted[0];
+    }
+
+    function escapeRegex(text) {
+      return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function extractCandidatesForKey(text, key) {
+      const normalised = normaliseOcrText(text);
+      const candidates = [];
+      const labels = OCR_LABELS[key] || [];
+      labels.forEach(label => {
+        const labelPattern = escapeRegex(label).replace(/\s+/g, '\\s*');
+        const regex = new RegExp(`${labelPattern}[\\s:=\\-]{0,6}([0-9OoQqIl|.]{1,8})`, 'ig');
+        let match;
+        while ((match = regex.exec(normalised)) !== null) {
+          const value = normaliseNumericToken(match[1]);
+          if (value != null) candidates.push(value);
+        }
+      });
+
+      const lines = normalised.split(/\n+/).map(line => line.trim()).filter(Boolean);
+      lines.forEach(line => {
+        const compact = line.toLowerCase();
+        const hasLabel = labels.some(label => compact.includes(label.toLowerCase()));
+        if (!hasLabel) return;
+        extractNumbersFromText(line).forEach(value => candidates.push(value));
+      });
+
+      return candidates;
+    }
+
+    function parseSpinTouchResults(text) {
+      const results = {};
+      Object.keys(OCR_LABELS).forEach(key => {
+        const candidates = extractCandidatesForKey(text, key);
+        const chosen = chooseBestValue(key, candidates);
+        if (chosen != null) results[key] = chosen;
+      });
+      return results;
+    }
+
+    function mergeSpinTouchResults(resultSets) {
+      const merged = {};
+      Object.keys(OCR_LABELS).forEach(key => {
+        const allCandidates = [];
+        resultSets.forEach(set => {
+          if (set && set[key] != null) allCandidates.push(set[key]);
+        });
+        const chosen = chooseBestValue(key, allCandidates);
+        if (chosen != null) merged[key] = chosen;
+      });
+      return merged;
+    }
+
+    function canvasFromImage(img, maxWidth = 1600) {
+      const scale = img.width > maxWidth ? maxWidth / img.width : 1;
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.width * scale));
+      canvas.height = Math.max(1, Math.round(img.height * scale));
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      return canvas;
+    }
+
+    function cropCanvas(sourceCanvas, box) {
+      const canvas = document.createElement('canvas');
+      const sx = Math.max(0, Math.floor(box.x));
+      const sy = Math.max(0, Math.floor(box.y));
+      const sw = Math.min(sourceCanvas.width - sx, Math.max(1, Math.floor(box.width)));
+      const sh = Math.min(sourceCanvas.height - sy, Math.max(1, Math.floor(box.height)));
+      canvas.width = sw;
+      canvas.height = sh;
+      canvas.getContext('2d', { willReadFrequently: true }).drawImage(sourceCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
+      return canvas;
+    }
+
+    function scaleCanvas(sourceCanvas, factor = 2) {
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(sourceCanvas.width * factor));
+      canvas.height = Math.max(1, Math.round(sourceCanvas.height * factor));
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(sourceCanvas, 0, 0, canvas.width, canvas.height);
+      return canvas;
+    }
+
+    function createHighContrastCanvas(sourceCanvas) {
+      const canvas = document.createElement('canvas');
+      canvas.width = sourceCanvas.width;
+      canvas.height = sourceCanvas.height;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(sourceCanvas, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const avg = (r + g + b) / 3;
+        const saturation = max - min;
+        const isLightText = avg > 120 && saturation < 95;
+        const value = isLightText ? 255 : 0;
+        data[i] = value;
+        data[i + 1] = value;
+        data[i + 2] = value;
+        data[i + 3] = 255;
+      }
+      ctx.putImageData(imageData, 0, 0);
+      return canvas;
+    }
+
+    function detectBlueScreenBox(sourceCanvas) {
+      const sampleWidth = Math.min(240, sourceCanvas.width);
+      const sampleHeight = Math.max(1, Math.round((sourceCanvas.height / sourceCanvas.width) * sampleWidth));
+      const sampleCanvas = document.createElement('canvas');
+      sampleCanvas.width = sampleWidth;
+      sampleCanvas.height = sampleHeight;
+      const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+      sampleCtx.drawImage(sourceCanvas, 0, 0, sampleWidth, sampleHeight);
+
+      const { data } = sampleCtx.getImageData(0, 0, sampleWidth, sampleHeight);
+      const totalPixels = sampleWidth * sampleHeight;
+      const visited = new Uint8Array(totalPixels);
+      const mask = new Uint8Array(totalPixels);
+
+      for (let y = 0; y < sampleHeight; y += 1) {
+        for (let x = 0; x < sampleWidth; x += 1) {
+          const index = y * sampleWidth + x;
+          const offset = index * 4;
+          const r = data[offset];
+          const g = data[offset + 1];
+          const b = data[offset + 2];
+          const isBlue = b > 70 && b > g + 10 && b > r + 25;
+          if (isBlue) mask[index] = 1;
+        }
+      }
+
+      let best = null;
+      const queue = [];
+      for (let y = 0; y < sampleHeight; y += 1) {
+        for (let x = 0; x < sampleWidth; x += 1) {
+          const startIndex = y * sampleWidth + x;
+          if (!mask[startIndex] || visited[startIndex]) continue;
+
+          let minX = x;
+          let maxX = x;
+          let minY = y;
+          let maxY = y;
+          let area = 0;
+
+          queue.length = 0;
+          queue.push(startIndex);
+          visited[startIndex] = 1;
+
+          while (queue.length) {
+            const current = queue.pop();
+            const cx = current % sampleWidth;
+            const cy = Math.floor(current / sampleWidth);
+            area += 1;
+            if (cx < minX) minX = cx;
+            if (cx > maxX) maxX = cx;
+            if (cy < minY) minY = cy;
+            if (cy > maxY) maxY = cy;
+
+            const neighbours = [
+              current - 1,
+              current + 1,
+              current - sampleWidth,
+              current + sampleWidth
+            ];
+            neighbours.forEach(next => {
+              if (next < 0 || next >= totalPixels) return;
+              const nx = next % sampleWidth;
+              const ny = Math.floor(next / sampleWidth);
+              if (Math.abs(nx - cx) + Math.abs(ny - cy) !== 1) return;
+              if (!mask[next] || visited[next]) return;
+              visited[next] = 1;
+              queue.push(next);
+            });
+          }
+
+          const width = maxX - minX + 1;
+          const height = maxY - minY + 1;
+          const aspect = width / Math.max(1, height);
+          const centerX = (minX + maxX) / 2 / sampleWidth;
+          const centerY = (minY + maxY) / 2 / sampleHeight;
+          const areaRatio = area / totalPixels;
+          if (areaRatio < 0.003) continue;
+          if (aspect < 0.7 || aspect > 2.6) continue;
+
+          const horizontalScore = 1 - Math.abs(centerX - 0.5);
+          const verticalScore = 1 - Math.abs(centerY - 0.56);
+          const score = areaRatio * 1000 * (0.6 + horizontalScore) * (0.6 + verticalScore);
+
+          if (!best || score > best.score) {
+            best = { minX, maxX, minY, maxY, score };
+          }
+        }
+      }
+
+      if (!best) return null;
+
+      const scaleX = sourceCanvas.width / sampleWidth;
+      const scaleY = sourceCanvas.height / sampleHeight;
+      const padX = (best.maxX - best.minX + 1) * 0.06;
+      const padY = (best.maxY - best.minY + 1) * 0.08;
+      return {
+        x: Math.max(0, (best.minX - padX) * scaleX),
+        y: Math.max(0, (best.minY - padY) * scaleY),
+        width: Math.min(sourceCanvas.width, (best.maxX - best.minX + 1 + padX * 2) * scaleX),
+        height: Math.min(sourceCanvas.height, (best.maxY - best.minY + 1 + padY * 2) * scaleY)
+      };
+    }
+
+    function buildSpinTouchOcrCanvases(sourceCanvas) {
+      const box = detectBlueScreenBox(sourceCanvas);
+      const screenCanvas = box ? cropCanvas(sourceCanvas, box) : sourceCanvas;
+
+      const resultsOnly = cropCanvas(screenCanvas, {
+        x: screenCanvas.width * 0.04,
+        y: screenCanvas.height * 0.18,
+        width: screenCanvas.width * 0.92,
+        height: screenCanvas.height * 0.58
+      });
+
+      const originalScaled = scaleCanvas(resultsOnly, 2.6);
+      const highContrast = createHighContrastCanvas(originalScaled);
+
+      return [
+        { canvas: originalScaled, psm: 6, label: 'screen pass' },
+        { canvas: originalScaled, psm: 11, label: 'screen sparse pass' },
+        { canvas: highContrast, psm: 6, label: 'high contrast pass' }
+      ];
+    }
+
+    function canvasToBlob(canvas) {
+      return new Promise(resolve => {
+        canvas.toBlob(blob => resolve(blob), 'image/png');
+      });
+    }
+
+    function readImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function applyOcrResults(results) {
+      const mapping = {
+        freeChlorine: 'freeChlorine',
+        ph: 'ph',
+        alkalinity: 'alkalinity',
+        calciumHardness: 'calciumHardness',
+        cyanuricAcid: 'cyanuricAcid',
+        salt: 'salt',
+        temperature: 'temperature',
+        phosphates: 'phosphates'
+      };
+
+      let populated = 0;
+      Object.entries(mapping).forEach(([resultKey, inputKey]) => {
+        const value = results[resultKey];
+        if (value == null) return;
+        if (!inputs[inputKey]) return;
+        inputs[inputKey].value = value;
+        populated += 1;
+      });
+
+      if (populated > 0) {
+        saveState();
+        renderCombinedTable();
+      }
+      return populated;
+    }
+
+    async function scanSpinTouchPhoto() {
+      const file = qs('photoInput').files && qs('photoInput').files[0];
+      const scanBtn = qs('scanPhotoBtn');
+      if (!file) {
+        setPhotoStatus('Add a Spin Touch photo first, then try again.', 'error');
+        return;
+      }
+      if (!window.Tesseract) {
+        setPhotoStatus('The photo reader could not load. Refresh the page and try again.', 'error');
+        return;
+      }
+
+      const originalLabel = scanBtn.textContent;
+      scanBtn.disabled = true;
+      scanBtn.textContent = 'Reading photo...';
+      setPhotoStatus('Reading the Spin Touch photo and focusing on the screen...');
+
+      try {
+        const img = await readImageFile(file);
+        const sourceCanvas = canvasFromImage(img, 1600);
+        const ocrJobs = buildSpinTouchOcrCanvases(sourceCanvas);
+        const resultSets = [];
+
+        for (let i = 0; i < ocrJobs.length; i += 1) {
+          const job = ocrJobs[i];
+          setPhotoStatus(`Reading the Spin Touch photo... pass ${i + 1} of ${ocrJobs.length}.`);
+          const blob = await canvasToBlob(job.canvas);
+          if (!blob) continue;
+          const { data } = await window.Tesseract.recognize(blob, 'eng', {
+            tessedit_pageseg_mode: job.psm,
+            preserve_interword_spaces: '1'
+          });
+          const parsed = parseSpinTouchResults(data && data.text ? data.text : '');
+          resultSets.push(parsed);
+        }
+
+        const results = mergeSpinTouchResults(resultSets);
+        const populated = applyOcrResults(results);
+        if (populated > 0) {
+          const fields = [];
+          if (results.freeChlorine != null) fields.push('free chlorine');
+          if (results.ph != null) fields.push('pH');
+          if (results.alkalinity != null) fields.push('alkalinity');
+          if (results.calciumHardness != null) fields.push('calcium hardness');
+          if (results.cyanuricAcid != null) fields.push('CYA');
+          if (results.salt != null) fields.push('salt');
+          if (results.temperature != null) fields.push('temperature');
+          if (results.phosphates != null) fields.push('phosphates');
+          setPhotoStatus(`Photo read complete. Filled: ${fields.join(', ')}.`, 'success');
+        } else {
+          setPhotoStatus('The photo was loaded, but no clear Spin Touch results were found. Try a clearer, straighter photo of just the Spin Touch screen.', 'error');
+        }
+      } catch (error) {
+        console.error('Spin Touch OCR failed', error);
+        setPhotoStatus('Could not read that photo. Try again with a clearer screen photo taken straight on.', 'error');
+      } finally {
+        scanBtn.disabled = false;
+        scanBtn.textContent = originalLabel;
+      }
+    }
+
+    function saveState() {
+      const payload = {};
+      Object.keys(inputs).forEach(key => {
+        if (!inputs[key]) return;
+        payload[key] = inputs[key].value;
+      });
+      DOSE_KEYS.forEach(key => {
+        const statusField = qs(`doseStatus_${key}`);
+        const sourceField = qs(`doseSource_${key}`);
+        const actualField = qs(`doseActual_${key}`);
+        const noteField = qs(`doseNote_${key}`);
+        if (statusField) payload[`doseStatus_${key}`] = statusField.value;
+        if (sourceField) payload[`doseSource_${key}`] = sourceField.value;
+        if (actualField) payload[`doseActual_${key}`] = actualField.value;
+        if (noteField) payload[`doseNote_${key}`] = noteField.value;
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }
+
+    function loadState() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        Object.keys(inputs).forEach(key => {
+          if (!inputs[key]) return;
+          if (stored[key] != null) inputs[key].value = stored[key];
+        });
+      } catch (error) {
+        console.error('Failed loading state', error);
+      }
+    }
+
+    function resetAll() {
+      localStorage.removeItem(STORAGE_KEY);
+      Object.keys(inputs).forEach(key => {
+        if (inputs[key].tagName === 'SELECT') {
+          inputs[key].selectedIndex = 0;
+        } else {
+          inputs[key].value = '';
+        }
+      });
+      populatePoolSelect();
+      inputs.poolSelect.value = POOLS[0].key;
+      photoDataUrl = '';
+      qs('photoPreviewBox').innerHTML = '<div class="placeholder">No photo attached. Add a photo and the app will try to fill the test results automatically.</div>';
+      setPhotoStatus('Upload a Spin Touch photo and the app will try to fill free chlorine, pH, alkalinity, calcium hardness, CYA, salt, temperature and phosphates automatically.');
+      setDefaultDateTime();
+      loadPoolDefaults();
+      renderCombinedTable();
+      renderStockSection();
+      renderQrSection();
+      qs('reportOutput').textContent = 'Tap Generate report to build the service report.';
+    }
+
+    function handleInputChange() {
+      if (document.activeElement === inputs.reportSite) inputs.reportSite.dataset.auto = 'false';
+      if (document.activeElement === inputs.reportPoolName) inputs.reportPoolName.dataset.auto = 'false';
+      updateActiveVolume();
+      saveState();
+      renderCombinedTable();
+      renderStockSection();
+      renderQrSection();
+    }
+
+    function handlePhotoUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        photoDataUrl = reader.result;
+        qs('photoPreviewBox').innerHTML = `<img src="${photoDataUrl}" alt="Uploaded pool test photo" />`;
+        setPhotoStatus('Photo added. Reading the Spin Touch results now...');
+        scanSpinTouchPhoto();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function init() {
+      [
+        'reportSite', 'reportPoolName', 'reportTechnician', 'reportDate', 'testTime', 'waterClarity',
+        'serviceNotes', 'poolSelect', 'poolVolumeAuto', 'customVolume', 'activeVolume',
+        'ph', 'targetPh', 'freeChlorine', 'targetFreeChlorine', 'alkalinity', 'targetAlkalinity',
+        'calciumHardness', 'targetCalcium', 'cyanuricAcid', 'targetCya', 'salt', 'targetSalt',
+        'temperature', 'phosphates',
+        'iceBath1Clarity', 'iceBath1Ph', 'iceBath1Fc', 'iceBath1Alk', 'iceBath1Temp', 'iceBath1Note',
+        'iceBath2Clarity', 'iceBath2Ph', 'iceBath2Fc', 'iceBath2Alk', 'iceBath2Temp', 'iceBath2Note',
+        'iceBath3Clarity', 'iceBath3Ph', 'iceBath3Fc', 'iceBath3Alk', 'iceBath3Temp', 'iceBath3Note'
+      ].forEach(id => {
+        inputs[id] = qs(id);
+      });
+
+      populatePoolSelect();
+      setDefaultDateTime();
+      inputs.poolSelect.value = POOLS[0].key;
+      loadState();
+      applyUrlSelection();
+      if (!inputs.poolSelect.value) inputs.poolSelect.value = POOLS[0].key;
+      loadPoolDefaults();
+      renderCombinedTable();
+      renderStockSection();
+      renderQrSection();
+
+      Object.values(inputs).forEach(input => {
+        if (!input) return;
+        if (input.id === 'poolVolumeAuto' || input.id === 'activeVolume') return;
+        input.addEventListener('input', handleInputChange);
+        input.addEventListener('change', handleInputChange);
+      });
+
+      inputs.poolSelect.addEventListener('change', () => {
+        loadPoolDefaults();
+        handleInputChange();
+      });
+
+      qs('photoInput').addEventListener('change', handlePhotoUpload);
+      qs('scanPhotoBtn').addEventListener('click', scanSpinTouchPhoto);
+      qs('clearPhotoBtn').addEventListener('click', () => {
+        photoDataUrl = '';
+        qs('photoInput').value = '';
+        qs('photoPreviewBox').innerHTML = '<div class="placeholder">No photo attached. Add a photo and the app will try to fill the test results automatically.</div>';
+        setPhotoStatus('Upload a Spin Touch photo and the app will try to fill free chlorine, pH, alkalinity, calcium hardness, CYA, salt, temperature and phosphates automatically.');
+      });
+      qs('generateReportBtn').addEventListener('click', renderReport);
+      qs('saveReportBtn').addEventListener('click', savePdfReport);
+      qs('resetBtn').addEventListener('click', resetAll);
+      qs('loadDefaultsBtn').addEventListener('click', () => {
+        loadPoolDefaults();
+        handleInputChange();
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

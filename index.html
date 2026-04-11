@@ -2873,6 +2873,27 @@
       }
     }
 
+    async function updateLiveMasterSheetBatch(payloads) {
+      if (!Array.isArray(payloads) || !payloads.length) {
+        return { attempted: false, success: false, count: 0 };
+      }
+      let successCount = 0;
+      for (const payload of payloads) {
+        const result = await updateLiveMasterSheet(payload);
+        if (result && result.success) successCount += 1;
+      }
+      if (successCount === payloads.length) {
+        setSheetStatus(`Updated the live master sheet for ${successCount} ice bath${successCount === 1 ? '' : 's'}.`, 'success');
+      } else if (successCount > 0) {
+        setSheetStatus(`Updated ${successCount} of ${payloads.length} ice bath rows in the live master sheet.`, 'info');
+      }
+      return {
+        attempted: true,
+        success: successCount === payloads.length,
+        count: successCount
+      };
+    }
+
     function buildPoolSheetPayload() {
       const pool = getSelectedPool();
       if (isRaidersGroupMode()) {
@@ -2965,6 +2986,74 @@
         otherChemicals: dosedChemicals.join(' | '),
         notes: notesParts.join(' ')
       };
+    }
+
+
+    function buildRaidersGroupSheetPayloads() {
+      const pool = getSelectedPool();
+      const commonContext = getContextTags();
+      const serviceNotes = (inputs.serviceNotes.value || '').trim();
+      const testStamp = `${inputs.reportDate.value || ''} ${inputs.testTime.value || ''}`.trim();
+
+      return [1, 2, 3].map(index => {
+        const bath = getIceBathRecommendations(index);
+        const chemRows = buildIceBathChemicalRows(index, {
+          acid: bath.acid || 0,
+          chlorine: bath.chlorine || 0,
+          bicarb: bath.bicarb || 0,
+          calcium: bath.calciumDose || 0
+        });
+
+        const flaggedChemRows = chemRows.filter(row => Number.isFinite(row.value) && row.value > 0);
+        const otherChemicals = flaggedChemRows.map(row => {
+          const sourceText = row.source ? ` from ${row.source}` : '';
+          return `${row.label}: ${row.dosed}${sourceText}`;
+        }).join(' | ');
+
+        const notes = [
+          'Grouped submission from Raiders Ice Baths - All 3.',
+          bath.clarity ? `Water clarity: ${bath.clarity}.` : '',
+          bath.temp != null ? `Temperature: ${formatNumber(bath.temp, 1)}.` : '',
+          bath.phosphates != null ? `Phosphates: ${formatNumber(bath.phosphates, 0)}.` : '',
+          flaggedChemRows.length
+            ? `Recommended dosing: ${flaggedChemRows.map(row => `${row.label} ${formatDose(row.value, row.unit, row.decimals)}`).join('; ')}.`
+            : 'Recommended dosing: none.',
+          bath.note ? `Bath note: ${bath.note}.` : '',
+          commonContext.length ? `Service context: ${commonContext.join('; ')}.` : '',
+          serviceNotes || ''
+        ].filter(Boolean).join(' ');
+
+        return {
+          technician: inputs.reportTechnician.value || '',
+          serviceType: 'Routine ice bath maintenance',
+          site: inputs.reportSite.value || pool.site || '',
+          assetName: bath.poolName,
+          volumeLitres: 6000,
+          system: 'Ice bath',
+          testTime: testStamp,
+          ph: bath.ph ?? '',
+          freeChlorine: bath.fc ?? '',
+          totalChlorine: bath.tc ?? '',
+          alkalinity: bath.alk ?? '',
+          calciumHardness: bath.calcium ?? '',
+          cya: '',
+          salt: '',
+          tds: '',
+          hhwPh: '',
+          hhwTds: '',
+          hhwInhibitor: '',
+          chwPh: '',
+          chwTds: '',
+          chwInhibitor: '',
+          acidAddedMl: bath.acid || '',
+          chlorineAddedG: bath.chlorine || '',
+          bicarbAddedKg: bath.bicarb || '',
+          calciumAddedKg: bath.calciumDose || '',
+          saltAddedKg: '',
+          otherChemicals,
+          notes
+        };
+      });
     }
 
     function buildClosedLoopSheetPayload() {
@@ -4658,7 +4747,7 @@ async function savePdfReport() {
 
         const filenameBase = (inputs.reportPoolName.value || 'water-quality-report').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         const filename = `${filenameBase || 'water-quality-report'}-${inputs.reportDate.value || 'report'}.pdf`;
-        await updateLiveMasterSheet(buildPoolSheetPayload());
+        await updateLiveMasterSheetBatch(buildRaidersGroupSheetPayloads());
         const blob = doc.output('blob');
         await saveBlob(blob, filename, 'application/pdf');
         return;

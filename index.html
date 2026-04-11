@@ -1914,7 +1914,7 @@
     function getIceBathRecommendations(index) {
       const pool = getIceBathPool(index);
       const values = getIceBathValues(index);
-      const defaults = (pool && pool.defaults) || { ph: 7.2, fc: 3.0, alk: 80 };
+      const defaults = (pool && pool.defaults) || { ph: 7.2, fc: 3.0, alk: 80, calcium: 200 };
       return {
         poolName: pool ? pool.poolName : `Raiders Ice Bath ${index}`,
         clarity: values.clarity || '-',
@@ -1929,10 +1929,207 @@
         targetPh: defaults.ph,
         targetFc: defaults.fc,
         targetAlk: defaults.alk,
+        targetCalcium: defaults.calcium ?? 200,
         acid: acidDoseMl((pool && pool.volume) || 6000, values.ph, defaults.ph, values.alk),
         chlorine: chlorineDoseMl((pool && pool.volume) || 6000, values.fc, defaults.fc),
-        bicarb: bicarbDoseKg((pool && pool.volume) || 6000, values.alk, defaults.alk)
+        bicarb: bicarbDoseKg((pool && pool.volume) || 6000, values.alk, defaults.alk),
+        calciumDose: calciumDoseKg((pool && pool.volume) || 6000, values.calcium, defaults.calcium ?? 200)
       };
+    }
+
+    function getRecordedOnlyStatus(value) {
+      if (value == null) return { label: 'Missing', className: 'status-pill' };
+      return { label: 'Recorded', className: 'status-pill status-good' };
+    }
+
+    function buildIceBathRecommendationRows(index) {
+      const rec = getIceBathRecommendations(index);
+      const ranges = {
+        ph: getRecommendedRange('ph', rec.targetPh),
+        fc: getRecommendedRange('fc', rec.targetFc),
+        alk: getRecommendedRange('alk', rec.targetAlk),
+        calcium: getRecommendedRange('calcium', rec.targetCalcium)
+      };
+      const rows = [
+        {
+          parameter: 'pH',
+          current: rec.ph,
+          target: rec.targetPh,
+          rangeLabel: ranges.ph ? ranges.ph.label : '-',
+          decimals: 2,
+          status: getRangeStatus(rec.ph, ranges.ph),
+          action: buildDoseGuidance({
+            current: rec.ph,
+            target: rec.targetPh,
+            range: ranges.ph,
+            dose: rec.acid,
+            unit: 'mL',
+            doseDecimals: 0,
+            targetDecimals: 2,
+            chemicalLabel: 'hydrochloric acid 32%',
+            increaseVerb: 'raise pH',
+            decreaseVerb: 'lower pH',
+            noDoseText: 'No acid dose needed.',
+            lowText: ranges.ph ? `Below normal range ${ranges.ph.label}. No acid dose needed - raise pH by your normal method if required.` : 'No acid dose needed.',
+            highText: ranges.ph ? `Above normal range ${ranges.ph.label}.` : 'High.'
+          })
+        },
+        {
+          parameter: 'Free chlorine',
+          current: rec.fc,
+          target: rec.targetFc,
+          rangeLabel: ranges.fc ? ranges.fc.label : '-',
+          decimals: 2,
+          status: getRangeStatus(rec.fc, ranges.fc),
+          action: buildDoseGuidance({
+            current: rec.fc,
+            target: rec.targetFc,
+            range: ranges.fc,
+            dose: rec.chlorine,
+            unit: 'mL',
+            doseDecimals: 0,
+            targetDecimals: 2,
+            chemicalLabel: 'liquid chlorine 12.5%',
+            increaseVerb: 'raise free chlorine',
+            noDoseText: 'No chlorine increase needed.',
+            highText: ranges.fc ? `Above normal range ${ranges.fc.label}. No chlorine increase needed right now.` : 'No chlorine increase needed.'
+          })
+        },
+        {
+          parameter: 'Alkalinity',
+          current: rec.alk,
+          target: rec.targetAlk,
+          rangeLabel: ranges.alk ? ranges.alk.label : '-',
+          decimals: 0,
+          status: getRangeStatus(rec.alk, ranges.alk),
+          action: buildDoseGuidance({
+            current: rec.alk,
+            target: rec.targetAlk,
+            range: ranges.alk,
+            dose: rec.bicarb,
+            unit: 'kg',
+            doseDecimals: 2,
+            targetDecimals: 0,
+            chemicalLabel: 'sodium bicarbonate',
+            increaseVerb: 'raise alkalinity',
+            noDoseText: 'No bicarb dose needed.',
+            highText: ranges.alk ? `Above normal range ${ranges.alk.label}. No bicarb dose needed.` : 'No bicarb dose needed.'
+          })
+        },
+        {
+          parameter: 'Calcium hardness',
+          current: rec.calcium,
+          target: rec.targetCalcium,
+          rangeLabel: ranges.calcium ? ranges.calcium.label : '-',
+          decimals: 0,
+          status: getRangeStatus(rec.calcium, ranges.calcium),
+          action: buildDoseGuidance({
+            current: rec.calcium,
+            target: rec.targetCalcium,
+            range: ranges.calcium,
+            dose: rec.calciumDose,
+            unit: 'kg',
+            doseDecimals: 2,
+            targetDecimals: 0,
+            chemicalLabel: 'calcium chloride',
+            increaseVerb: 'raise calcium hardness',
+            noDoseText: 'No calcium dose needed.',
+            highText: ranges.calcium ? `Above normal range ${ranges.calcium.label}. No calcium dose needed.` : 'No calcium dose needed.'
+          })
+        },
+        {
+          parameter: 'Total chlorine',
+          current: rec.tc,
+          target: null,
+          rangeLabel: '-',
+          decimals: 2,
+          status: getRecordedOnlyStatus(rec.tc),
+          action: rec.tc == null ? 'Enter the total chlorine reading for reference.' : 'Recorded for reference only - no automatic dose calculation.'
+        },
+        {
+          parameter: 'Temperature',
+          current: rec.temp,
+          target: null,
+          rangeLabel: '-',
+          decimals: 1,
+          status: getRecordedOnlyStatus(rec.temp),
+          action: rec.temp == null ? 'Enter the water temperature for reference.' : 'Recorded for reference only - monitor alongside bather comfort and demand.'
+        },
+        {
+          parameter: 'Phosphates',
+          current: rec.phosphates,
+          target: null,
+          rangeLabel: '-',
+          decimals: 0,
+          status: getRecordedOnlyStatus(rec.phosphates),
+          action: rec.phosphates == null ? 'Enter the phosphate reading for reference.' : 'Recorded for reference only - treat separately if site practice requires it.'
+        }
+      ];
+      const doses = {
+        acid: rec.acid || 0,
+        chlorine: rec.chlorine || 0,
+        bicarb: rec.bicarb || 0,
+        calcium: rec.calciumDose || 0
+      };
+      return { rec, rows, doses };
+    }
+
+    function renderIceBathRecommendationBlock(index) {
+      const target = qs(`iceBath${index}Summary`);
+      if (!target) return 0;
+      const { rec, rows, doses } = buildIceBathRecommendationRows(index);
+      const doseCount = Object.values(doses).filter(value => Number.isFinite(value) && value > 0).length;
+      target.innerHTML = `
+        <div class="mini-pill"><strong>Volume</strong>6,000 L each</div>
+        <div class="mini-pill"><strong>Clarity</strong>${escapeHtml(rec.clarity)}</div>
+        <div class="mini-pill"><strong>Dose items</strong>${doseCount}</div>
+        <div class="mini-pill"><strong>Targets</strong>pH ${formatNumber(rec.targetPh, 2)} | FC ${formatNumber(rec.targetFc, 2)} | Alk ${formatNumber(rec.targetAlk, 0)} | Cal ${formatNumber(rec.targetCalcium, 0)}</div>
+        <div class="table-wrap" style="grid-column: 1 / -1; margin-top: 4px;">
+          <table class="stock-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Current</th>
+                <th>Target</th>
+                <th>Normal range</th>
+                <th>Status</th>
+                <th>Recommended action / dose</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(row => `
+                <tr>
+                  <td><strong>${escapeHtml(row.parameter)}</strong></td>
+                  <td>${row.current == null ? '-' : formatNumber(row.current, row.decimals)}</td>
+                  <td>${row.target == null ? '-' : formatNumber(row.target, row.decimals)}</td>
+                  <td>${escapeHtml(row.rangeLabel || '-')}</td>
+                  <td><span class="${row.status.className}">${escapeHtml(row.status.label)}</span></td>
+                  <td>${escapeHtml(row.action)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="dose-checklist" style="grid-column: 1 / -1; margin-top: 0;">
+          <div class="dose-row">
+            <div class="dose-row-top"><div class="dose-row-name">Hydrochloric Acid 32%</div><div class="dose-row-amount">${formatDose(doses.acid, 'mL', 0)}</div></div>
+            <div class="subtle">Retest pH after dosing.</div>
+          </div>
+          <div class="dose-row">
+            <div class="dose-row-top"><div class="dose-row-name">Liquid Chlorine 12.5%</div><div class="dose-row-amount">${formatDose(doses.chlorine, 'mL', 0)}</div></div>
+            <div class="subtle">Dose only if free chlorine needs to be lifted.</div>
+          </div>
+          <div class="dose-row">
+            <div class="dose-row-top"><div class="dose-row-name">Sodium Bicarbonate</div><div class="dose-row-amount">${formatDose(doses.bicarb, 'kg', 2)}</div></div>
+            <div class="subtle">Split the dose if a larger correction is needed.</div>
+          </div>
+          <div class="dose-row">
+            <div class="dose-row-top"><div class="dose-row-name">Calcium Chloride</div><div class="dose-row-amount">${formatDose(doses.calcium, 'kg', 2)}</div></div>
+            <div class="subtle">Only needed if calcium hardness is low.</div>
+          </div>
+        </div>
+      `;
+      return doseCount;
     }
 
     function renderRaidersGroupMode() {
@@ -1951,25 +2148,19 @@
       qs('kpiVolume').textContent = `${formatNumber(eachVolume, 0)} ea`;
       const volumeUnit = qs('kpiVolume') && qs('kpiVolume').nextElementSibling;
       if (volumeUnit) volumeUnit.textContent = `${formatNumber(totalVolume, 0)} total litres`;
-      qs('kpiBalance').textContent = 'Grouped';
-      qs('kpiDoseCount').textContent = '3';
-      qs('kpiReport').textContent = 'Live';
+      let totalDoseCount = 0;
+      let hasAction = false;
+      let hasAdjust = false;
       [1, 2, 3].forEach(index => {
-        const rec = getIceBathRecommendations(index);
-        const target = qs(`iceBath${index}Summary`);
-        if (!target) return;
-        target.innerHTML = `
-          <div class="mini-pill"><strong>Volume</strong>6,000 L each</div>
-          <div class="mini-pill"><strong>Clarity</strong>${escapeHtml(rec.clarity)}</div>
-          <div class="mini-pill"><strong>Acid</strong>${formatDose(rec.acid, 'mL', 0)}</div>
-          <div class="mini-pill"><strong>Chlorine</strong>${formatDose(rec.chlorine, 'mL', 0)}</div>
-          <div class="mini-pill"><strong>Bicarb</strong>${formatDose(rec.bicarb, 'kg', 2)}</div>
-          <div class="mini-pill"><strong>Targets</strong>pH ${formatNumber(rec.targetPh, 2)} | FC ${formatNumber(rec.targetFc, 2)} | Alk ${formatNumber(rec.targetAlk, 0)}</div>
-          <div class="mini-pill"><strong>Core reading</strong>pH ${rec.ph == null ? '-' : formatNumber(rec.ph, 2)} | FC ${rec.fc == null ? '-' : formatNumber(rec.fc, 2)} | TC ${rec.tc == null ? '-' : formatNumber(rec.tc, 2)}</div>
-          <div class="mini-pill"><strong>Extra reading</strong>Alk ${rec.alk == null ? '-' : formatNumber(rec.alk, 0)} | Cal ${rec.calcium == null ? '-' : formatNumber(rec.calcium, 0)} | Temp ${rec.temp == null ? '-' : formatNumber(rec.temp, 1)}</div>
-          <div class="mini-pill"><strong>Phosphates</strong>${rec.phosphates == null ? '-' : formatNumber(rec.phosphates, 0)}</div>
-        `;
+        totalDoseCount += renderIceBathRecommendationBlock(index);
+        const { rows } = buildIceBathRecommendationRows(index);
+        const labels = rows.map(row => row.status.label);
+        if (labels.includes('High')) hasAction = true;
+        if (labels.includes('Low')) hasAdjust = true;
       });
+      qs('kpiBalance').textContent = hasAction ? 'Attention' : hasAdjust ? 'Adjust' : 'Balanced';
+      qs('kpiDoseCount').textContent = String(totalDoseCount);
+      qs('kpiReport').textContent = 'Live';
     }
 
     function getContextTags() {
@@ -2390,7 +2581,7 @@
         const notes = [
           'Each ice bath is calculated separately at 6,000 L.',
           (inputs.serviceNotes.value || '').trim(),
-          baths.map(bath => `${bath.poolName}: clarity ${bath.clarity || '-'}, pH ${bath.ph == null ? '-' : formatNumber(bath.ph, 2)}, FC ${bath.fc == null ? '-' : formatNumber(bath.fc, 2)}, TC ${bath.tc == null ? '-' : formatNumber(bath.tc, 2)}, Alk ${bath.alk == null ? '-' : formatNumber(bath.alk, 0)}, Calcium ${bath.calcium == null ? '-' : formatNumber(bath.calcium, 0)}, Temp ${bath.temp == null ? '-' : formatNumber(bath.temp, 1)}, Phosphates ${bath.phosphates == null ? '-' : formatNumber(bath.phosphates, 0)}, Acid ${formatDose(bath.acid, 'mL', 0)}, Chlorine ${formatDose(bath.chlorine, 'mL', 0)}, Bicarb ${formatDose(bath.bicarb, 'kg', 2)}${bath.note ? `, Note: ${bath.note}` : ''}.`).join(' '),
+          baths.map(bath => `${bath.poolName}: clarity ${bath.clarity || '-'}, pH ${bath.ph == null ? '-' : formatNumber(bath.ph, 2)}, FC ${bath.fc == null ? '-' : formatNumber(bath.fc, 2)}, TC ${bath.tc == null ? '-' : formatNumber(bath.tc, 2)}, Alk ${bath.alk == null ? '-' : formatNumber(bath.alk, 0)}, Calcium ${bath.calcium == null ? '-' : formatNumber(bath.calcium, 0)}, Temp ${bath.temp == null ? '-' : formatNumber(bath.temp, 1)}, Phosphates ${bath.phosphates == null ? '-' : formatNumber(bath.phosphates, 0)}, Acid ${formatDose(bath.acid, 'mL', 0)}, Chlorine ${formatDose(bath.chlorine, 'mL', 0)}, Bicarb ${formatDose(bath.bicarb, 'kg', 2)}, Calcium dose ${formatDose(bath.calciumDose, 'kg', 2)}${bath.note ? `, Note: ${bath.note}` : ''}.`).join(' '),
           getContextTags().length ? `Service context: ${getContextTags().join('; ')}.` : ''
         ].filter(Boolean).join(' ');
         return {
@@ -2418,7 +2609,7 @@
           acidAddedMl: round(baths.reduce((sum, bath) => sum + (bath.acid || 0), 0), 0),
           chlorineAddedG: round(baths.reduce((sum, bath) => sum + (bath.chlorine || 0), 0), 0),
           bicarbAddedKg: round(baths.reduce((sum, bath) => sum + (bath.bicarb || 0), 0), 2),
-          calciumAddedKg: '',
+          calciumAddedKg: round(baths.reduce((sum, bath) => sum + (bath.calciumDose || 0), 0), 2),
           saltAddedKg: '',
           otherChemicals: 'Grouped ice bath report',
           notes
@@ -3789,7 +3980,7 @@ function buildReportHtml() {
           </div>
           <div class="report-section-bar">Ice bath results</div>
           <table class="report-table tight">
-            <thead><tr><th>Bath</th><th>Clarity</th><th>pH</th><th>FC</th><th>TC</th><th>Alk</th><th>Calcium</th><th>Temp</th><th>Phos</th><th>Acid</th><th>Chlorine</th><th>Bicarb</th><th>Note</th></tr></thead>
+            <thead><tr><th>Bath</th><th>Clarity</th><th>pH</th><th>FC</th><th>TC</th><th>Alk</th><th>Calcium</th><th>Temp</th><th>Phos</th><th>Acid</th><th>Chlorine</th><th>Bicarb</th><th>Calcium dose</th><th>Note</th></tr></thead>
             <tbody>
               ${model.baths.map(bath => `
                 <tr>
@@ -3805,6 +3996,7 @@ function buildReportHtml() {
                   <td>${formatDose(bath.acid, 'mL', 0)}</td>
                   <td>${formatDose(bath.chlorine, 'mL', 0)}</td>
                   <td>${formatDose(bath.bicarb, 'kg', 2)}</td>
+                  <td>${formatDose(bath.calciumDose, 'kg', 2)}</td>
                   <td>${escapeHtml(bath.note || '')}</td>
                 </tr>
               `).join('')}

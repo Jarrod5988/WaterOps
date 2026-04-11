@@ -843,54 +843,78 @@
 
     .icebath-combined-cards {
       display: grid;
-      gap: 10px;
+      gap: 8px;
       margin-top: 10px;
     }
 
-    .icebath-combined-card {
+    .icebath-compact-card {
       border: 1px solid rgba(137, 183, 226, 0.18);
-      border-radius: 18px;
-      padding: 12px;
+      border-radius: 16px;
+      padding: 10px;
       background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
     }
 
-    .icebath-combined-head {
+    .icebath-compact-top {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
-    .icebath-combined-title {
-      font-size: 15px;
+    .icebath-compact-title {
+      font-size: 14px;
       font-weight: 800;
       color: #1c4771;
+      line-height: 1.2;
     }
 
-    .icebath-combined-dose {
-      font-size: 15px;
+    .icebath-compact-dose {
+      font-size: 14px;
       font-weight: 800;
       color: #17324d;
+      white-space: nowrap;
+      line-height: 1.2;
     }
 
-    .icebath-combined-meta {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .icebath-combined-summary {
-      font-size: 13px;
-      line-height: 1.45;
+    .icebath-compact-facts {
+      font-size: 12px;
+      line-height: 1.35;
       color: #244d77;
-      border: 1px solid rgba(141, 189, 232, 0.22);
-      border-radius: 14px;
-      padding: 9px 10px;
-      background: linear-gradient(180deg, rgba(250,253,255,0.96) 0%, rgba(243,248,253,0.96) 100%);
+      margin-bottom: 6px;
+    }
+
+    .icebath-compact-action {
+      font-size: 12px;
+      line-height: 1.35;
+      color: #244d77;
       margin-bottom: 8px;
+    }
+
+    .icebath-compact-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .icebath-compact-controls .field {
+      gap: 4px;
+    }
+
+    .icebath-compact-controls .field label {
+      font-size: 12px;
+    }
+
+    .icebath-compact-controls input,
+    .icebath-compact-controls select {
+      min-height: 42px;
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 15px;
+    }
+
+    .icebath-dose-extra.hidden {
+      display: none !important;
     }
 
     .icebath-reference-grid {
@@ -930,8 +954,7 @@
 
     @media (max-width: 640px) {
       .icebath-result-grid,
-      .icebath-dose-grid,
-      .icebath-combined-meta {
+      .icebath-dose-grid {
         grid-template-columns: 1fr 1fr;
       }
     }
@@ -939,8 +962,11 @@
     @media (max-width: 420px) {
       .icebath-result-grid,
       .icebath-dose-grid,
-      .icebath-combined-meta,
       .icebath-reference-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .icebath-compact-controls {
         grid-template-columns: 1fr;
       }
     }
@@ -2282,24 +2308,42 @@
       }
     }
 
+
+    function updateIceBathDoseVisibility(index, key) {
+      const statusField = qs(`iceBath${index}DoseStatus_${key}`);
+      const sourceWrap = qs(`iceBath${index}DoseSourceWrap_${key}`);
+      const actualWrap = qs(`iceBath${index}DoseActualWrap_${key}`);
+      const noteWrap = qs(`iceBath${index}DoseNoteWrap_${key}`);
+      const showExtras = statusField && statusField.value === 'Yes';
+      [sourceWrap, actualWrap, noteWrap].forEach(el => {
+        if (el) el.classList.toggle('hidden', !showExtras);
+      });
+    }
+
     function bindIceBathDoseFields(index) {
       GROUP_ICE_DOSING_KEYS.forEach(key => {
         const statusField = qs(`iceBath${index}DoseStatus_${key}`);
         const sourceField = qs(`iceBath${index}DoseSource_${key}`);
         const actualField = qs(`iceBath${index}DoseActual_${key}`);
         const noteField = qs(`iceBath${index}DoseNote_${key}`);
-        [statusField, sourceField].forEach(field => {
-          if (field && !field.dataset.bound) {
-            field.addEventListener('change', handleDoseFieldChange);
-            field.dataset.bound = 'true';
-          }
-        });
+        if (statusField && !statusField.dataset.bound) {
+          statusField.addEventListener('change', () => {
+            updateIceBathDoseVisibility(index, key);
+            handleDoseFieldChange();
+          });
+          statusField.dataset.bound = 'true';
+        }
+        if (sourceField && !sourceField.dataset.bound) {
+          sourceField.addEventListener('change', handleDoseFieldChange);
+          sourceField.dataset.bound = 'true';
+        }
         [actualField, noteField].forEach(field => {
           if (field && !field.dataset.bound) {
             field.addEventListener('input', handleDoseFieldChange);
             field.dataset.bound = 'true';
           }
         });
+        updateIceBathDoseVisibility(index, key);
       });
     }
 
@@ -2346,19 +2390,16 @@
         <div class="mini-pill"><strong>Targets</strong>pH ${formatNumber(rec.targetPh, 2)} | FC ${formatNumber(rec.targetFc, 2)} | Alk ${formatNumber(rec.targetAlk, 0)} | Cal ${formatNumber(rec.targetCalcium, 0)}</div>
         <div class="icebath-combined-cards">
           ${combinedRows.map(item => `
-            <div class="icebath-combined-card">
-              <div class="icebath-combined-head">
-                <div class="icebath-combined-title">${escapeHtml(item.chemical.label)}</div>
-                <div class="icebath-combined-dose">${formatDose(item.chemical.value, item.chemical.unit, item.chemical.decimals)}</div>
+            <div class="icebath-compact-card">
+              <div class="icebath-compact-top">
+                <div class="icebath-compact-title">${escapeHtml(item.chemical.label)}</div>
+                <div class="icebath-compact-dose">${formatDose(item.chemical.value, item.chemical.unit, item.chemical.decimals)}</div>
               </div>
-              <div class="icebath-combined-meta">
-                <div class="mini-pill"><strong>Status</strong>${escapeHtml(item.result.status.label)}</div>
-                <div class="mini-pill"><strong>Current</strong>${item.result.current == null ? '-' : formatNumber(item.result.current, item.result.decimals)}</div>
-                <div class="mini-pill"><strong>Target</strong>${item.result.target == null ? '-' : formatNumber(item.result.target, item.result.decimals)}</div>
-                <div class="mini-pill"><strong>Range</strong>${escapeHtml(item.result.rangeLabel || '-')}</div>
+              <div class="icebath-compact-facts">
+                <strong>${escapeHtml(item.result.status.label)}</strong> • Current ${item.result.current == null ? '-' : formatNumber(item.result.current, item.result.decimals)} • Target ${item.result.target == null ? '-' : formatNumber(item.result.target, item.result.decimals)} • Range ${escapeHtml(item.result.rangeLabel || '-')}
               </div>
-              <div class="icebath-combined-summary">${escapeHtml(item.result.action)}</div>
-              <div class="dose-row-grid icebath-dose-grid">
+              <div class="icebath-compact-action">${escapeHtml(item.result.action)}</div>
+              <div class="icebath-compact-controls">
                 <div class="field">
                   <label for="iceBath${index}DoseStatus_${item.chemical.key}">Dosed?</label>
                   <select id="iceBath${index}DoseStatus_${item.chemical.key}">
@@ -2366,21 +2407,21 @@
                     <option value="Yes">Yes</option>
                   </select>
                 </div>
-                <div class="field">
-                  <label for="iceBath${index}DoseSource_${item.chemical.key}">Stock source</label>
+                <div class="field icebath-dose-extra" id="iceBath${index}DoseSourceWrap_${item.chemical.key}">
+                  <label for="iceBath${index}DoseSource_${item.chemical.key}">Source</label>
                   <select id="iceBath${index}DoseSource_${item.chemical.key}">
                     <option value="">Select</option>
                     <option value="ute">Ute stock</option>
-                    <option value="onsite">Stock onsite</option>
+                    <option value="onsite">Onsite</option>
                   </select>
                 </div>
-                <div class="field">
-                  <label for="iceBath${index}DoseActual_${item.chemical.key}">Actual qty used</label>
-                  <input id="iceBath${index}DoseActual_${item.chemical.key}" type="number" step="any" inputmode="decimal" placeholder="Optional override" />
+                <div class="field icebath-dose-extra" id="iceBath${index}DoseActualWrap_${item.chemical.key}">
+                  <label for="iceBath${index}DoseActual_${item.chemical.key}">Actual qty</label>
+                  <input id="iceBath${index}DoseActual_${item.chemical.key}" type="number" step="any" inputmode="decimal" placeholder="Optional" />
                 </div>
-                <div class="field">
+                <div class="field icebath-dose-extra" id="iceBath${index}DoseNoteWrap_${item.chemical.key}">
                   <label for="iceBath${index}DoseNote_${item.chemical.key}">Note</label>
-                  <input id="iceBath${index}DoseNote_${item.chemical.key}" type="text" placeholder="Optional note" />
+                  <input id="iceBath${index}DoseNote_${item.chemical.key}" type="text" placeholder="Optional" />
                 </div>
               </div>
             </div>

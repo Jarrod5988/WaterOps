@@ -786,6 +786,75 @@
       margin-bottom: 4px;
     }
 
+    .icebath-result-cards,
+    .icebath-chemical-cards {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .icebath-result-card {
+      border: 1px solid rgba(137, 183, 226, 0.18);
+      border-radius: 18px;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
+    }
+
+    .icebath-result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .icebath-result-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1c4771;
+    }
+
+    .icebath-result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+    }
+
+    .icebath-action {
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #244d77;
+      border: 1px solid rgba(141, 189, 232, 0.22);
+      border-radius: 14px;
+      padding: 10px;
+      background: linear-gradient(180deg, rgba(250,253,255,0.96) 0%, rgba(243,248,253,0.96) 100%);
+    }
+
+    .icebath-dose-row {
+      gap: 12px;
+    }
+
+    .icebath-dose-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    @media (max-width: 640px) {
+      .icebath-result-grid,
+      .icebath-dose-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .icebath-result-grid,
+      .icebath-dose-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .stock-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -2163,6 +2232,7 @@
       });
     }
 
+
     function renderIceBathRecommendationBlock(index) {
       const target = qs(`iceBath${index}Summary`);
       if (!target) return 0;
@@ -2175,68 +2245,56 @@
         <div class="mini-pill"><strong>Clarity</strong>${escapeHtml(rec.clarity)}</div>
         <div class="mini-pill"><strong>Dose items</strong>${doseCount}</div>
         <div class="mini-pill"><strong>Targets</strong>pH ${formatNumber(rec.targetPh, 2)} | FC ${formatNumber(rec.targetFc, 2)} | Alk ${formatNumber(rec.targetAlk, 0)} | Cal ${formatNumber(rec.targetCalcium, 0)}</div>
-        <div class="table-wrap" style="grid-column: 1 / -1; margin-top: 4px;">
-          <table class="stock-table">
-            <thead>
-              <tr>
-                <th>Parameter</th>
-                <th>Current</th>
-                <th>Target</th>
-                <th>Normal range</th>
-                <th>Status</th>
-                <th>Recommended action / dose</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows.map(row => `
-                <tr>
-                  <td><strong>${escapeHtml(row.parameter)}</strong></td>
-                  <td>${row.current == null ? '-' : formatNumber(row.current, row.decimals)}</td>
-                  <td>${row.target == null ? '-' : formatNumber(row.target, row.decimals)}</td>
-                  <td>${escapeHtml(row.rangeLabel || '-')}</td>
-                  <td><span class="${row.status.className}">${escapeHtml(row.status.label)}</span></td>
-                  <td>${escapeHtml(row.action)}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+        <div class="icebath-result-cards">
+          ${rows.map(row => `
+            <div class="icebath-result-card">
+              <div class="icebath-result-head">
+                <div class="icebath-result-name">${escapeHtml(row.parameter)}</div>
+                <span class="${row.status.className}">${escapeHtml(row.status.label)}</span>
+              </div>
+              <div class="icebath-result-grid">
+                <div class="mini-pill"><strong>Current</strong>${row.current == null ? '-' : formatNumber(row.current, row.decimals)}</div>
+                <div class="mini-pill"><strong>Target</strong>${row.target == null ? '-' : formatNumber(row.target, row.decimals)}</div>
+                <div class="mini-pill"><strong>Normal range</strong>${escapeHtml(row.rangeLabel || '-')}</div>
+              </div>
+              <div class="icebath-action">${escapeHtml(row.action)}</div>
+            </div>
+          `).join('')}
         </div>
-        <div class="table-wrap" style="grid-column: 1 / -1; margin-top: 4px;">
-          <table class="stock-table">
-            <thead>
-              <tr>
-                <th>Chemical</th>
-                <th>Recommended dose</th>
-                <th>Dosed?</th>
-                <th>Stock source</th>
-                <th>Actual qty used</th>
-                <th>Note</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${chemicalRows.map(item => `
-                <tr>
-                  <td><strong>${escapeHtml(item.label)}</strong></td>
-                  <td>${formatDose(item.value, item.unit, item.decimals)}</td>
-                  <td>
-                    <select id="iceBath${index}DoseStatus_${item.key}">
-                      <option value="No">No</option>
-                      <option value="Yes">Yes</option>
-                    </select>
-                  </td>
-                  <td>
-                    <select id="iceBath${index}DoseSource_${item.key}">
-                      <option value="">Select</option>
-                      <option value="ute">Ute stock</option>
-                      <option value="onsite">Stock onsite</option>
-                    </select>
-                  </td>
-                  <td><input id="iceBath${index}DoseActual_${item.key}" type="number" step="any" inputmode="decimal" placeholder="Optional override" /></td>
-                  <td><input id="iceBath${index}DoseNote_${item.key}" type="text" placeholder="Optional note" /></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+        <div class="icebath-chemical-cards">
+          ${chemicalRows.map(item => `
+            <div class="dose-row icebath-dose-row">
+              <div class="dose-row-top">
+                <div class="dose-row-name">${escapeHtml(item.label)}</div>
+                <div class="dose-row-amount">${formatDose(item.value, item.unit, item.decimals)}</div>
+              </div>
+              <div class="dose-row-grid icebath-dose-grid">
+                <div class="field">
+                  <label for="iceBath${index}DoseStatus_${item.key}">Dosed?</label>
+                  <select id="iceBath${index}DoseStatus_${item.key}">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="iceBath${index}DoseSource_${item.key}">Stock source</label>
+                  <select id="iceBath${index}DoseSource_${item.key}">
+                    <option value="">Select</option>
+                    <option value="ute">Ute stock</option>
+                    <option value="onsite">Stock onsite</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="iceBath${index}DoseActual_${item.key}">Actual qty used</label>
+                  <input id="iceBath${index}DoseActual_${item.key}" type="number" step="any" inputmode="decimal" placeholder="Optional override" />
+                </div>
+                <div class="field">
+                  <label for="iceBath${index}DoseNote_${item.key}">Note</label>
+                  <input id="iceBath${index}DoseNote_${item.key}" type="text" placeholder="Optional note" />
+                </div>
+              </div>
+            </div>
+          `).join('')}
         </div>
       `;
       restoreIceBathDoseFields(index, currentFieldValues);

@@ -1366,7 +1366,7 @@
           <button class="button ghost" id="saveVisitSnapshotBtn" type="button">Save visit snapshot</button>
         </div>
         <div class="report-output" id="reportOutput">Tap Generate report to build the service report.</div>
-        <div class="footer-note">PDF export is set to landscape. If the master sheet URL is saved in QR & setup, this button also updates the live log sheet.</div>
+        <div class="footer-note">PDF export is set to landscape. If the built-in master sheet URL is active, this button also updates the live log sheet.</div>
       </section>
     </div>
   </div>
@@ -1469,7 +1469,7 @@
           <button class="button ghost" id="saveClosedSnapshotBtn" type="button">Save closed loop snapshot</button>
         </div>
         <div class="report-output" id="closedReportOutput">Tap Generate report to build the closed loop report.</div>
-        <div class="footer-note">PDF export is set to landscape. If the master sheet URL is saved in QR & setup, this button also updates the live log sheet.</div>
+        <div class="footer-note">PDF export is set to landscape. If the built-in master sheet URL is active, this button also updates the live log sheet.</div>
       </section>
     </div>
   </div>
@@ -1582,14 +1582,14 @@
           <div class="field">
             <label for="googleScriptUrl">Google Apps Script Web App URL</label>
             <input id="googleScriptUrl" type="url" placeholder="Paste your deployed /exec URL" />
-            <small>Use the deployed Apps Script web app URL ending in <strong>/exec</strong>. When this is set, Generate and save PDF also sends the visit to the live master sheet.</small>
+            <small>The deployed Apps Script web app URL is prefilled below. Generate and save PDF also sends the visit to the live master sheet.</small>
           </div>
         </div>
         <div class="actions" style="margin-bottom: 12px;">
-          <button class="button secondary" id="saveGoogleScriptUrlBtn" type="button">Save sheet URL</button>
+          <button class="button secondary" id="saveGoogleScriptUrlBtn" type="button">Save / overwrite sheet URL</button>
           <button class="button ghost" id="openScriptTestBtn" type="button">Open script test</button>
         </div>
-        <div class="hint" id="sheetStatusBox">No master sheet URL saved yet.</div>
+        <div class="hint" id="sheetStatusBox">Master sheet URL is built in.</div>
       </section>
 
       <section class="card span-12">
@@ -1622,6 +1622,7 @@
     const ACTIVE_SCREEN_STORAGE_KEY = 'mbs-active-screen-v1';
     const GOOGLE_SCRIPT_URL_STORAGE_KEY = 'mbs-google-script-url-v1';
     const SHEET_STATUS_STORAGE_KEY = 'mbs-sheet-status-v1';
+    const DEFAULT_GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxim0-6TTC5IBLXUAG7vYDE8wf_criRVROl5uuDmAdWfe3rkWh-3wHitmbYEUjtjFkR/exec';
     let activeScreen = 'pools';
 
     // Updated list of pools including Raiders Ice Baths 2 & 3, Kamy Saeedi and Nathan's Pool.
@@ -2470,7 +2471,9 @@
 
 
     function getGoogleScriptUrl() {
-      return (qs('googleScriptUrl') && qs('googleScriptUrl').value ? qs('googleScriptUrl').value : localStorage.getItem(GOOGLE_SCRIPT_URL_STORAGE_KEY) || '').trim();
+      const inputUrl = qs('googleScriptUrl') && qs('googleScriptUrl').value ? qs('googleScriptUrl').value : '';
+      const storedUrl = localStorage.getItem(GOOGLE_SCRIPT_URL_STORAGE_KEY) || '';
+      return (inputUrl || storedUrl || DEFAULT_GOOGLE_SCRIPT_URL || '').trim();
     }
 
     function saveGoogleScriptUrlSetting() {
@@ -2480,7 +2483,7 @@
         setSheetStatus('Master sheet URL saved. PDF save will also send the visit log.', 'success');
       } else {
         localStorage.removeItem(GOOGLE_SCRIPT_URL_STORAGE_KEY);
-        setSheetStatus('No master sheet URL saved yet.', 'info');
+        setSheetStatus('Master sheet URL is built in.', 'info');
       }
     }
 
@@ -2493,7 +2496,8 @@
     }
 
     function restoreSheetStatus() {
-      const url = localStorage.getItem(GOOGLE_SCRIPT_URL_STORAGE_KEY) || '';
+      const storedUrl = localStorage.getItem(GOOGLE_SCRIPT_URL_STORAGE_KEY) || '';
+      const url = storedUrl || DEFAULT_GOOGLE_SCRIPT_URL || '';
       if (qs('googleScriptUrl')) qs('googleScriptUrl').value = url;
       try {
         const stored = JSON.parse(localStorage.getItem(SHEET_STATUS_STORAGE_KEY) || 'null');
@@ -2502,7 +2506,7 @@
           return;
         }
       } catch (error) {}
-      setSheetStatus(url ? 'Master sheet URL saved. PDF save will also send the visit log.' : 'No master sheet URL saved yet.', url ? 'success' : 'info');
+      setSheetStatus(url ? 'Master sheet URL is built in. PDF save will also send the visit log.' : 'Master sheet URL is built in.', url ? 'success' : 'info');
     }
 
     function openScriptTest() {
@@ -3885,6 +3889,18 @@ function buildReportHtml() {
             </div>
           </div>
 
+          <div class="report-section-bar">${escapeHtml(model.poolName)}</div>
+          <table class="report-table">
+            <tbody>
+              <tr>
+                <th style="width:22%;">Tested asset</th>
+                <td style="width:28%;">${escapeHtml(model.poolName)}</td>
+                <th style="width:22%;">Water clarity</th>
+                <td style="width:28%;">${escapeHtml(inputs.waterClarity.value || '-')}</td>
+              </tr>
+            </tbody>
+          </table>
+
           <div class="report-section-bar">Water Summary</div>
           <table class="report-table tight">
             <thead>
@@ -3939,7 +3955,15 @@ function buildReportHtml() {
     }
 
     function buildRaidersGroupReportModel() {
-      const baths = [1, 2, 3].map(index => getIceBathRecommendations(index));
+      const baths = [1, 2, 3].map(index => {
+        const detail = buildIceBathRecommendationRows(index);
+        return {
+          index,
+          ...detail.rec,
+          rows: detail.rows,
+          doses: detail.doses
+        };
+      });
       return {
         title: 'Raiders Ice Baths - Combined Water Quality Testing Report',
         site: inputs.reportSite.value || 'Raiders',
@@ -3978,30 +4002,60 @@ function buildReportHtml() {
               </div>
             </div>
           </div>
-          <div class="report-section-bar">Ice bath results</div>
-          <table class="report-table tight">
-            <thead><tr><th>Bath</th><th>Clarity</th><th>pH</th><th>FC</th><th>TC</th><th>Alk</th><th>Calcium</th><th>Temp</th><th>Phos</th><th>Acid</th><th>Chlorine</th><th>Bicarb</th><th>Calcium dose</th><th>Note</th></tr></thead>
-            <tbody>
-              ${model.baths.map(bath => `
+          ${model.baths.map(bath => `
+            <div class="report-section-bar">${escapeHtml(bath.poolName)}</div>
+            <table class="report-table">
+              <tbody>
                 <tr>
-                  <td>${escapeHtml(bath.poolName)}</td>
-                  <td>${escapeHtml(bath.clarity)}</td>
+                  <th style="width:18%;">Water clarity</th>
+                  <td style="width:32%;">${escapeHtml(bath.clarity)}</td>
+                  <th style="width:18%;">Volume used for dosing</th>
+                  <td style="width:32%;">6,000 L</td>
+                </tr>
+                <tr>
+                  <th>Current pH</th>
                   <td>${bath.ph == null ? '-' : formatNumber(bath.ph, 2)}</td>
+                  <th>Free chlorine</th>
                   <td>${bath.fc == null ? '-' : formatNumber(bath.fc, 2)}</td>
+                </tr>
+                <tr>
+                  <th>Total chlorine</th>
                   <td>${bath.tc == null ? '-' : formatNumber(bath.tc, 2)}</td>
+                  <th>Alkalinity</th>
                   <td>${bath.alk == null ? '-' : formatNumber(bath.alk, 0)}</td>
+                </tr>
+                <tr>
+                  <th>Calcium hardness</th>
                   <td>${bath.calcium == null ? '-' : formatNumber(bath.calcium, 0)}</td>
+                  <th>Temperature</th>
                   <td>${bath.temp == null ? '-' : formatNumber(bath.temp, 1)}</td>
+                </tr>
+                <tr>
+                  <th>Phosphates</th>
                   <td>${bath.phosphates == null ? '-' : formatNumber(bath.phosphates, 0)}</td>
-                  <td>${formatDose(bath.acid, 'mL', 0)}</td>
-                  <td>${formatDose(bath.chlorine, 'mL', 0)}</td>
-                  <td>${formatDose(bath.bicarb, 'kg', 2)}</td>
-                  <td>${formatDose(bath.calciumDose, 'kg', 2)}</td>
+                  <th>Note</th>
                   <td>${escapeHtml(bath.note || '')}</td>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+            <table class="report-table tight" style="margin-top:-4px;">
+              <thead>
+                <tr><th>Parameter</th><th>Current</th><th>Target</th><th>Normal range</th><th>Status</th><th>Recommended action / dose</th></tr>
+              </thead>
+              <tbody>
+                ${bath.rows.map(row => `
+                  <tr>
+                    <td>${escapeHtml(row.parameter)}</td>
+                    <td>${row.current == null ? '-' : formatNumber(row.current, row.decimals)}</td>
+                    <td>${row.target == null ? '-' : formatNumber(row.target, row.decimals)}</td>
+                    <td>${escapeHtml(row.rangeLabel || '-')}</td>
+                    <td>${escapeHtml(row.status.label)}</td>
+                    <td>${escapeHtml(row.action)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `).join('')}
           <div class="report-section-block" style="margin-top:12px;">
             <div class="report-section-block-title">Technician notes</div>
             <div class="report-paragraph">${escapeHtml(model.notes || 'No extra technician notes.')}</div>
@@ -4967,6 +5021,7 @@ async function savePdfReport() {
       renderStockSection();
       renderQrSection();
       restoreSheetStatus();
+      initTabs();
       [1, 2, 3].forEach(index => clearIceBathPhoto(index));
 
       Object.values(inputs).forEach(input => {

@@ -1,0 +1,24 @@
+{
+  "name": "MBS FM WaterOps",
+  "short_name": "WaterOps",
+  "description": "MBS FM WaterOps for water testing, dosing, closed loops and service logging.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#edf5fc",
+  "theme_color": "#2b96ff",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

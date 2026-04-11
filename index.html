@@ -2380,9 +2380,11 @@
       target.innerHTML = `
         <div class="mini-pill"><strong>Volume</strong>6,000 L each</div>
         <div class="mini-pill"><strong>Clarity</strong>${escapeHtml(rec.clarity)}</div>
-        <div class="mini-pill"><strong>Dose items</strong>${doseCount}</div>
         <div class="icebath-combined-cards">
-          ${combinedRows.map(item => `
+          ${combinedRows.filter(item => Number.isFinite(item.chemical.value) && item.chemical.value > 0).length
+            ? combinedRows
+                .filter(item => Number.isFinite(item.chemical.value) && item.chemical.value > 0)
+                .map(item => `
             <div class="icebath-compact-card">
               <div class="icebath-compact-top">
                 <div class="icebath-compact-title">${escapeHtml(item.chemical.label)}</div>
@@ -2407,17 +2409,10 @@
                     <option value="onsite">Onsite</option>
                   </select>
                 </div>
-                <div class="field icebath-dose-extra" id="iceBath${index}DoseActualWrap_${item.chemical.key}">
-                  <label for="iceBath${index}DoseActual_${item.chemical.key}">Actual</label>
-                  <input id="iceBath${index}DoseActual_${item.chemical.key}" type="number" step="any" inputmode="decimal" placeholder="Optional" />
-                </div>
-                <div class="field icebath-dose-extra" id="iceBath${index}DoseNoteWrap_${item.chemical.key}">
-                  <label for="iceBath${index}DoseNote_${item.chemical.key}">Note</label>
-                  <input id="iceBath${index}DoseNote_${item.chemical.key}" type="text" placeholder="Optional" />
-                </div>
               </div>
             </div>
-          `).join('')}
+          `).join('')
+            : `<div class="icebath-reference-card"><strong>No chemical dosing required</strong><div class="icebath-reference-value">All automatic dose items are currently within range.</div></div>`}
         </div>
         <div class="icebath-reference-grid">
           ${referenceRows.map(row => `

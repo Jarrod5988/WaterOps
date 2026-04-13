@@ -3153,7 +3153,7 @@
       const rows = buildClosedLoopRows();
       return {
         title: 'Closed Loop Water Quality Testing Report',
-        companyName: 'MBS Facility Maintenance',
+        companyName: 'MBS Facility Management',
         companyLines: ['63 Tennant Street', 'Fyshwick ACT 2609', '(02) 6162 0216', 'info@mbsfm.com.au'],
         site: inputs.closedSite.value || '-',
         systemName: inputs.closedSystemName.value || '-',
@@ -4201,7 +4201,7 @@
 
       return {
         title: 'Water Quality Testing Report',
-        companyName: 'MBS Facility Maintenance',
+        companyName: 'MBS Facility Management',
         companyLines: ['63 Tennant Street', 'Fyshwick ACT 2609', '(02) 6162 0216', 'info@mbsfm.com.au'],
         site: inputs.reportSite.value || '-',
         poolName: inputs.reportPoolName.value || '-',
@@ -4387,7 +4387,7 @@ function buildReportHtml() {
             <div class="report-brand-card">
               <div class="report-brand-top">
                 <img class="report-logo" src="${REPORT_LOGO_DATA}" alt="MBS FM logo" />
-                <div class="report-company"><strong>MBS Facility Maintenance</strong>63 Tennant Street<br>Fyshwick ACT 2609<br>(02) 6162 0216<br>info@mbsfm.com.au</div>
+                <div class="report-company"><strong>MBS Facility Management</strong>63 Tennant Street<br>Fyshwick ACT 2609<br>(02) 6162 0216<br>info@mbsfm.com.au</div>
               </div>
               <div class="report-brand-strip"><div class="report-title">${escapeHtml(model.title)}</div></div>
             </div>
@@ -4629,7 +4629,7 @@ async function savePdfReport() {
           doc.setFont('helvetica', 'bold');
           doc.setTextColor(...blue);
           doc.setFontSize(9.4);
-          doc.text('MBS Facility Maintenance', brandX + brandW - 5, brandY + 7, { align: 'right' });
+          doc.text('MBS Facility Management', brandX + brandW - 5, brandY + 7, { align: 'right' });
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(51, 65, 85);
           doc.setFontSize(7.7);

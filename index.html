@@ -1465,7 +1465,7 @@
             <div class="preview-box" id="photoPreviewBox">
               <div class="placeholder">No photo attached. Add a photo and the app will try to fill the test results automatically.</div>
             </div>
-            <div class="photo-note" id="photoOcrStatus" style="margin-top: 8px; font-size: 12px;">Upload a Spin Touch photo and the app will try to fill free chlorine, pH, alkalinity, calcium hardness, CYA, salt, temperature and phosphates automatically.</div>
+            <div class="photo-note" id="photoOcrStatus" style="margin-top: 8px; font-size: 12px;">Upload a Spin Touch photo and the app will try to fill free chlorine, pH, alkalinity, calcium hardness, CYA, salt, temperature, copper and phosphates automatically.</div>
           </div>
           <div class="span-6" style="grid-column: span 12;">
             <div class="field">
@@ -1533,6 +1533,10 @@
           <div class="field">
             <label for="temperature">Water temperature</label>
             <input id="temperature" type="number" inputmode="decimal" step="0.1" placeholder="°C" />
+          </div>
+          <div class="field">
+            <label for="copper">Copper</label>
+            <input id="copper" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
           </div>
           <div class="field">
             <label for="phosphates">Phosphates</label>
@@ -2798,6 +2802,7 @@
         calcium: n(inputs.calciumHardness.value),
         cya: n(inputs.cyanuricAcid.value),
         salt: n(inputs.salt.value),
+        copper: n(inputs.copper.value),
         acid: doses.acid || 0,
         chlorine: doses.chlorine || 0,
         bicarb: doses.bicarb || 0,
@@ -4974,20 +4979,31 @@
 
       const summaryItems = [
         { label: 'Water Clarity', value: inputs.waterClarity.value || '-' },
-        { label: 'Free Chlorine', value: rowsMap.chlorine && rowsMap.chlorine.current != null ? formatNumber(rowsMap.chlorine.current, 2) : '-' },
-        { label: 'Target FC', value: rowsMap.chlorine && rowsMap.chlorine.target != null ? formatNumber(rowsMap.chlorine.target, 2) : '-' },
-        { label: 'pH', value: rowsMap.acid && rowsMap.acid.current != null ? formatNumber(rowsMap.acid.current, 2) : '-' },
-        { label: 'Target pH', value: rowsMap.acid && rowsMap.acid.target != null ? formatNumber(rowsMap.acid.target, 2) : '-' },
-        { label: 'Alkalinity', value: rowsMap.bicarb && rowsMap.bicarb.current != null ? formatNumber(rowsMap.bicarb.current, 0) : '-' },
-        { label: 'Target Alk', value: rowsMap.bicarb && rowsMap.bicarb.target != null ? formatNumber(rowsMap.bicarb.target, 0) : '-' },
         { label: 'Volume (L)', value: formatNumber(volume, 0) },
+        { label: 'Free Chlorine', value: rowsMap.chlorine && rowsMap.chlorine.current != null ? formatNumber(rowsMap.chlorine.current, 2) : '-' },
+        { label: 'pH', value: rowsMap.acid && rowsMap.acid.current != null ? formatNumber(rowsMap.acid.current, 2) : '-' },
+        { label: 'Alkalinity', value: rowsMap.bicarb && rowsMap.bicarb.current != null ? formatNumber(rowsMap.bicarb.current, 0) : '-' },
         { label: 'Calcium', value: rowsMap.calcium && rowsMap.calcium.current != null ? formatNumber(rowsMap.calcium.current, 0) : '-' },
         { label: 'CYA', value: rowsMap.stabiliser && rowsMap.stabiliser.current != null ? formatNumber(rowsMap.stabiliser.current, 0) : '-' },
-        { label: 'Copper', value: '-' },
-        { label: 'Salt', value: rowsMap.salt && rowsMap.salt.current != null ? formatNumber(rowsMap.salt.current, 0) : '-' }
+        { label: 'Salt', value: rowsMap.salt && rowsMap.salt.current != null ? formatNumber(rowsMap.salt.current, 0) : '-' },
+        { label: 'Temperature', value: n(inputs.temperature.value) != null ? formatNumber(n(inputs.temperature.value), 1) : '-' },
+        { label: 'Copper', value: n(inputs.copper.value) != null ? formatNumber(n(inputs.copper.value), 2) : '-' },
+        { label: 'Phosphates', value: n(inputs.phosphates.value) != null ? formatNumber(n(inputs.phosphates.value), 0) : '-' }
       ];
 
-      const chemicalRows = getReportDoseItems(doses).map(item => {
+      const spinTouchRows = [
+        { label: 'Free Chlorine', value: n(inputs.freeChlorine.value), unit: 'ppm', decimals: 2 },
+        { label: 'pH', value: n(inputs.ph.value), unit: '', decimals: 2 },
+        { label: 'Alkalinity', value: n(inputs.alkalinity.value), unit: 'ppm', decimals: 0 },
+        { label: 'Calcium Hardness', value: n(inputs.calciumHardness.value), unit: 'ppm', decimals: 0 },
+        { label: 'CYA', value: n(inputs.cyanuricAcid.value), unit: 'ppm', decimals: 0 },
+        { label: 'Salt', value: n(inputs.salt.value), unit: 'ppm', decimals: 0 },
+        { label: 'Temperature', value: n(inputs.temperature.value), unit: '°C', decimals: 1 },
+        { label: 'Copper', value: n(inputs.copper.value), unit: 'ppm', decimals: 2 },
+        { label: 'Phosphates', value: n(inputs.phosphates.value), unit: 'ppb', decimals: 0 }
+      ];
+
+      const allChemicalRows = getReportDoseItems(doses).map(item => {
         const snapshot = getDoseFieldSnapshot(item.key);
         const reason = getReportReasonText(item.key, item.value, rowsMap);
         return {
@@ -5003,8 +5019,10 @@
         };
       });
 
+      const chemicalRows = allChemicalRows
+        .filter(row => row.dosed === 'Yes' && Number.isFinite(row.value) && row.value > 0);
+
       const chemicalsAdded = chemicalRows
-        .filter(row => row.dosed === 'Yes' && Number.isFinite(row.value) && row.value > 0)
         .map(row => buildCorrectiveSentence({ key: row.key, label: row.name, value: row.value, unit: row.unit, decimals: row.decimals }, row.reason));
 
       const correctiveActions = chemicalRows
@@ -5030,6 +5048,7 @@
         date: formatDateDisplay(inputs.reportDate.value || ''),
         testTime: formatTimeDisplay(inputs.testTime.value || ''),
         summaryItems,
+        spinTouchRows,
         chemicalRows,
         chemicalsAddedText: chemicalsAdded.length ? chemicalsAdded.join(' ') : 'No chemicals were marked as added.',
         correctiveActionsText: correctiveActions.length ? correctiveActions.join(' ') : 'No corrective dosing required based on the entered results.',
@@ -5052,8 +5071,15 @@
       lines.push('Water Summary');
       lines.push(model.summaryItems.map(item => `${item.label}: ${item.value}`).join(' | '));
       lines.push('');
-      lines.push('Water Test Results');
-      model.chemicalRows.forEach(row => lines.push(`${row.name} | ${row.qty} ${row.unit} | ${row.reason} | Dosed: ${row.dosed}${row.notes ? ` | ${row.notes}` : ''}`));
+      lines.push('Spin Touch Test Results');
+      model.spinTouchRows.forEach(row => lines.push(`${row.label}: ${row.value == null ? '-' : formatNumber(row.value, row.decimals)}${row.unit ? ` ${row.unit}` : ''}`));
+      lines.push('');
+      lines.push('Chemical Dosing Log');
+      if (model.chemicalRows.length) {
+        model.chemicalRows.forEach(row => lines.push(`${row.name} | ${row.qty} ${row.unit} | ${row.reason} | Dosed: ${row.dosed}${row.notes ? ` | ${row.notes}` : ''}`));
+      } else {
+        lines.push('No chemicals were used.');
+      }
       lines.push('');
       lines.push('Chemicals Added');
       lines.push(model.chemicalsAddedText);
@@ -5133,7 +5159,27 @@ function buildReportHtml() {
             </tbody>
           </table>
 
-          <div class="report-section-bar">Water Test Results</div>
+          <div class="report-section-bar">Spin Touch Test Results</div>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th style="width: 44%;">Result</th>
+                <th style="width: 28%;">Value</th>
+                <th>Unit</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${model.spinTouchRows.map(row => `
+                <tr>
+                  <td>${escapeHtml(row.label)}</td>
+                  <td>${row.value == null ? '-' : escapeHtml(formatNumber(row.value, row.decimals))}</td>
+                  <td>${escapeHtml(row.unit || '-')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="report-section-bar">Chemical Dosing Log</div>
           <table class="report-table">
             <thead>
               <tr>
@@ -5146,7 +5192,7 @@ function buildReportHtml() {
               </tr>
             </thead>
             <tbody>
-              ${model.chemicalRows.map(row => `
+              ${model.chemicalRows.length ? model.chemicalRows.map(row => `
                 <tr>
                   <td>${escapeHtml(row.name)}</td>
                   <td>${escapeHtml(row.qty)}</td>
@@ -5155,7 +5201,11 @@ function buildReportHtml() {
                   <td>${escapeHtml(row.dosed)}</td>
                   <td>${escapeHtml(row.notes)}</td>
                 </tr>
-              `).join('')}
+              `).join('') : `
+                <tr>
+                  <td colspan="6">No chemicals were used.</td>
+                </tr>
+              `}
             </tbody>
           </table>
 
@@ -5511,7 +5561,7 @@ async function savePdfReport() {
           );
 
           y += 4;
-          y = drawSectionBar('Water Test Results', y);
+          y = drawSectionBar('Chemical Dosing Log', y);
           const resultRows = bath.rows.map(row => [
             row.parameter,
             row.current == null ? '-' : formatNumber(row.current, row.decimals),
@@ -5701,8 +5751,10 @@ async function savePdfReport() {
       );
 
       y += 4;
-      y = drawSectionBar('Water Test Results', y);
-      const chemicalRows = model.chemicalRows.map(row => [row.name, row.qty, row.unit, row.reason, row.dosed, row.notes]);
+      y = drawSectionBar('Chemical Dosing Log', y);
+      const chemicalRows = model.chemicalRows.length
+        ? model.chemicalRows.map(row => [row.name, row.qty, row.unit, row.reason, row.dosed, row.notes])
+        : [['No chemicals were used.', '', '', '', '', '']];
       y = drawTable(
         doc,
         margin,
@@ -5763,6 +5815,7 @@ async function savePdfReport() {
       cyanuricAcid: ['cyanuric acid', 'cya', 'cva', 'stabiliser', 'stabilizer'],
       salt: ['salt', 'sodium chloride'],
       temperature: ['temperature', 'temp'],
+      copper: ['copper', 'cu'],
       phosphates: ['phosphates', 'phosphate', 'phos']
     };
 
@@ -5839,6 +5892,11 @@ async function savePdfReport() {
           if (value >= 0 && value <= 60) return round(value, 1);
           if (value > 60 && value <= 600) return round(value / 10, 1);
         }
+        if (key === 'copper') {
+          if (value >= 0 && value <= 10) return round(value, 2);
+          if (value > 10 && value <= 100) return round(value / 10, 2);
+          if (value > 100 && value <= 1000) return round(value / 100, 2);
+        }
         if (key === 'phosphates') {
           if (value >= 0 && value <= 10000) return Math.round(value);
           if (value > 0 && value < 1) return Math.round(value * 1000);
@@ -5868,6 +5926,9 @@ async function savePdfReport() {
       }
       if (key === 'temperature') {
         return adjusted.find(value => value >= 0 && value <= 60) ?? adjusted[0];
+      }
+      if (key === 'copper') {
+        return adjusted.find(value => value >= 0 && value <= 10) ?? adjusted[0];
       }
       if (key === 'phosphates') {
         return adjusted.find(value => value >= 0 && value <= 10000) ?? adjusted[0];
@@ -6139,6 +6200,7 @@ async function savePdfReport() {
         cyanuricAcid: 'cyanuricAcid',
         salt: 'salt',
         temperature: 'temperature',
+        copper: 'copper',
         phosphates: 'phosphates'
       };
 
@@ -6258,6 +6320,7 @@ async function savePdfReport() {
           if (results.cyanuricAcid != null) fields.push('CYA');
           if (results.salt != null) fields.push('salt');
           if (results.temperature != null) fields.push('temperature');
+          if (results.copper != null) fields.push('copper');
           if (results.phosphates != null) fields.push('phosphates');
           setPhotoStatus(`Photo read complete. Filled: ${fields.join(', ')}.`, 'success');
         } else {
@@ -6388,7 +6451,7 @@ async function savePdfReport() {
       photoDataUrl = '';
       [1, 2, 3].forEach(index => clearIceBathPhoto(index));
       qs('photoPreviewBox').innerHTML = '<div class="placeholder">No photo attached. Add a photo and the app will try to fill the test results automatically.</div>';
-      setPhotoStatus('Upload a Spin Touch photo and the app will try to fill free chlorine, pH, alkalinity, calcium hardness, CYA, salt, temperature and phosphates automatically.');
+      setPhotoStatus('Upload a Spin Touch photo and the app will try to fill free chlorine, pH, alkalinity, calcium hardness, CYA, salt, temperature, copper and phosphates automatically.');
       setDefaultDateTime();
       loadPoolDefaults();
       renderQuickActions();
@@ -6437,7 +6500,7 @@ async function savePdfReport() {
         'serviceNotes', 'poolSelect', 'poolVolumeAuto', 'customVolume', 'activeVolume',
         'ph', 'targetPh', 'freeChlorine', 'targetFreeChlorine', 'alkalinity', 'targetAlkalinity',
         'calciumHardness', 'targetCalcium', 'cyanuricAcid', 'targetCya', 'salt', 'targetSalt',
-        'temperature', 'phosphates',
+        'temperature', 'copper', 'phosphates',
         'visitFrequencyDays', 'siteMemoryText', 'contextExtraNote',
         'ctxOwnerChemicals', 'ctxNoCirculation', 'ctxHeavySun', 'ctxHighBatherLoad', 'ctxRainDilution', 'ctxTopUpOff',
         'assetType', 'assetId', 'assetLocation', 'assetStatus', 'assetNote',
@@ -6487,7 +6550,7 @@ async function savePdfReport() {
         photoDataUrl = '';
         qs('photoInput').value = '';
         qs('photoPreviewBox').innerHTML = '<div class="placeholder">No photo attached. Add a photo and the app will try to fill the test results automatically.</div>';
-        setPhotoStatus('Upload a Spin Touch photo and the app will try to fill free chlorine, pH, alkalinity, calcium hardness, CYA, salt, temperature and phosphates automatically.');
+        setPhotoStatus('Upload a Spin Touch photo and the app will try to fill free chlorine, pH, alkalinity, calcium hardness, CYA, salt, temperature, copper and phosphates automatically.');
       });
       [1, 2, 3].forEach(index => {
         const photoInput = qs(`iceBath${index}PhotoInput`);

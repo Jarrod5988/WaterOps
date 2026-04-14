@@ -1550,7 +1550,7 @@
       
       <section class="card span-12 hidden" id="groupIceBathsCard">
         <h2>Raiders ice baths - all 3</h2>
-        <div class="mode-note">Dose calculations always use 6,000 L per bath. The 18,000 L figure is display-only for the full group.</div>
+        <div class="mode-note">Each ice bath is calculated separately at 6,000 L. Group view shown as 3 x 6,000 L = 18,000 L total.</div>
         <div class="subcard-grid">
           <div class="subcard">
             <h3>Raiders Ice Bath 1</h3>
@@ -2032,10 +2032,6 @@
       { key: 'chlorine', label: 'Chlorine dose', decimals: 0, unit: 'mL', accessor: item => item.chlorine }
     ];
 
-    const ICE_BATH_EACH_VOLUME_L = 6000;
-    const ICE_BATH_COUNT = 3;
-    const ICE_BATH_TOTAL_VOLUME_L = ICE_BATH_EACH_VOLUME_L * ICE_BATH_COUNT;
-
     // Updated list of pools including Raiders Ice Baths 2 & 3, Kamy Saeedi and Nathan's Pool.
     // James Court Pool and Spa have their CYA targets set to 0.  Each of the ice baths now
     // has its own record so you can adjust the targets independently.  The salt target
@@ -2046,9 +2042,9 @@
         key: 'raiders_ice_baths_all',
         site: 'Raiders',
         poolName: 'Raiders Ice Baths - All 3',
-        selectLabel: `Raiders Ice Baths - All 3 (${ICE_BATH_EACH_VOLUME_L.toLocaleString()} L each | ${ICE_BATH_TOTAL_VOLUME_L.toLocaleString()} L total)`,
-        volume: ICE_BATH_EACH_VOLUME_L,
-        totalVolume: ICE_BATH_TOTAL_VOLUME_L,
+        selectLabel: 'Raiders Ice Baths - All 3 (6,000 L each | 18,000 L total)',
+        volume: 6000,
+        totalVolume: 18000,
         defaults: { ph: 7.2, fc: 3.0, alk: 80, calcium: 200, cya: 0, salt: 0 },
         isGroup: true
       },
@@ -2064,24 +2060,24 @@
         key: 'raiders_ice_bath_1',
         site: 'Raiders',
         poolName: 'Raiders Ice Bath 1',
-        selectLabel: `Raiders Ice Bath 1 (${ICE_BATH_EACH_VOLUME_L.toLocaleString()} L)`,
-        volume: ICE_BATH_EACH_VOLUME_L,
+        selectLabel: 'Raiders Ice Bath 1 (6,000 L)',
+        volume: 6000,
         defaults: { ph: 7.2, fc: 3.0, alk: 80, calcium: 200, cya: 0, salt: 0 }
       },
       {
         key: 'raiders_ice_bath_2',
         site: 'Raiders',
         poolName: 'Raiders Ice Bath 2',
-        selectLabel: `Raiders Ice Bath 2 (${ICE_BATH_EACH_VOLUME_L.toLocaleString()} L)`,
-        volume: ICE_BATH_EACH_VOLUME_L,
+        selectLabel: 'Raiders Ice Bath 2 (6,000 L)',
+        volume: 6000,
         defaults: { ph: 7.2, fc: 3.0, alk: 80, calcium: 200, cya: 0, salt: 0 }
       },
       {
         key: 'raiders_ice_bath_3',
         site: 'Raiders',
         poolName: 'Raiders Ice Bath 3',
-        selectLabel: `Raiders Ice Bath 3 (${ICE_BATH_EACH_VOLUME_L.toLocaleString()} L)`,
-        volume: ICE_BATH_EACH_VOLUME_L,
+        selectLabel: 'Raiders Ice Bath 3 (6,000 L)',
+        volume: 6000,
         defaults: { ph: 7.2, fc: 3.0, alk: 80, calcium: 200, cya: 0, salt: 0 }
       },
       {
@@ -2299,7 +2295,7 @@
       if (!helperEl || !pool) return;
 
       if (pool.isGroup && pool.key === 'raiders_ice_baths_all') {
-        helperEl.textContent = `Dose calculations always use ${ICE_BATH_EACH_VOLUME_L.toLocaleString()} L per bath. ${ICE_BATH_TOTAL_VOLUME_L.toLocaleString()} L is the display total for all 3 only.`;
+        helperEl.textContent = `Each bath is dosed separately at ${Number(pool.volume || 0).toLocaleString()} L. Combined total for all 3 = ${Number(pool.totalVolume || 0).toLocaleString()} L.`;
         helperEl.style.display = 'block';
       } else {
         helperEl.textContent = '';
@@ -2337,11 +2333,6 @@
       return POOLS.find(pool => pool.key === `raiders_ice_bath_${index}`);
     }
 
-    function getIceBathDoseVolume(index) {
-      const pool = getIceBathPool(index);
-      return (pool && pool.volume) || ICE_BATH_EACH_VOLUME_L;
-    }
-
     function getIceBathValues(index) {
       return {
         clarity: (inputs[`iceBath${index}Clarity`] && inputs[`iceBath${index}Clarity`].value) || '',
@@ -2358,7 +2349,6 @@
 
     function getIceBathRecommendations(index) {
       const pool = getIceBathPool(index);
-      const doseVolume = getIceBathDoseVolume(index);
       const values = getIceBathValues(index);
       const defaults = (pool && pool.defaults) || { ph: 7.2, fc: 3.0, alk: 80, calcium: 200 };
       return {
@@ -2376,10 +2366,10 @@
         targetFc: defaults.fc,
         targetAlk: defaults.alk,
         targetCalcium: defaults.calcium ?? 200,
-        acid: acidDoseMl(doseVolume, values.ph, defaults.ph, values.alk),
-        chlorine: chlorineDoseMl(doseVolume, values.fc, defaults.fc),
-        bicarb: bicarbDoseKg(doseVolume, values.alk, defaults.alk),
-        calciumDose: calciumDoseKg(doseVolume, values.calcium, defaults.calcium ?? 200)
+        acid: acidDoseMl((pool && pool.volume) || 6000, values.ph, defaults.ph, values.alk),
+        chlorine: chlorineDoseMl((pool && pool.volume) || 6000, values.fc, defaults.fc),
+        bicarb: bicarbDoseKg((pool && pool.volume) || 6000, values.alk, defaults.alk),
+        calciumDose: calciumDoseKg((pool && pool.volume) || 6000, values.calcium, defaults.calcium ?? 200)
       };
     }
 
@@ -2643,7 +2633,7 @@
       ].filter(item => item.result && item.chemical);
       const referenceRows = rows.filter(row => ['Total chlorine', 'Temperature', 'Phosphates'].includes(row.parameter));
       target.innerHTML = `
-        <div class="mini-pill"><strong>Volume</strong>${formatNumber(ICE_BATH_EACH_VOLUME_L, 0)} L each</div>
+        <div class="mini-pill"><strong>Volume</strong>6,000 L each</div>
         <div class="mini-pill"><strong>Clarity</strong>${escapeHtml(rec.clarity)}</div>
         <div class="icebath-combined-cards">
           ${combinedRows.filter(item => Number.isFinite(item.chemical.value) && item.chemical.value > 0).length
@@ -2704,8 +2694,8 @@
         inputs.reportPoolName.value = 'Raiders Ice Baths - All 3';
         inputs.reportPoolName.dataset.auto = 'true';
       }
-      const totalVolume = ICE_BATH_TOTAL_VOLUME_L;
-      const eachVolume = ICE_BATH_EACH_VOLUME_L;
+      const totalVolume = 18000;
+      const eachVolume = 6000;
       qs('kpiVolume').textContent = `${formatNumber(eachVolume, 0)} ea`;
       const volumeUnit = qs('kpiVolume') && qs('kpiVolume').nextElementSibling;
       if (volumeUnit) volumeUnit.textContent = `${formatNumber(totalVolume, 0)} total litres`;
@@ -3618,7 +3608,7 @@
       if (isRaidersGroupMode()) {
         const baths = [1, 2, 3].map(index => getIceBathRecommendations(index));
         const notes = [
-          `Each ice bath is calculated separately at ${ICE_BATH_EACH_VOLUME_L.toLocaleString()} L.`,
+          'Each ice bath is calculated separately at 6,000 L.',
           (inputs.serviceNotes.value || '').trim(),
           baths.map((bath, idx) => {
             const chemRows = buildIceBathChemicalRows(idx + 1, {
@@ -3637,7 +3627,7 @@
           serviceType: 'Routine ice bath maintenance',
           site: inputs.reportSite.value || pool.site || '',
           assetName: 'Raiders Ice Baths - All 3',
-          volumeLitres: `${ICE_BATH_EACH_VOLUME_L.toLocaleString()} each (${ICE_BATH_TOTAL_VOLUME_L.toLocaleString()} total)`,
+          volumeLitres: '6,000 each (18,000 total)',
           system: 'Grouped ice bath report',
           testTime: `${inputs.reportDate.value || ''} ${inputs.testTime.value || ''}`.trim(),
           ph: '',
@@ -3749,7 +3739,7 @@
           serviceType: 'Routine ice bath maintenance',
           site: inputs.reportSite.value || pool.site || '',
           assetName: bath.poolName,
-          volumeLitres: ICE_BATH_EACH_VOLUME_L,
+          volumeLitres: 6000,
           system: 'Ice bath',
           testTime: testStamp,
           ph: bath.ph ?? '',
@@ -4378,7 +4368,9 @@
       if (!volumeL || currentPh == null || targetPh == null || currentPh <= targetPh) return 0;
       const delta = currentPh - targetPh;
       const taFactor = clamp((alkalinity || 80) / 80, 0.6, 2.0);
-      return Math.max(0, Math.round((volumeL / 10000) * delta * 600 * taFactor));
+      // Tuned to better match real-world 32% hydrochloric acid dosing,
+      // especially for smaller bodies of water like the 6,000 L ice baths.
+      return Math.max(0, Math.round((volumeL / 10000) * delta * 250 * taFactor));
     }
 
     function chlorineDoseMl(volumeL, currentFc, targetFc) {
@@ -5256,7 +5248,7 @@ function buildReportHtml() {
         testTime: formatTimeDisplay(inputs.testTime.value || ''),
         notes: (inputs.serviceNotes.value || '').trim(),
         baths,
-        volumeNote: `Each bath is dosed as ${ICE_BATH_EACH_VOLUME_L.toLocaleString()} L. Combined display total: ${ICE_BATH_TOTAL_VOLUME_L.toLocaleString()} L.`
+        volumeNote: 'Each bath is dosed as 6,000 L. Combined display total: 18,000 L.'
       };
     }
 
@@ -5293,7 +5285,7 @@ function buildReportHtml() {
                   <th style="width:18%;">Ice bath</th>
                   <td style="width:32%; font-weight:700;">${escapeHtml(bath.poolName)}</td>
                   <th style="width:18%;">Volume used for dosing</th>
-                  <td style="width:32%;">${formatNumber(ICE_BATH_EACH_VOLUME_L, 0)} L</td>
+                  <td style="width:32%;">6,000 L</td>
                 </tr>
                 <tr>
                   <th>Water clarity</th>

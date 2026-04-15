@@ -1460,7 +1460,7 @@
               </label>
               <button class="button secondary" type="button" id="scanPhotoBtn">Read results from photo</button>
               <button class="button ghost" type="button" id="clearPhotoBtn">Clear photo</button>
-              <input id="photoInput" type="file" accept="image/*" class="hidden" />
+              <input id="photoInput" type="file" accept="image/*" capture="environment" class="hidden" />
             </div>
             <div class="preview-box" id="photoPreviewBox">
               <div class="placeholder">No photo attached. Add a photo and the app will try to fill the test results automatically.</div>
@@ -1559,7 +1559,7 @@
               <label class="button secondary" for="iceBath1PhotoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">Add photo</label>
               <button class="button secondary" type="button" id="scanIceBath1PhotoBtn">Read photo</button>
               <button class="button ghost" type="button" id="clearIceBath1PhotoBtn">Clear photo</button>
-              <input id="iceBath1PhotoInput" type="file" accept="image/*" class="hidden" />
+              <input id="iceBath1PhotoInput" type="file" accept="image/*" capture="environment" class="hidden" />
             </div>
             <div class="preview-box" id="iceBath1PhotoPreviewBox" style="min-height:160px;">
               <div class="placeholder">No photo attached for Ice Bath 1.</div>
@@ -1585,7 +1585,7 @@
               <label class="button secondary" for="iceBath2PhotoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">Add photo</label>
               <button class="button secondary" type="button" id="scanIceBath2PhotoBtn">Read photo</button>
               <button class="button ghost" type="button" id="clearIceBath2PhotoBtn">Clear photo</button>
-              <input id="iceBath2PhotoInput" type="file" accept="image/*" class="hidden" />
+              <input id="iceBath2PhotoInput" type="file" accept="image/*" capture="environment" class="hidden" />
             </div>
             <div class="preview-box" id="iceBath2PhotoPreviewBox" style="min-height:160px;">
               <div class="placeholder">No photo attached for Ice Bath 2.</div>
@@ -1611,7 +1611,7 @@
               <label class="button secondary" for="iceBath3PhotoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">Add photo</label>
               <button class="button secondary" type="button" id="scanIceBath3PhotoBtn">Read photo</button>
               <button class="button ghost" type="button" id="clearIceBath3PhotoBtn">Clear photo</button>
-              <input id="iceBath3PhotoInput" type="file" accept="image/*" class="hidden" />
+              <input id="iceBath3PhotoInput" type="file" accept="image/*" capture="environment" class="hidden" />
             </div>
             <div class="preview-box" id="iceBath3PhotoPreviewBox" style="min-height:160px;">
               <div class="placeholder">No photo attached for Ice Bath 3.</div>
@@ -2217,6 +2217,27 @@
       return `${formatNumber(value, decimals)} ${unit}`;
     }
 
+    function roundDoseUp(value) {
+      if (!Number.isFinite(value) || value <= 0) return 0;
+      return Math.ceil(value - 1e-9);
+    }
+
+    function formatRecommendedDose(value, unit) {
+      const roundedValue = roundDoseUp(value);
+      if (!roundedValue) return 'No dose';
+      return `${formatNumber(roundedValue, 0)} ${unit}`;
+    }
+
+    function getDoseSourceLabel(source, mode = 'short') {
+      const labels = {
+        ute: mode === 'used' ? 'Ute stock used' : 'Ute stock',
+        onsite: mode === 'used' ? 'Site stock used' : 'Site stock',
+        bulk: mode === 'used' ? 'Bulk stock used' : 'Bulk stock',
+        other: 'Other source'
+      };
+      return labels[source] || '';
+    }
+
     function getSelectedPool() {
       return POOLS.find(pool => pool.key === inputs.poolSelect.value) || POOLS[0];
     }
@@ -2608,7 +2629,7 @@
         return {
           ...item,
           dosed: snapshot.status === 'yes' ? 'Yes' : 'No',
-          source: snapshot.source === 'ute' ? 'Ute stock' : snapshot.source === 'onsite' ? 'Stock onsite' : '',
+          source: getDoseSourceLabel(snapshot.source),
           actualQtyText: Number.isFinite(actualQty) && actualQty > 0 ? `${formatNumber(actualQty, item.decimals)} ${item.unit}` : '',
           notes: snapshot.note || ''
         };
@@ -2643,7 +2664,7 @@
             <div class="icebath-compact-card">
               <div class="icebath-compact-top">
                 <div class="icebath-compact-title">${escapeHtml(item.chemical.label)}</div>
-                <div class="icebath-compact-dose">${formatDose(item.chemical.value, item.chemical.unit, item.chemical.decimals)}</div>
+                <div class="icebath-compact-dose">${formatRecommendedDose(item.chemical.value, item.chemical.unit)}</div>
               </div>
               <div class="icebath-compact-facts">
                 <strong>${escapeHtml(item.result.status.label)}</strong> • ${item.result.current == null ? '-' : formatNumber(item.result.current, item.result.decimals)} → ${item.result.target == null ? '-' : formatNumber(item.result.target, item.result.decimals)} • ${escapeHtml(item.result.rangeLabel || '-')}
@@ -2661,7 +2682,7 @@
                   <select id="iceBath${index}DoseSource_${item.chemical.key}">
                     <option value="">Select</option>
                     <option value="ute">Ute stock</option>
-                    <option value="onsite">Onsite</option>
+                    <option value="onsite">Site stock</option>
                   </select>
                 </div>
               </div>
@@ -3617,7 +3638,7 @@
               bicarb: bath.bicarb || 0,
               calcium: bath.calciumDose || 0
             });
-            const chemText = chemRows.map(row => `${row.label}: recommended ${formatDose(row.value, row.unit, row.decimals)}, dosed ${row.dosed}${row.source ? ` from ${row.source}` : ''}${row.actualQtyText ? `, actual ${row.actualQtyText}` : ''}${row.notes ? `, note ${row.notes}` : ''}`).join('; ');
+            const chemText = chemRows.map(row => `${row.label}: recommended ${formatRecommendedDose(row.value, row.unit)}, dosed ${row.dosed}${row.source ? ` from ${row.source}` : ''}${row.actualQtyText ? `, actual ${row.actualQtyText}` : ''}${row.notes ? `, note ${row.notes}` : ''}`).join('; ');
             return `${bath.poolName}: clarity ${bath.clarity || '-'}, pH ${bath.ph == null ? '-' : formatNumber(bath.ph, 2)}, FC ${bath.fc == null ? '-' : formatNumber(bath.fc, 2)}, TC ${bath.tc == null ? '-' : formatNumber(bath.tc, 2)}, Alk ${bath.alk == null ? '-' : formatNumber(bath.alk, 0)}, Calcium ${bath.calcium == null ? '-' : formatNumber(bath.calcium, 0)}, Temp ${bath.temp == null ? '-' : formatNumber(bath.temp, 1)}, Phosphates ${bath.phosphates == null ? '-' : formatNumber(bath.phosphates, 0)}. Chemical log: ${chemText}.${bath.note ? ` Note: ${bath.note}.` : ''}`;
           }).join(' '),
           getContextTags().length ? `Service context: ${getContextTags().join('; ')}.` : ''
@@ -3727,7 +3748,7 @@
           bath.temp != null ? `Temperature: ${formatNumber(bath.temp, 1)}.` : '',
           bath.phosphates != null ? `Phosphates: ${formatNumber(bath.phosphates, 0)}.` : '',
           flaggedChemRows.length
-            ? `Recommended dosing: ${flaggedChemRows.map(row => `${row.label} ${formatDose(row.value, row.unit, row.decimals)}`).join('; ')}.`
+            ? `Recommended dosing: ${flaggedChemRows.map(row => `${row.label} ${formatRecommendedDose(row.value, row.unit)}`).join('; ')}.`
             : 'Recommended dosing: none.',
           bath.note ? `Bath note: ${bath.note}.` : '',
           commonContext.length ? `Service context: ${commonContext.join('; ')}.` : '',
@@ -4141,7 +4162,7 @@
                 <select id="extraStockSource">
                   <option value="">Select source</option>
                   <option value="ute">Ute stock used</option>
-                  <option value="onsite">Onsite stock used</option>
+                  <option value="onsite">Site stock used</option>
                   <option value="bulk">Bulk stock used</option>
                   <option value="other">Other source</option>
                 </select>
@@ -4238,7 +4259,7 @@
           chemical: key,
           chemicalLabel: chemicalNames[key],
           source: snapshot.source,
-          sourceLabel: snapshot.source === 'ute' ? 'Ute stock used' : snapshot.source === 'onsite' ? 'Onsite stock used' : 'Source not set',
+          sourceLabel: getDoseSourceLabel(snapshot.source, 'used') || 'Source not set',
           qty,
           qtyText: `${formatNumber(qty, chemicalMeta[key].decimals)} ${chemicalMeta[key].unit}`,
           note: snapshot.note || ''
@@ -4291,7 +4312,7 @@
       const decimals = unit === 'mL' || unit === 'g' || unit === 'tablets' || unit === 'bags' ? 0 : 2;
       const sourceLabelMap = {
         ute: 'Ute stock used',
-        onsite: 'Onsite stock used',
+        onsite: 'Site stock used',
         bulk: 'Bulk stock used',
         other: 'Other source'
       };
@@ -4475,7 +4496,7 @@
       const rangeText = `normal range ${range.label}`;
 
       if (dose > 0) {
-        const doseText = `add ${formatDose(dose, unit, doseDecimals)} of ${chemicalLabel}`;
+        const doseText = `add ${formatRecommendedDose(dose, unit)} of ${chemicalLabel}`;
         if (withinRange) {
           if (decreaseVerb) {
             return `Within ${rangeText}. Optional: ${doseText} to ${decreaseVerb} back to the target of ${formatNumber(target, targetDecimals)}.`;
@@ -4716,7 +4737,7 @@
             <div class="icebath-compact-card">
               <div class="icebath-compact-top">
                 <div class="icebath-compact-title">${escapeHtml(item.chemical.label)}</div>
-                <div class="icebath-compact-dose">${formatDose(item.chemical.value, item.chemical.unit, item.chemical.decimals)}</div>
+                <div class="icebath-compact-dose">${formatRecommendedDose(item.chemical.value, item.chemical.unit)}</div>
               </div>
               <div class="icebath-compact-facts">
                 <strong>${escapeHtml(item.result.status.label)}</strong> • ${item.result.current == null ? '-' : formatNumber(item.result.current, item.result.decimals)} → ${item.result.target == null ? '-' : formatNumber(item.result.target, item.result.decimals)} • ${escapeHtml(item.result.rangeLabel || '-')}
@@ -4734,7 +4755,7 @@
                   <select id="doseSource_${item.chemical.key}">
                     <option value="">Select</option>
                     <option value="ute">Ute stock</option>
-                    <option value="onsite">Onsite</option>
+                    <option value="onsite">Site stock</option>
                   </select>
                 </div>
               </div>
@@ -4887,7 +4908,7 @@
 
       if (Number.isFinite(amount) && amount > 0) {
         const lead = status === 'yes' ? 'Added' : 'Recommended';
-        sentence = `${lead} ${formatDose(amount, unit, decimals)} of ${chemicalName}`;
+        sentence = `${lead} ${formatRecommendedDose(amount, unit)} of ${chemicalName}`;
         if (outcomeText) sentence += ` ${outcomeText}`;
         sentence += '.';
       } else if (status === 'yes') {
@@ -4958,7 +4979,7 @@
 
     function buildCorrectiveSentence(item, reason) {
       if (!(Number.isFinite(item.value) && item.value > 0)) return '';
-      const prefix = `Add ${formatDose(item.value, item.unit, item.decimals)} ${item.label}`;
+      const prefix = `Add ${formatRecommendedDose(item.value, item.unit)} ${item.label}`;
       if (item.key === 'acid') return `${prefix} to lower pH to ${reason.replace('Lower pH to ', '')}.`;
       if (item.key === 'chlorine') return `${prefix} to raise free chlorine to ${reason.replace('Raise free chlorine to ', '')}.`;
       if (item.key === 'bicarb') return `${prefix} to raise alkalinity to ${reason.replace('Raise alkalinity to ', '')}.`;
@@ -5008,16 +5029,19 @@
       const allChemicalRows = getReportDoseItems(doses).map(item => {
         const snapshot = getDoseFieldSnapshot(item.key);
         const reason = getReportReasonText(item.key, item.value, rowsMap);
+        const sourceLabel = snapshot.status === 'yes' ? getDoseSourceLabel(snapshot.source) : '';
         return {
           name: item.label,
-          qty: Number.isFinite(item.value) && item.value > 0 ? formatNumber(item.value, item.decimals) : '',
+          displayName: sourceLabel ? `${item.label} (${sourceLabel})` : item.label,
+          qty: Number.isFinite(item.value) && item.value > 0 ? formatNumber(roundDoseUp(item.value), 0) : '',
           unit: item.unit,
           reason,
           dosed: snapshot.status === 'yes' ? 'Yes' : 'No',
           notes: snapshot.note || getDefaultDoseNote(item.key, item.value),
           key: item.key,
           value: item.value,
-          decimals: item.decimals
+          decimals: item.decimals,
+          sourceLabel
         };
       });
 
@@ -5078,7 +5102,7 @@
       lines.push('');
       lines.push('Chemical Dosing Log');
       if (model.chemicalRows.length) {
-        model.chemicalRows.forEach(row => lines.push(`${row.name} | ${row.qty} ${row.unit} | ${row.reason} | Dosed: ${row.dosed}${row.notes ? ` | ${row.notes}` : ''}`));
+        model.chemicalRows.forEach(row => lines.push(`${row.displayName || row.name} | ${row.qty} ${row.unit} | ${row.reason} | Dosed: ${row.dosed}${row.notes ? ` | ${row.notes}` : ''}`));
       } else {
         lines.push('No chemicals were used.');
       }
@@ -5196,7 +5220,7 @@ function buildReportHtml() {
             <tbody>
               ${model.chemicalRows.length ? model.chemicalRows.map(row => `
                 <tr>
-                  <td>${escapeHtml(row.name)}</td>
+                  <td>${escapeHtml(row.displayName || row.name)}</td>
                   <td>${escapeHtml(row.qty)}</td>
                   <td>${escapeHtml(row.unit)}</td>
                   <td>${escapeHtml(row.reason)}</td>
@@ -5342,7 +5366,7 @@ function buildReportHtml() {
                 ${bath.chemicalRows.map(row => `
                   <tr>
                     <td>${escapeHtml(row.label)}</td>
-                    <td>${formatDose(row.value, row.unit, row.decimals)}</td>
+                    <td>${formatRecommendedDose(row.value, row.unit)}</td>
                     <td>${escapeHtml(row.dosed)}</td>
                     <td>${escapeHtml(row.source || '-')}</td>
                     <td>${escapeHtml(row.actualQtyText || '-')}</td>
@@ -5586,7 +5610,7 @@ async function savePdfReport() {
           y = drawSectionBar('Chemical Log', y);
           const chemicalRows = bath.chemicalRows.map(row => [
             row.label,
-            formatDose(row.value, row.unit, row.decimals),
+            formatRecommendedDose(row.value, row.unit),
             row.dosed,
             row.source || '-',
             row.actualQtyText || '-',
@@ -5755,7 +5779,7 @@ async function savePdfReport() {
       y += 4;
       y = drawSectionBar('Chemical Dosing Log', y);
       const chemicalRows = model.chemicalRows.length
-        ? model.chemicalRows.map(row => [row.name, row.qty, row.unit, row.reason, row.dosed, row.notes])
+        ? model.chemicalRows.map(row => [row.displayName || row.name, row.qty, row.unit, row.reason, row.dosed, row.notes])
         : [['No chemicals were used.', '', '', '', '', '']];
       y = drawTable(
         doc,
@@ -6152,6 +6176,91 @@ async function savePdfReport() {
       };
     }
 
+    function getCanvasLumaStats(sourceCanvas) {
+      const sampleWidth = Math.min(240, sourceCanvas.width);
+      const sampleHeight = Math.max(1, Math.round((sourceCanvas.height / Math.max(1, sourceCanvas.width)) * sampleWidth));
+      const canvas = document.createElement('canvas');
+      canvas.width = sampleWidth;
+      canvas.height = sampleHeight;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(sourceCanvas, 0, 0, sampleWidth, sampleHeight);
+      const { data } = ctx.getImageData(0, 0, sampleWidth, sampleHeight);
+
+      let sum = 0;
+      let sumSquares = 0;
+      let darkPixels = 0;
+      let lightPixels = 0;
+      const total = sampleWidth * sampleHeight;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const luma = (data[i] * 0.2126) + (data[i + 1] * 0.7152) + (data[i + 2] * 0.0722);
+        sum += luma;
+        sumSquares += luma * luma;
+        if (luma < 55) darkPixels += 1;
+        if (luma > 215) lightPixels += 1;
+      }
+
+      const mean = total ? sum / total : 0;
+      const variance = total ? Math.max(0, (sumSquares / total) - (mean * mean)) : 0;
+      const stdDev = Math.sqrt(variance);
+      return {
+        mean,
+        stdDev,
+        darkRatio: total ? darkPixels / total : 0,
+        lightRatio: total ? lightPixels / total : 0
+      };
+    }
+
+    function assessSpinTouchPhotoQuality(sourceCanvas) {
+      const tips = [];
+      const box = detectBlueScreenBox(sourceCanvas);
+      const genericTip = 'Try a clearer photo of just the blue Spin Touch screen.';
+
+      if (!box) {
+        tips.push('Move closer so the blue screen fills more of the photo.');
+        tips.push('Keep the phone straight and aim squarely at the screen.');
+        return {
+          looksGood: false,
+          box: null,
+          tips,
+          readingMessage: `Photo check: ${tips.join(' ')} Reading results now...`,
+          failureMessage: `The photo was loaded, but no clear Spin Touch results were found. ${tips.join(' ')}`
+        };
+      }
+
+      const areaRatio = (box.width * box.height) / Math.max(1, sourceCanvas.width * sourceCanvas.height);
+      const leftRatio = box.x / Math.max(1, sourceCanvas.width);
+      const topRatio = box.y / Math.max(1, sourceCanvas.height);
+      const rightRatio = (sourceCanvas.width - (box.x + box.width)) / Math.max(1, sourceCanvas.width);
+      const bottomRatio = (sourceCanvas.height - (box.y + box.height)) / Math.max(1, sourceCanvas.height);
+      const aspect = box.width / Math.max(1, box.height);
+      const screenCanvas = cropCanvas(sourceCanvas, box);
+      const stats = getCanvasLumaStats(screenCanvas);
+
+      if (areaRatio < 0.12) tips.push('Move closer so the screen fills more of the frame.');
+      if (leftRatio < 0.02 || rightRatio < 0.02 || topRatio < 0.02 || bottomRatio < 0.02) {
+        tips.push('Keep the full screen in frame with a small border around it.');
+      }
+      if (aspect < 0.95 || aspect > 1.9) tips.push('Hold the phone straighter so the screen is photographed square-on.');
+      if (stats.mean < 65 || stats.darkRatio > 0.32) tips.push('Use a brighter photo and tap the screen to focus before taking it.');
+      if (stats.mean > 210 || stats.lightRatio > 0.3) tips.push('Reduce glare or reflections on the screen.');
+      if (stats.stdDev < 28) tips.push('Hold steady and wait for the screen text to look sharp before taking the photo.');
+      if (sourceCanvas.width < 900 || sourceCanvas.height < 900) tips.push('Use a sharper, closer photo if possible.');
+
+      const looksGood = tips.length === 0;
+      return {
+        looksGood,
+        box,
+        tips,
+        readingMessage: looksGood
+          ? 'Photo check: screen looks well framed. Reading results now...'
+          : `Photo check: ${tips.join(' ')} Reading results now...`,
+        failureMessage: tips.length
+          ? `The photo was loaded, but no clear Spin Touch results were found. ${tips.join(' ')}`
+          : `The photo was loaded, but no clear Spin Touch results were found. ${genericTip}`
+      };
+    }
+
     function buildSpinTouchOcrCanvases(sourceCanvas) {
       const box = detectBlueScreenBox(sourceCanvas);
       const screenCanvas = box ? cropCanvas(sourceCanvas, box) : sourceCanvas;
@@ -6163,13 +6272,22 @@ async function savePdfReport() {
         height: screenCanvas.height * 0.58
       });
 
+      const resultsLoose = cropCanvas(screenCanvas, {
+        x: screenCanvas.width * 0.02,
+        y: screenCanvas.height * 0.12,
+        width: screenCanvas.width * 0.96,
+        height: screenCanvas.height * 0.68
+      });
+
       const originalScaled = scaleCanvas(resultsOnly, 2.6);
       const highContrast = createHighContrastCanvas(originalScaled);
+      const looseScaled = scaleCanvas(resultsLoose, 2.3);
 
       return [
         { canvas: originalScaled, psm: 6, label: 'screen pass' },
         { canvas: originalScaled, psm: 11, label: 'screen sparse pass' },
-        { canvas: highContrast, psm: 6, label: 'high contrast pass' }
+        { canvas: highContrast, psm: 6, label: 'high contrast pass' },
+        { canvas: looseScaled, psm: 11, label: 'loose crop pass' }
       ];
     }
 
@@ -6261,7 +6379,7 @@ async function savePdfReport() {
     }
 
     async function runSpinTouchOcrFromFile(file, setStatus, button) {
-      if (!file) return { populated: 0, results: {} };
+      if (!file) return { populated: 0, results: {}, assessment: null };
       if (!window.Tesseract) {
         throw new Error('The photo reader could not load. Refresh the page and try again.');
       }
@@ -6271,17 +6389,20 @@ async function savePdfReport() {
         button.disabled = true;
         button.textContent = 'Reading photo...';
       }
-      setStatus('Reading the Spin Touch photo and focusing on the screen...');
+      setStatus('Checking the Spin Touch photo...');
 
       try {
         const img = await readImageFile(file);
         const sourceCanvas = canvasFromImage(img, 1600);
+        const assessment = assessSpinTouchPhotoQuality(sourceCanvas);
+        setStatus(assessment.readingMessage);
         const ocrJobs = buildSpinTouchOcrCanvases(sourceCanvas);
         const resultSets = [];
 
         for (let i = 0; i < ocrJobs.length; i += 1) {
           const job = ocrJobs[i];
-          setStatus(`Reading the Spin Touch photo... pass ${i + 1} of ${ocrJobs.length}.`);
+          const prefix = assessment && !assessment.looksGood ? 'Tips noted. ' : '';
+          setStatus(`${prefix}Reading the Spin Touch photo... pass ${i + 1} of ${ocrJobs.length}.`);
           const blob = await canvasToBlob(job.canvas);
           if (!blob) continue;
           const { data } = await window.Tesseract.recognize(blob, 'eng', {
@@ -6293,7 +6414,7 @@ async function savePdfReport() {
         }
 
         const results = mergeSpinTouchResults(resultSets);
-        return { populated: 0, results };
+        return { populated: 0, results, assessment };
       } finally {
         if (button) {
           button.disabled = false;
@@ -6311,7 +6432,7 @@ async function savePdfReport() {
       }
 
       try {
-        const { results } = await runSpinTouchOcrFromFile(file, (message) => setPhotoStatus(message), scanBtn);
+        const { results, assessment } = await runSpinTouchOcrFromFile(file, (message) => setPhotoStatus(message), scanBtn);
         const populated = applyOcrResults(results);
         if (populated > 0) {
           const fields = [];
@@ -6324,9 +6445,12 @@ async function savePdfReport() {
           if (results.temperature != null) fields.push('temperature');
           if (results.copper != null) fields.push('copper');
           if (results.phosphates != null) fields.push('phosphates');
-          setPhotoStatus(`Photo read complete. Filled: ${fields.join(', ')}.`, 'success');
+          const guidanceSuffix = assessment && assessment.tips && assessment.tips.length
+            ? ` Tips for next photo: ${assessment.tips.join(' ')}`
+            : '';
+          setPhotoStatus(`Photo read complete. Filled: ${fields.join(', ')}.${guidanceSuffix}`, 'success');
         } else {
-          setPhotoStatus('The photo was loaded, but no clear Spin Touch results were found. Try a clearer, straighter photo of just the Spin Touch screen.', 'error');
+          setPhotoStatus((assessment && assessment.failureMessage) || 'The photo was loaded, but no clear Spin Touch results were found. Try a clearer, straighter photo of just the Spin Touch screen.', 'error');
         }
       } catch (error) {
         console.error('Spin Touch OCR failed', error);
@@ -6344,7 +6468,7 @@ async function savePdfReport() {
       }
 
       try {
-        const { results } = await runSpinTouchOcrFromFile(file, (message) => setIceBathPhotoStatus(index, message), scanBtn);
+        const { results, assessment } = await runSpinTouchOcrFromFile(file, (message) => setIceBathPhotoStatus(index, message), scanBtn);
         const populated = applyOcrResultsToIceBath(index, results);
         if (populated > 0) {
           const fields = [];
@@ -6354,9 +6478,12 @@ async function savePdfReport() {
           if (results.calciumHardness != null) fields.push('calcium hardness');
           if (results.temperature != null) fields.push('temperature');
           if (results.phosphates != null) fields.push('phosphates');
-          setIceBathPhotoStatus(index, `Photo read complete. Filled Ice Bath ${index}: ${fields.join(', ')}.`, 'success');
+          const guidanceSuffix = assessment && assessment.tips && assessment.tips.length
+            ? ` Tips for next photo: ${assessment.tips.join(' ')}`
+            : '';
+          setIceBathPhotoStatus(index, `Photo read complete. Filled Ice Bath ${index}: ${fields.join(', ')}.${guidanceSuffix}`, 'success');
         } else {
-          setIceBathPhotoStatus(index, `The photo was loaded, but no clear Spin Touch results were found for Ice Bath ${index}. Try a clearer, straighter photo of just the Spin Touch screen.`, 'error');
+          setIceBathPhotoStatus(index, (assessment && assessment.failureMessage) || `The photo was loaded, but no clear Spin Touch results were found for Ice Bath ${index}. Try a clearer, straighter photo of just the Spin Touch screen.`, 'error');
         }
       } catch (error) {
         console.error(`Spin Touch OCR failed for Ice Bath ${index}`, error);
@@ -6372,7 +6499,7 @@ async function savePdfReport() {
         iceBathPhotoData[index] = reader.result;
         const preview = qs(`iceBath${index}PhotoPreviewBox`);
         if (preview) preview.innerHTML = `<img src="${iceBathPhotoData[index]}" alt="Uploaded Ice Bath ${index} photo" />`;
-        setIceBathPhotoStatus(index, `Photo added for Ice Bath ${index}. Reading the Spin Touch results now...`);
+        setIceBathPhotoStatus(index, `Photo added for Ice Bath ${index}. Checking framing and reading the Spin Touch results now...`);
         scanSpinTouchPhotoForIceBath(index);
       };
       reader.readAsDataURL(file);
@@ -6490,7 +6617,7 @@ async function savePdfReport() {
       reader.onload = () => {
         photoDataUrl = reader.result;
         qs('photoPreviewBox').innerHTML = `<img src="${photoDataUrl}" alt="Uploaded pool test photo" />`;
-        setPhotoStatus('Photo added. Reading the Spin Touch results now...');
+        setPhotoStatus('Photo added. Checking framing and reading the Spin Touch results now...');
         scanSpinTouchPhoto();
       };
       reader.readAsDataURL(file);

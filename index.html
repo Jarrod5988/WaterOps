@@ -1355,6 +1355,56 @@
       line-height: 1.45;
       font-weight: 700;
     }
+
+    .job-photo-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .job-photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .job-photo-card {
+      border: 1px solid rgba(137, 183, 226, 0.18);
+      border-radius: 18px;
+      padding: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
+    }
+
+    .job-photo-thumb {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      display: block;
+      border-radius: 12px;
+      border: 1px solid rgba(137, 183, 226, 0.18);
+      background: #fff;
+      margin-bottom: 8px;
+    }
+
+    .job-photo-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .job-photo-name {
+      min-width: 0;
+      flex: 1 1 auto;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 700;
+      color: #1c4771;
+    }
   </style>
 </head>
 <body>
@@ -1475,6 +1525,24 @@
             <div class="field">
               <label for="serviceNotes">Service notes</label>
               <textarea id="serviceNotes" placeholder="Optional notes"></textarea>
+            </div>
+          </div>
+          <div class="span-12" style="grid-column: span 12;">
+            <h2 style="margin-top: 4px;">Job photos for report attachment</h2>
+            <div class="job-photo-actions">
+              <label class="button secondary" for="jobPhotoCameraInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                Take job photo
+              </label>
+              <label class="button secondary" for="jobPhotoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                Choose job photos
+              </label>
+              <button class="button ghost" type="button" id="clearJobPhotosBtn">Clear all job photos</button>
+              <input id="jobPhotoCameraInput" type="file" accept="image/*" capture="environment" multiple class="hidden" />
+              <input id="jobPhotoInput" type="file" accept="image/*" multiple class="hidden" />
+            </div>
+            <div class="photo-note" style="margin-bottom: 8px; font-size: 12px;">These photos will be added after the service report pages and saved in the same PDF file.</div>
+            <div id="jobPhotoPreviewBox" class="job-photo-grid">
+              <div class="placeholder" style="grid-column: 1 / -1;">No job photos attached yet.</div>
             </div>
           </div>
         </div>
@@ -2175,6 +2243,7 @@
     let currentPhotoFile = null;
     const iceBathPhotoData = { 1: '', 2: '', 3: '' };
     const iceBathPhotoFiles = { 1: null, 2: null, 3: null };
+    let jobPhotoAttachments = [];
 
     function qs(id) {
       return document.getElementById(id);
@@ -4951,6 +5020,148 @@
         .replace(/'/g, '&#39;');
     }
 
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('Failed reading file'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function getJobPhotoFormat(dataUrl) {
+      return /^data:image\/png/i.test(String(dataUrl || '')) ? 'PNG' : 'JPEG';
+    }
+
+    function getImageSize(dataUrl) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve({ width: img.naturalWidth || img.width || 1, height: img.naturalHeight || img.height || 1 });
+        img.onerror = () => reject(new Error('Failed loading image'));
+        img.src = dataUrl;
+      });
+    }
+
+    function renderJobPhotoPreview() {
+      const wrap = qs('jobPhotoPreviewBox');
+      if (!wrap) return;
+      if (!jobPhotoAttachments.length) {
+        wrap.innerHTML = '<div class="placeholder" style="grid-column: 1 / -1;">No job photos attached yet.</div>';
+        return;
+      }
+
+      wrap.innerHTML = jobPhotoAttachments.map((photo, index) => `
+        <div class="job-photo-card">
+          <img class="job-photo-thumb" src="${photo.dataUrl}" alt="Job photo ${index + 1}" />
+          <div class="job-photo-meta">
+            <div class="job-photo-name" title="${escapeHtml(photo.name || `Job photo ${index + 1}`)}">${escapeHtml(photo.name || `Job photo ${index + 1}`)}</div>
+            <button class="button ghost remove-job-photo-btn" type="button" data-job-photo-id="${photo.id}" style="min-height: 36px; padding: 8px 10px; font-size: 12px;">Remove</button>
+          </div>
+        </div>
+      `).join('');
+
+      wrap.querySelectorAll('.remove-job-photo-btn').forEach(button => {
+        button.addEventListener('click', () => removeJobPhotoAttachment(button.dataset.jobPhotoId));
+      });
+    }
+
+    function removeJobPhotoAttachment(id) {
+      jobPhotoAttachments = jobPhotoAttachments.filter(photo => photo.id !== id);
+      renderJobPhotoPreview();
+    }
+
+    function clearJobPhotoAttachments() {
+      jobPhotoAttachments = [];
+      if (qs('jobPhotoInput')) qs('jobPhotoInput').value = '';
+      if (qs('jobPhotoCameraInput')) qs('jobPhotoCameraInput').value = '';
+      renderJobPhotoPreview();
+    }
+
+    async function handleJobPhotoUpload(event) {
+      const files = Array.from(event.target.files || []).filter(Boolean);
+      if (!files.length) return;
+      try {
+        const attachments = await Promise.all(files.map(async file => ({
+          id: `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+          name: file.name || 'job-photo.jpg',
+          type: file.type || '',
+          dataUrl: await readFileAsDataUrl(file)
+        })));
+        jobPhotoAttachments = jobPhotoAttachments.concat(attachments);
+        renderJobPhotoPreview();
+      } catch (error) {
+        console.error('Failed loading job photo attachments', error);
+        alert('One or more job photos could not be loaded. Please try again.');
+      } finally {
+        if (qs('jobPhotoInput')) qs('jobPhotoInput').value = '';
+        if (qs('jobPhotoCameraInput')) qs('jobPhotoCameraInput').value = '';
+      }
+    }
+
+    async function appendJobPhotosToPdf(doc, options = {}) {
+      const attachments = Array.isArray(options.attachments) ? options.attachments.filter(photo => photo && photo.dataUrl) : [];
+      if (!attachments.length) return;
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = options.margin || 10;
+      const blue = options.blue || [0, 58, 117];
+      const borderBlue = options.borderBlue || [168, 191, 216];
+
+      for (let index = 0; index < attachments.length; index += 1) {
+        const photo = attachments[index];
+        doc.addPage('a4', 'landscape');
+        doc.setDrawColor(...borderBlue);
+        doc.roundedRect(6, 6, pageWidth - 12, pageHeight - 12, 4, 4, 'S');
+
+        doc.setDrawColor(...borderBlue);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(margin, 10, pageWidth - (margin * 2), 16, 3, 3, 'FD');
+        doc.setFillColor(...blue);
+        doc.roundedRect(margin, 10, pageWidth - (margin * 2), 7.5, 3, 3, 'F');
+        doc.rect(margin, 14.5, pageWidth - (margin * 2), 3, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.2);
+        doc.setTextColor(255, 255, 255);
+        doc.text('Job photo attachment', margin + 3, 15);
+        doc.setTextColor(31, 41, 55);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.1);
+        doc.text(`Photo ${index + 1} of ${attachments.length}`, margin + 3, 22);
+        doc.text(String(photo.name || `Job photo ${index + 1}`), pageWidth - margin - 3, 22, { align: 'right' });
+
+        const frameX = margin;
+        const frameY = 31;
+        const frameW = pageWidth - (margin * 2);
+        const frameH = pageHeight - frameY - 14;
+        doc.setDrawColor(...borderBlue);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(frameX, frameY, frameW, frameH, 3, 3, 'FD');
+
+        try {
+          const { width, height } = await getImageSize(photo.dataUrl);
+          const scale = Math.min(frameW / Math.max(1, width), frameH / Math.max(1, height));
+          const drawW = Math.max(1, width * scale);
+          const drawH = Math.max(1, height * scale);
+          const drawX = frameX + ((frameW - drawW) / 2);
+          const drawY = frameY + ((frameH - drawH) / 2);
+          doc.addImage(photo.dataUrl, getJobPhotoFormat(photo.dataUrl), drawX, drawY, drawW, drawH, undefined, 'FAST');
+        } catch (error) {
+          console.error('Failed adding job photo to PDF', error);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          doc.setTextColor(100, 116, 139);
+          doc.text('This job photo could not be rendered in the PDF.', pageWidth / 2, frameY + (frameH / 2), { align: 'center' });
+        }
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Attached after the service report in the same PDF file.', pageWidth - margin, pageHeight - 8, { align: 'right' });
+        doc.setTextColor(0, 0, 0);
+      }
+    }
+
     function formatDateDisplay(value) {
       if (!value) return '-';
       const parts = String(value).split('-');
@@ -5668,6 +5879,7 @@ async function savePdfReport() {
           doc.setTextColor(0, 0, 0);
         });
 
+        await appendJobPhotosToPdf(doc, { attachments: jobPhotoAttachments, blue, borderBlue, margin });
         const filenameBase = (inputs.reportPoolName.value || 'water-quality-report').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         const filename = `${filenameBase || 'water-quality-report'}-${inputs.reportDate.value || 'report'}.pdf`;
         await updateLiveMasterSheetBatch(buildRaidersGroupSheetPayloads());
@@ -5845,6 +6057,7 @@ async function savePdfReport() {
       doc.text(model.footerText, pageWidth - margin, pageHeight - 10, { align: 'right' });
       doc.setTextColor(0, 0, 0);
 
+      await appendJobPhotosToPdf(doc, { attachments: jobPhotoAttachments, blue, borderBlue, margin });
       const filenameBase = (inputs.reportPoolName.value || 'water-quality-report').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const filename = `${filenameBase || 'water-quality-report'}-${inputs.reportDate.value || 'report'}.pdf`;
       await updateLiveMasterSheet(buildPoolSheetPayload());
@@ -6638,6 +6851,7 @@ async function savePdfReport() {
       inputs.poolSelect.value = POOLS[0].key;
       photoDataUrl = '';
       currentPhotoFile = null;
+      clearJobPhotoAttachments();
       [1, 2, 3].forEach(index => clearIceBathPhoto(index));
       qs('photoPreviewBox').innerHTML = '<div class="placeholder">No photo attached. Add a photo and the app will try to fill the test results automatically.</div>';
       setPhotoStatus('Upload a Spin Touch photo and the app will try to fill free chlorine, pH, alkalinity, calcium hardness, CYA, salt, temperature, copper and phosphates automatically.');
@@ -6723,6 +6937,7 @@ async function savePdfReport() {
       restoreSheetStatus();
       initTabs();
       renderDraftStatus();
+      renderJobPhotoPreview();
       [1, 2, 3].forEach(index => clearIceBathPhoto(index));
 
       Object.values(inputs).forEach(input => {
@@ -6739,6 +6954,9 @@ async function savePdfReport() {
 
       qs('photoInput').addEventListener('change', handlePhotoUpload);
       qs('photoInputCamera').addEventListener('change', handlePhotoUpload);
+      qs('jobPhotoInput').addEventListener('change', handleJobPhotoUpload);
+      qs('jobPhotoCameraInput').addEventListener('change', handleJobPhotoUpload);
+      qs('clearJobPhotosBtn').addEventListener('click', clearJobPhotoAttachments);
       qs('scanPhotoBtn').addEventListener('click', scanSpinTouchPhoto);
       qs('clearPhotoBtn').addEventListener('click', () => {
         photoDataUrl = '';

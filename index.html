@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#2b96ff" />
+  <!-- Update the theme colour to reflect the new purple palette -->
+  <!-- Updated theme colour to align with the new bright azure palette -->
+  <meta name="theme-color" content="#00a1e0" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -19,42 +21,35 @@
   <title>MBS FM WaterOps</title>
   <style>
     :root {
-      --brand: #49b9ff;
-      --blue: #2b96ff;
-      --blue-dark: #153e69;
-      /* Lighten the subtle blue tint used for hover states.  A lower
-       * opacity yields a softer highlight on interactive elements. */
-      --blue-light: rgba(43, 150, 255, 0.08);
-      --line: rgba(103, 156, 214, 0.20);
-      --text: #17324d;
-      --muted: #627b96;
-      /* Use a brighter, almost‑white page background for a cleaner look. */
-      --bg: #f7fafe;
-      /* Increase card opacity for better contrast against the new page
-       * background.  Cards are now near‑white for a crisp, modern feel. */
-      --card: rgba(255, 255, 255, 0.97);
-      --good: #15945e;
-      --warn: #b8750d;
-      --bad: #c94b4b;
-      --shadow: 0 12px 28px rgba(72, 109, 149, 0.08);
-      --radius: 22px;
+       /* Primary accent colour palette switched from teal to a refined purple.  These
+          variables drive the overall look of the application, including
+          navigation highlights, buttons and subtle tints. */
+       /* Refresh the primary accent colours from purple to a bright azure.
+          These variables drive navigation highlights, buttons and subtle tints
+          throughout the application. */
+       --brand: #00a1e0;
+       --blue: #00a1e0;
+       --blue-dark: #0078b7;
+       /* Soft hover state tint matching the new azure palette */
+       --blue-light: rgba(0, 161, 224, 0.08);
+       /* Line colour tinted to complement the azure palette */
+       --line: rgba(0, 161, 224, 0.20);
+       /* Default text colour slightly darkened to improve contrast on the pale blue background */
+       --text: #17324d;
+       --muted: #637b95;
+       /* Background with a hint of sky blue */
+       --bg: #f5fbfe;
+       --card: rgba(255, 255, 255, 0.98);
+       --good: #15945e;
+       --warn: #b8750d;
+       --bad: #c94b4b;
+       /* Softer azure tinted shadow */
+       --shadow: 0 12px 28px rgba(0, 149, 209, 0.08);
+       --radius: 22px;
     }
 
-  /* Dark mode variables override the default light palette when the
-     `data-theme="dark"` attribute is present on the body element.  This
-     enables a low‑contrast, comfortable viewing experience ideal for
-     nighttime or low‑light environments.  Colours are tuned to
-     maintain sufficient contrast while matching the brand’s blue
-     accent. */
-  [data-theme="dark"] {
-    --bg: #0f1e33;
-    --card: rgba(20, 32, 55, 0.96);
-    --text: #e5efff;
-    --muted: #94aac4;
-    --line: rgba(99, 130, 170, 0.35);
-    --blue-light: rgba(43, 150, 255, 0.15);
-    --shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
-  }
+  /* Removed dark mode variables to simplify the theme.
+     The application now only supports a single light theme. */
 
     * { box-sizing: border-box; }
 
@@ -62,26 +57,15 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(43, 150, 255, 0.12), transparent 34%),
-        radial-gradient(circle at top right, rgba(77, 228, 255, 0.09), transparent 30%),
-        linear-gradient(180deg, #f4f9ff 0%, #edf4fb 48%, #f8fbff 100%);
+       /* Use azure‑tinted radial accents and a soft sky gradient for the page background */
+       background:
+         radial-gradient(circle at top left, rgba(0, 161, 224, 0.12), transparent 34%),
+         radial-gradient(circle at top right, rgba(0, 190, 240, 0.09), transparent 30%),
+         linear-gradient(180deg, #f5fbfe 0%, #f2fafe 48%, #f5fbfe 100%);
       color: var(--text);
     }
 
-    /* Dark mode page background uses deep blues and subtle gradients to
-       maintain depth without overwhelming contrast.  Radial tints
-       provide gentle highlights while the linear gradient creates a
-       smooth transition down the page.  The text colour remains
-       controlled by the --text variable for consistency. */
-    html[data-theme="dark"],
-    body[data-theme="dark"] {
-      background:
-        radial-gradient(circle at top left, rgba(43, 150, 255, 0.08), transparent 34%),
-        radial-gradient(circle at top right, rgba(77, 228, 255, 0.06), transparent 30%),
-        linear-gradient(180deg, #071c33 0%, #0d2a48 48%, #0a1830 100%);
-      color: var(--text);
-    }
+    /* Removed dark mode page background overrides. */
 
     body {
       position: relative;
@@ -94,21 +78,16 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background:
-        linear-gradient(rgba(45, 110, 176, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(45, 110, 176, 0.04) 1px, transparent 1px);
+       /* Subtle azure grid pattern on the page background */
+       background:
+         linear-gradient(rgba(0, 140, 200, 0.04) 1px, transparent 1px),
+         linear-gradient(90deg, rgba(0, 140, 200, 0.04) 1px, transparent 1px);
       background-size: 34px 34px;
       mask-image: linear-gradient(180deg, rgba(255,255,255,0.35), transparent 78%);
       opacity: 0.24;
     }
 
-    [data-theme="dark"] body::before {
-      background:
-        linear-gradient(rgba(45, 110, 176, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(45, 110, 176, 0.08) 1px, transparent 1px);
-      mask-image: linear-gradient(180deg, rgba(0,0,0,0.3), transparent 78%);
-      opacity: 0.35;
-    }
+    /* Removed dark mode grid overrides for the body background */
 
     .app {
       max-width: 1180px;
@@ -122,28 +101,14 @@
       position: relative;
       overflow: hidden;
       background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(247,251,255,0.92) 100%);
-      border: 1px solid rgba(133, 184, 232, 0.20);
+       border: 1px solid rgba(0, 161, 224, 0.20);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
 
-    /* Override card and header surfaces in dark mode.  We darken the
-       gradient and adjust the border to maintain separation from the
-       page background. */
-    [data-theme="dark"] .header,
-    [data-theme="dark"] .card {
-      background: linear-gradient(180deg, rgba(20, 32, 55, 0.96) 0%, rgba(15, 29, 49, 0.92) 100%);
-      border-color: rgba(80, 120, 170, 0.35);
-    }
-    [data-theme="dark"] .card h2 {
-      color: #c7d8f3;
-    }
-    [data-theme="dark"] .card h2::before {
-      background: radial-gradient(circle, #4bb0ff 0%, #2a7eff 68%, #193a78 100%);
-      box-shadow: 0 0 16px rgba(40, 100, 180, 0.35);
-    }
+    /* Removed dark mode surface overrides as dark mode is no longer supported. */
 
     .header {
       /* Compact the header into a horizontal bar.  Display the logo and tagline
@@ -166,7 +131,7 @@
       width: 300px;
       height: 300px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(72, 189, 255, 0.13), transparent 68%);
+       background: radial-gradient(circle, rgba(0, 161, 224, 0.13), transparent 68%);
       filter: blur(8px);
       pointer-events: none;
     }
@@ -215,12 +180,12 @@
     }
 
     .waterops-wordmark {
-      filter: drop-shadow(0 10px 22px rgba(43, 150, 255, 0.10));
+      filter: drop-shadow(0 10px 22px rgba(0, 161, 224, 0.10));
     }
 
     .waterops-wordmark-banner {
       border-radius: 18px;
-      box-shadow: 0 10px 24px rgba(29, 100, 255, 0.14);
+      box-shadow: 0 10px 24px rgba(0, 120, 180, 0.14);
     }
 
     .brand-copy-center {
@@ -307,7 +272,7 @@
       align-items: center;
       gap: 10px;
       font-size: 19px;
-      color: #19456f;
+      color: #17324d;
       letter-spacing: -0.02em;
     }
 
@@ -317,8 +282,9 @@
       height: 10px;
       border-radius: 999px;
       flex: 0 0 auto;
-      background: radial-gradient(circle, #93f3ff 0%, #2aa8ff 68%, #1d5ebd 100%);
-      box-shadow: 0 0 16px rgba(93, 212, 255, 0.22);
+      /* Azure accent dot on card headings */
+      background: radial-gradient(circle, #d0f2ff 0%, #80d7ff 68%, #00a1e0 100%);
+      box-shadow: 0 0 16px rgba(0, 161, 224, 0.22);
     }
 
     .field-grid {
@@ -384,11 +350,11 @@
     }
 
     input:focus, select:focus, textarea:focus {
-      outline: 3px solid rgba(70, 177, 255, 0.12);
-      border-color: rgba(85, 173, 243, 0.75);
+      outline: 3px solid rgba(0, 177, 161, 0.12);
+      border-color: rgba(0, 150, 134, 0.75);
       box-shadow:
-        0 0 0 1px rgba(106, 204, 255, 0.18),
-        0 0 18px rgba(35, 162, 255, 0.08);
+        0 0 0 1px rgba(0, 180, 163, 0.18),
+        0 0 18px rgba(0, 150, 134, 0.08);
     }
 
     .button {
@@ -400,80 +366,30 @@
       font-weight: 700;
       cursor: pointer;
       color: #fff;
-      background: linear-gradient(135deg, #2b96ff 0%, #2a6bff 100%);
-      box-shadow: 0 10px 20px rgba(33, 111, 214, 0.18);
+      /* Primary actions use a bright azure gradient and gentle azure shadow */
+      background: linear-gradient(135deg, #80caff 0%, #00a1e0 100%);
+      box-shadow: 0 10px 20px rgba(0, 149, 209, 0.18);
       -webkit-appearance: none;
       appearance: none;
     }
 
     .button.secondary {
-      background: linear-gradient(135deg, rgba(92, 197, 255, 0.15) 0%, rgba(76, 129, 255, 0.12) 100%);
-      color: #1f5b93;
-      border: 1px solid rgba(120, 186, 239, 0.28);
+      background: linear-gradient(135deg, rgba(0, 161, 224, 0.15) 0%, rgba(0, 120, 180, 0.12) 100%);
+      color: #174f7c;
+      border: 1px solid rgba(0, 120, 180, 0.28);
       box-shadow: none;
     }
 
     .button.ghost {
       background: rgba(255,255,255,0.82);
-      color: #1e4f81;
-      border: 1px solid rgba(133, 184, 232, 0.28);
+      color: #174f7c;
+      border: 1px solid rgba(0, 120, 180, 0.28);
       box-shadow: none;
     }
 
-    /* Position the theme toggle as a floating circular button near the top
-       right of the page.  This overrides the default button sizing to
-       ensure the control remains compact and easily discoverable.  It
-       inherits colour variables from the current theme. */
-    #themeToggle {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      width: 40px;
-      height: 40px;
-      min-height: 0;
-      padding: 0;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      box-shadow: var(--shadow);
-      z-index: 1000;
-    }
+    /* Theme toggle styles removed */
 
-    #themeToggle svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    [data-theme="dark"] #themeToggle {
-      background: var(--blue);
-      color: #fff;
-      border: none;
-    }
-
-    /* Dark mode button styles ensure contrast on darker surfaces.  Ghost
-       and secondary buttons invert their colours while primary buttons
-       adopt a deeper blue gradient. */
-    [data-theme="dark"] .button {
-      background: linear-gradient(135deg, #2b88e1 0%, #2050a8 100%);
-      color: #ffffff;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
-    }
-    [data-theme="dark"] .button.secondary {
-      background: linear-gradient(135deg, rgba(58, 100, 157, 0.25) 0%, rgba(48, 85, 139, 0.22) 100%);
-      color: #c7d8f3;
-      border: 1px solid rgba(80, 120, 170, 0.4);
-      box-shadow: none;
-    }
-    [data-theme="dark"] .button.ghost {
-      background: rgba(34, 53, 84, 0.82);
-      color: #c7d8f3;
-      border: 1px solid rgba(80, 120, 170, 0.5);
-      box-shadow: none;
-    }
+    /* Dark mode button styles removed as the application no longer supports a dark colour scheme */
 
     .button-row,
     .actions {
@@ -483,18 +399,18 @@
     }
 
     #resetBtn {
-      background: linear-gradient(135deg, #e6f4ec 0%, #d4eadf 100%);
-      color: #1f5b45;
-      border: 1px solid rgba(90, 140, 112, 0.32);
-      box-shadow: 0 6px 14px rgba(72, 109, 149, 0.08);
+      background: linear-gradient(135deg, #e6f5fd 0%, #d6eefb 100%);
+      color: #174f7c;
+      border: 1px solid rgba(0, 120, 180, 0.32);
+      box-shadow: 0 6px 14px rgba(0, 149, 209, 0.08);
       font-weight: 700;
     }
 
     #resetBtn:hover,
     #resetBtn:focus {
-      background: linear-gradient(135deg, #dcefe4 0%, #c7e2d3 100%);
-      box-shadow: 0 8px 18px rgba(72, 109, 149, 0.12);
-      color: #184c39;
+      background: linear-gradient(135deg, #e9e2f4 0%, #d6cdee 100%);
+      box-shadow: 0 8px 18px rgba(90, 80, 160, 0.12);
+      color: #3c327e;
     }
 
 
@@ -503,8 +419,8 @@
     .summary,
     .hint,
     .report-output {
-      background: linear-gradient(180deg, rgba(250,253,255,0.96) 0%, rgba(243,248,253,0.96) 100%);
-      border: 1px solid rgba(141, 189, 232, 0.22);
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,244,253,0.96) 100%);
+      border: 1px solid rgba(130, 114, 200, 0.22);
       border-radius: 16px;
     }
 
@@ -872,7 +788,7 @@
     }
 
     .dose-row {
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
       border-radius: 20px;
       padding: 14px;
       background: linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(244,249,255,0.92) 100%);
@@ -891,7 +807,7 @@
     .dose-row-name {
       font-size: 17px;
       font-weight: 800;
-      color: #1c4771;
+      color: #36336e;
     }
 
     .dose-row-amount {
@@ -938,7 +854,7 @@
     }
 
     .subcard {
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
       border-radius: 18px;
       padding: 14px;
       background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
@@ -947,7 +863,7 @@
     .subcard h3 {
       margin: 0 0 10px;
       font-size: 17px;
-      color: #1c4771;
+      color: #36336e;
     }
 
     .mini-summary {
@@ -1001,7 +917,7 @@
 
     .mini-pill {
       border-radius: 14px;
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(0, 150, 210, 0.18);
       background: rgba(255,255,255,0.9);
       padding: 10px;
     }
@@ -1063,10 +979,10 @@
     }
 
     .icebath-result-card {
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(0, 150, 210, 0.18);
       border-radius: 18px;
       padding: 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(240,252,255,0.92) 100%);
     }
 
     /* Dark mode overrides for ice bath cards.  Deep gradients and
@@ -1092,7 +1008,7 @@
     .icebath-result-name {
       font-size: 16px;
       font-weight: 800;
-      color: #1c4771;
+      color: #17324d;
     }
 
     .icebath-result-grid {
@@ -1105,11 +1021,11 @@
       margin-top: 8px;
       font-size: 13px;
       line-height: 1.5;
-      color: #244d77;
-      border: 1px solid rgba(141, 189, 232, 0.22);
+      color: #17324d;
+      border: 1px solid rgba(0, 150, 210, 0.22);
       border-radius: 14px;
       padding: 10px;
-      background: linear-gradient(180deg, rgba(250,253,255,0.96) 0%, rgba(243,248,253,0.96) 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(240,250,255,0.96) 100%);
     }
 
     .icebath-dose-row {
@@ -1127,7 +1043,7 @@
     }
 
     .icebath-compact-card {
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
       border-radius: 14px;
       padding: 8px;
       background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
@@ -1144,7 +1060,7 @@
     .icebath-compact-title {
       font-size: 13px;
       font-weight: 800;
-      color: #1c4771;
+      color: #36336e;
       line-height: 1.15;
     }
 
@@ -1159,7 +1075,7 @@
     .icebath-compact-facts {
       font-size: 11px;
       line-height: 1.3;
-      color: #244d77;
+      color: #36336e;
       margin-bottom: 6px;
     }
 
@@ -1201,7 +1117,7 @@
     }
 
     .icebath-reference-card {
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
       border-radius: 14px;
       padding: 8px;
       background: rgba(255,255,255,0.9);
@@ -1210,7 +1126,7 @@
     .icebath-reference-card strong {
       display: block;
       font-size: 12px;
-      color: #1c4771;
+      color: #36336e;
       margin-bottom: 2px;
     }
 
@@ -1286,9 +1202,9 @@
 
     .log-table-wrap {
       overflow-x: auto;
-      border: 1px solid rgba(141, 189, 232, 0.22);
+      border: 1px solid rgba(130, 114, 200, 0.22);
       border-radius: 16px;
-      background: linear-gradient(180deg, rgba(250,253,255,0.96) 0%, rgba(243,248,253,0.96) 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,244,253,0.96) 100%);
     }
 
     .qr-grid {
@@ -1298,7 +1214,7 @@
     }
 
     .qr-card {
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
       border-radius: 18px;
       padding: 12px;
       background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
@@ -1308,7 +1224,7 @@
     .qr-card h3 {
       margin: 0 0 8px;
       font-size: 15px;
-      color: #1c4771;
+      color: #36336e;
     }
 
     .qr-card canvas,
@@ -1321,7 +1237,7 @@
       border-radius: 12px;
       background: #fff;
       padding: 10px;
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
     }
 
     .inline-note {
@@ -1340,14 +1256,14 @@
       padding: 10px;
       border-radius: 18px;
       background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(246,250,255,0.9) 100%);
-      border: 1px solid rgba(133, 184, 232, 0.20);
+      border: 1px solid rgba(0, 161, 224, 0.20);
       box-shadow: var(--shadow);
     }
 
     .tab-btn {
-      border: 1px solid rgba(133, 184, 232, 0.22);
+      border: 1px solid rgba(0, 150, 210, 0.22);
       background: rgba(255,255,255,0.86);
-      color: #1e4f81;
+      color: #174f7c;
       border-radius: 999px;
       min-height: 44px;
       padding: 10px 16px;
@@ -1358,8 +1274,8 @@
 
     .tab-btn.active {
       color: #fff;
-      background: linear-gradient(135deg, #2b96ff 0%, #2a6bff 100%);
-      box-shadow: 0 10px 20px rgba(33, 111, 214, 0.18);
+      background: linear-gradient(135deg, #80caff 0%, #00a1e0 100%);
+      box-shadow: 0 10px 20px rgba(0, 149, 209, 0.18);
     }
 
     .screen-panel {
@@ -1389,9 +1305,9 @@
       gap: 10px;
       padding: 12px 14px;
       border-radius: 16px;
-      border: 1px solid rgba(137, 183, 226, 0.18);
-      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
-      color: #1c4771;
+      border: 1px solid rgba(0, 150, 210, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(240,250,255,0.92) 100%);
+      color: #17324d;
       font-size: 14px;
       font-weight: 700;
     }
@@ -1410,10 +1326,10 @@
 
     .insight-item {
       border-radius: 16px;
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
       padding: 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
-      color: #244d77;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,244,253,0.92) 100%);
+      color: #36336e;
       font-size: 14px;
       line-height: 1.5;
     }
@@ -1442,7 +1358,7 @@
     }
 
     .asset-qr-card {
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
       border-radius: 18px;
       padding: 12px;
       background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
@@ -1458,7 +1374,7 @@
       border-radius: 12px;
       background: #fff;
       padding: 10px;
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
     }
 
     .metric-band {
@@ -1475,8 +1391,8 @@
       padding: 10px 12px;
       border-radius: 999px;
       background: rgba(255,255,255,0.86);
-      border: 1px solid rgba(133, 184, 232, 0.22);
-      color: #1e4f81;
+      border: 1px solid rgba(130, 114, 200, 0.22);
+      color: #463a7e;
       font-size: 13px;
       font-weight: 700;
     }
@@ -1503,9 +1419,9 @@
       min-height: 40px;
       padding: 9px 14px;
       border-radius: 999px;
-      border: 1px solid rgba(133, 184, 232, 0.22);
+      border: 1px solid rgba(0, 150, 210, 0.22);
       background: rgba(255,255,255,0.86);
-      color: #1e4f81;
+      color: #174f7c;
       font-size: 13px;
       font-weight: 800;
       cursor: pointer;
@@ -1514,8 +1430,8 @@
 
     .history-trend-btn.active {
       color: #fff;
-      background: linear-gradient(135deg, #2b96ff 0%, #2a6bff 100%);
-      box-shadow: 0 10px 20px rgba(33, 111, 214, 0.18);
+      background: linear-gradient(135deg, #bfe8ff 0%, #00a1e0 55%, #0078b7 100%);
+      box-shadow: 0 10px 20px rgba(0, 149, 209, 0.18);
     }
 
     .history-trend-stage {
@@ -1524,10 +1440,10 @@
       border-radius: 20px;
       padding: 10px;
       overflow: hidden;
-      border: 1px solid rgba(141, 189, 232, 0.22);
+      border: 1px solid rgba(0, 150, 210, 0.22);
       background:
-        radial-gradient(circle at top left, rgba(43, 150, 255, 0.18), transparent 34%),
-        linear-gradient(180deg, rgba(250,253,255,0.98) 0%, rgba(242,248,255,0.98) 100%);
+        radial-gradient(circle at top left, rgba(0, 161, 224, 0.18), transparent 34%),
+        linear-gradient(180deg, rgba(252,252,255,0.98) 0%, rgba(240,252,255,0.98) 100%);
     }
 
     .history-trend-stage::before {
@@ -1536,8 +1452,8 @@
       inset: 0;
       pointer-events: none;
       background:
-        linear-gradient(rgba(45, 110, 176, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(45, 110, 176, 0.04) 1px, transparent 1px);
+        linear-gradient(rgba(0, 120, 180, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 120, 180, 0.04) 1px, transparent 1px);
       background-size: 40px 40px;
       mask-image: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.2));
       opacity: 0.55;
@@ -1588,9 +1504,9 @@
       margin-top: 10px;
       padding: 10px 12px;
       border-radius: 14px;
-      border: 1px solid rgba(43, 150, 255, 0.18);
-      background: linear-gradient(180deg, rgba(43, 150, 255, 0.09) 0%, rgba(255, 255, 255, 0.92) 100%);
-      color: #1f5b93;
+      border: 1px solid rgba(0, 150, 210, 0.18);
+      background: linear-gradient(180deg, rgba(0, 161, 224, 0.09) 0%, rgba(255, 255, 255, 0.92) 100%);
+      color: #174f7c;
       font-size: 12px;
       line-height: 1.45;
       font-weight: 700;
@@ -1610,7 +1526,7 @@
     }
 
     .job-photo-card {
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
       border-radius: 18px;
       padding: 10px;
       background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,249,255,0.92) 100%);
@@ -1622,7 +1538,7 @@
       object-fit: cover;
       display: block;
       border-radius: 12px;
-      border: 1px solid rgba(137, 183, 226, 0.18);
+      border: 1px solid rgba(130, 114, 200, 0.18);
       background: #fff;
       margin-bottom: 8px;
     }
@@ -1643,7 +1559,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       font-weight: 700;
-      color: #1c4771;
+      color: #36336e;
     }
 
     /*
@@ -1663,9 +1579,9 @@
       left: 0;
       bottom: 0;
       width: 200px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.99) 0%, rgba(248,251,255,0.96) 100%);
-      border-right: 1px solid rgba(133, 184, 232, 0.16);
-      box-shadow: 0 8px 24px rgba(72, 109, 149, 0.05);
+      background: linear-gradient(180deg, rgba(255,255,255,0.99) 0%, rgba(245,253,255,0.96) 100%);
+      border-right: 1px solid rgba(0, 161, 224, 0.16);
+      box-shadow: 0 8px 24px rgba(0, 149, 209, 0.05);
       z-index: 100;
       display: none;
       flex-direction: column;
@@ -1758,18 +1674,7 @@
       <div class="toolbar">
         <button class="button ghost" id="resetBtn" type="button">Reset last pool test</button>
         <button class="button secondary" id="loadDefaultsBtn" type="button">Reload pool defaults</button>
-        <!--
-          Theme toggle button.  This discrete control lets the user switch
-          between the default light palette and the optional dark theme.
-          The button is represented by a moon icon when light mode is
-          active and a sun icon when dark mode is active.  The title
-          attribute updates dynamically to reflect the next available
-          mode for accessibility and screen readers.
-        -->
-        <button class="button ghost" id="themeToggle" type="button" title="Switch to dark mode" aria-label="Toggle colour theme">
-          <!-- Moon / Sun icon will be replaced dynamically via JavaScript -->
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path id="themeIcon" fill="currentColor" d="M21.752 15.002A9.998 9.998 0 1112 2a1 1 0 010 2 8 8 0 100 16 9.998 9.998 0 009.752-4.998z"/></svg>
-        </button>
+        <!-- Dark mode toggle removed -->
       </div>
     </div>
 
@@ -3419,7 +3324,7 @@
       for (const asset of assets.slice(-8)) {
         const card = document.createElement('div');
         card.className = 'asset-qr-card';
-        card.innerHTML = `<div style="font-weight:800; color:#1c4771; margin-bottom:6px;">${escapeHtml(asset.type || 'Asset')}</div><div class="inline-note">${escapeHtml(asset.id || '')}</div><div id="assetQr_${escapeHtml(asset.id || '').replace(/[^a-zA-Z0-9_-]/g, '')}"></div><div class="inline-note">${escapeHtml(asset.location || '')}</div>`;
+        card.innerHTML = `<div style="font-weight:800; color:#36336e; margin-bottom:6px;">${escapeHtml(asset.type || 'Asset')}</div><div class="inline-note">${escapeHtml(asset.id || '')}</div><div id="assetQr_${escapeHtml(asset.id || '').replace(/[^a-zA-Z0-9_-]/g, '')}"></div><div class="inline-note">${escapeHtml(asset.location || '')}</div>`;
         wrap.appendChild(card);
         const target = card.querySelector('div[id^="assetQr_"]');
         if (target && window.QRCode && asset.id) {
@@ -3575,7 +3480,7 @@
         const y = yAt(value);
         return `
           <g>
-            <line x1="${left}" y1="${y}" x2="${left + plotWidth}" y2="${y}" stroke="rgba(103, 156, 214, 0.25)" stroke-width="1" />
+            <line x1="${left}" y1="${y}" x2="${left + plotWidth}" y2="${y}" stroke="rgba(0, 161, 224, 0.25)" stroke-width="1" />
             <text x="${left - 10}" y="${y + 4}" text-anchor="end" class="history-trend-axis-label">${escapeHtml(formatTrendMetricValue(value, config))}</text>
           </g>
         `;
@@ -3596,7 +3501,7 @@
         const y = yAt(ideal);
         return `
           <g>
-            <line x1="${left}" y1="${y}" x2="${left + plotWidth}" y2="${y}" stroke="rgba(21, 62, 105, 0.55)" stroke-dasharray="7 6" stroke-width="2" />
+            <line x1="${left}" y1="${y}" x2="${left + plotWidth}" y2="${y}" stroke="rgba(60, 50, 110, 0.55)" stroke-dasharray="7 6" stroke-width="2" />
             <text x="${left + plotWidth - 4}" y="${y - 8}" text-anchor="end" class="history-trend-axis-label">Ideal ${escapeHtml(formatTrendMetricValue(ideal, config))}</text>
           </g>
         `;
@@ -3610,11 +3515,11 @@
         const frontHeight = Math.max(6, top + plotHeight - y);
         return `
           <g>
-            <line x1="${x}" y1="${top + plotHeight}" x2="${x}" y2="${top}" stroke="rgba(103, 156, 214, 0.12)" stroke-width="1" />
-            <polygon points="${leftX + frontWidth},${y} ${leftX + frontWidth + depthX},${y - depthY} ${leftX + frontWidth + depthX},${top + plotHeight - depthY} ${leftX + frontWidth},${top + plotHeight}" fill="rgba(21, 62, 105, 0.18)" />
-            <polygon points="${leftX},${y} ${leftX + depthX},${y - depthY} ${leftX + frontWidth + depthX},${y - depthY} ${leftX + frontWidth},${y}" fill="rgba(73, 185, 255, 0.42)" />
-            <rect x="${leftX}" y="${y}" width="${frontWidth}" height="${frontHeight}" rx="12" fill="url(#historyTrendBarGradient)" stroke="rgba(21, 62, 105, 0.10)" />
-            <circle cx="${x}" cy="${y}" r="5.5" fill="#ffffff" stroke="#2b96ff" stroke-width="3" />
+            <line x1="${x}" y1="${top + plotHeight}" x2="${x}" y2="${top}" stroke="rgba(0, 161, 224, 0.12)" stroke-width="1" />
+            <polygon points="${leftX + frontWidth},${y} ${leftX + frontWidth + depthX},${y - depthY} ${leftX + frontWidth + depthX},${top + plotHeight - depthY} ${leftX + frontWidth},${top + plotHeight}" fill="rgba(0, 115, 170, 0.18)" />
+            <polygon points="${leftX},${y} ${leftX + depthX},${y - depthY} ${leftX + frontWidth + depthX},${y - depthY} ${leftX + frontWidth},${y}" fill="rgba(0, 161, 224, 0.42)" />
+            <rect x="${leftX}" y="${y}" width="${frontWidth}" height="${frontHeight}" rx="12" fill="url(#historyTrendBarGradient)" stroke="rgba(0, 115, 170, 0.10)" />
+            <circle cx="${x}" cy="${y}" r="5.5" fill="#ffffff" stroke="#00a1e0" stroke-width="3" />
             <text x="${x}" y="${Math.max(top + 12, y - 10)}" text-anchor="middle" class="history-trend-value-label">${escapeHtml(formatNumber(item.metricValue, config.decimals || 0))}</text>
             <text x="${x}" y="${height - 20}" text-anchor="middle" class="history-trend-axis-label">${escapeHtml(getShortHistoryLabel(item))}</text>
           </g>
@@ -3628,25 +3533,25 @@
       svg.innerHTML = `
         <defs>
           <linearGradient id="historyTrendBarGradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stop-color="#7fd3ff" />
-            <stop offset="55%" stop-color="#2b96ff" />
-            <stop offset="100%" stop-color="#1f62d1" />
+            <stop offset="0%" stop-color="#bfe8ff" />
+            <stop offset="55%" stop-color="#00a1e0" />
+            <stop offset="100%" stop-color="#0078b7" />
           </linearGradient>
           <linearGradient id="historyTrendAreaGradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stop-color="rgba(43,150,255,0.24)" />
-            <stop offset="100%" stop-color="rgba(43,150,255,0.03)" />
+            <stop offset="0%" stop-color="rgba(0,161,224,0.24)" />
+            <stop offset="100%" stop-color="rgba(0,161,224,0.03)" />
           </linearGradient>
           <filter id="historyTrendShadow" x="-20%" y="-20%" width="140%" height="160%">
-            <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(20,65,110,0.14)" />
+            <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(0,115,170,0.14)" />
           </filter>
         </defs>
-        <polygon points="${left},${top + plotHeight} ${left + depthX},${top + plotHeight - depthY} ${left + plotWidth + depthX},${top + plotHeight - depthY} ${left + plotWidth},${top + plotHeight}" fill="rgba(21, 62, 105, 0.10)" />
-        <polygon points="${left + plotWidth},${top} ${left + plotWidth + depthX},${top - depthY} ${left + plotWidth + depthX},${top + plotHeight - depthY} ${left + plotWidth},${top + plotHeight}" fill="rgba(21, 62, 105, 0.07)" />
+        <polygon points="${left},${top + plotHeight} ${left + depthX},${top + plotHeight - depthY} ${left + plotWidth + depthX},${top + plotHeight - depthY} ${left + plotWidth},${top + plotHeight}" fill="rgba(0, 115, 170, 0.10)" />
+        <polygon points="${left + plotWidth},${top} ${left + plotWidth + depthX},${top - depthY} ${left + plotWidth + depthX},${top + plotHeight - depthY} ${left + plotWidth},${top + plotHeight}" fill="rgba(0, 115, 170, 0.07)" />
         ${rangeBand}
         ${grid}
         ${idealLine}
-        <path d="${areaPath}" fill="rgba(43,150,255,0.10)" />
-        <polyline points="${pathPoints}" fill="none" stroke="#153e69" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" filter="url(#historyTrendShadow)" />
+        <path d="${areaPath}" fill="rgba(0,161,224,0.10)" />
+        <polyline points="${pathPoints}" fill="none" stroke="#0c4c72" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" filter="url(#historyTrendShadow)" />
         ${pillars}
       `;
 
@@ -7460,43 +7365,6 @@ async function savePdfReport() {
   </script>
   <!-- Removed collapsible subcard script -->
 
-  <!-- Theme toggle script.  This immediately applies the last stored
-       preference (light or dark) and updates the icon and tooltip when
-       the toggle button is pressed.  The theme preference is stored in
-       localStorage so that it persists across sessions. -->
-  <script>
-    (function() {
-      const toggleBtn = document.getElementById('themeToggle');
-      const iconPath = document.getElementById('themeIcon');
-      if (!toggleBtn || !iconPath) return;
-      // SVG paths for the moon (indicating dark mode is available) and sun
-      // (indicating light mode is available).  These shapes are simple
-      // silhouettes drawn in a single continuous path using currentColor.
-      const MOON_PATH = 'M21.752 15.002A9.998 9.998 0 1112 2a1 1 0 010 2 8 8 0 100 16 9.998 9.998 0 009.752-4.998z';
-      const SUN_PATH  = 'M6.76 4.84l-1.8-1.79 1.42-1.42 1.79 1.8A8 8 0 0120 12a7.72 7.72 0 01-1.79 4.46l1.79 1.79-1.42 1.42-1.79-1.79A8 8 0 0112 20a7.72 7.72 0 01-4.46-1.79l-1.79 1.79-1.42-1.42 1.79-1.79A8 8 0 014 12a7.72 7.72 0 011.79-4.46z';
-      function applyTheme(theme) {
-        const root = document.documentElement;
-        if (theme === 'dark') {
-          root.setAttribute('data-theme', 'dark');
-          iconPath.setAttribute('d', SUN_PATH);
-          toggleBtn.setAttribute('title', 'Switch to light mode');
-        } else {
-          root.removeAttribute('data-theme');
-          iconPath.setAttribute('d', MOON_PATH);
-          toggleBtn.setAttribute('title', 'Switch to dark mode');
-        }
-      }
-      // Determine initial theme: prefer stored setting, then OS preference
-      const storedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      let currentTheme = storedTheme || (prefersDark ? 'dark' : 'light');
-      applyTheme(currentTheme);
-      toggleBtn.addEventListener('click', function() {
-          currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-          localStorage.setItem('theme', currentTheme);
-          applyTheme(currentTheme);
-      });
-    })();
-  </script>
+  <!-- Theme toggle script removed as dark mode is no longer supported -->
 </body>
 </html>

@@ -2064,8 +2064,11 @@
         <h2>Service report</h2>
         <div class="actions" style="margin-bottom: 12px;">
           <button class="button" id="generateReportBtn" type="button">Generate report</button>
-          <button class="button secondary" id="saveReportBtn" type="button">Generate and save PDF</button>
-          <button class="button ghost" id="saveVisitSnapshotBtn" type="button">Save visit snapshot</button>
+          <!-- Updated: the save and generate button now also records a visit snapshot automatically -->
+          <button class="button secondary" id="saveReportBtn" type="button">Save report (PDF + snapshot)</button>
+
+          <!-- Removed: separate save snapshot button is redundant because the PDF save now records a snapshot -->
+          <!-- <button class="button ghost" id="saveVisitSnapshotBtn" type="button">Save visit snapshot</button> -->
         </div>
         <div class="report-output" id="reportOutput">Tap Generate report to build the service report.</div>
         <div class="footer-note">PDF export is set to landscape. If the built-in master sheet URL is active, this button also updates the live log sheet.</div>
@@ -2167,8 +2170,11 @@
         <h2>Closed loop report</h2>
         <div class="actions" style="margin-bottom: 12px;">
           <button class="button" id="generateClosedReportBtn" type="button">Generate report</button>
-          <button class="button secondary" id="saveClosedReportBtn" type="button">Generate and save PDF</button>
-          <button class="button ghost" id="saveClosedSnapshotBtn" type="button">Save closed loop snapshot</button>
+          <!-- Updated: this button now generates the PDF and stores a closed loop snapshot -->
+          <button class="button secondary" id="saveClosedReportBtn" type="button">Save report (PDF + snapshot)</button>
+
+          <!-- Removed: separate closed loop snapshot button is redundant because the PDF save now records a snapshot -->
+          <!-- <button class="button ghost" id="saveClosedSnapshotBtn" type="button">Save closed loop snapshot</button> -->
         </div>
         <div class="report-output" id="closedReportOutput">Tap Generate report to build the closed loop report.</div>
         <div class="footer-note">PDF export is set to landscape. If the built-in master sheet URL is active, this button also updates the live log sheet.</div>
@@ -3222,6 +3228,52 @@
       saveHistoryState(history);
       renderInsightsSection();
     }
+
+  // When generating a combined Raiders ice bath report, also save individual snapshots
+  // for Ice Bath 1, 2 and 3.  Each snapshot includes the current readings for the bath,
+  // the dosing recommendations and notes, and persists them to the history alongside
+  // single-pool snapshots.  This makes the history charts and insights reflect group reports.
+  function saveRaidersGroupSnapshots() {
+    const now = new Date();
+    const site = inputs.reportSite.value || 'Raiders';
+    const date = inputs.reportDate.value || getLocalDateInputValue(now);
+    const time = inputs.testTime.value || now.toTimeString().slice(0, 5);
+    const history = getHistoryState();
+    [1, 2, 3].forEach(index => {
+      const pool = getIceBathPool(index);
+      const values = getIceBathValues(index);
+      const detail = buildIceBathRecommendationRows(index);
+      const doses = (detail && detail.doses) || {};
+      history.push({
+        ts: now.toISOString(),
+        poolKey: (pool && pool.key) || `raiders_ice_bath_${index}`,
+        poolName: (pool && pool.poolName) || `Raiders Ice Bath ${index}`,
+        site: site,
+        date: date,
+        time: time,
+        clarity: values.clarity || '',
+        ph: values.ph,
+        fc: values.fc,
+        alk: values.alk,
+        calcium: values.calcium,
+        cya: 0,
+        salt: 0,
+        copper: 0,
+        acid: doses.acid || 0,
+        chlorine: doses.chlorine || 0,
+        bicarb: doses.bicarb || 0,
+        calciumDose: doses.calcium || 0,
+        stabiliser: doses.stabiliser || 0,
+        saltDose: doses.salt || 0,
+        notes: values.note || '',
+        actions: getQuickActionLabels(),
+        context: getContextTags()
+      });
+    });
+    while (history.length > 300) history.shift();
+    saveHistoryState(history);
+    renderInsightsSection();
+  }
 
     function getRangeAlertMessages(current, average, label, threshold, decimals) {
       if (current == null || average == null) return null;
@@ -4408,6 +4460,8 @@
       await updateLiveMasterSheet(buildClosedLoopSheetPayload());
       const blob = doc.output('blob');
       await saveBlob(blob, filename, 'application/pdf');
+      // Automatically record a closed loop visit snapshot whenever a PDF is saved.
+      saveClosedLoopSnapshot();
     }
 
     function saveClosedLoopSnapshot() {
@@ -6171,6 +6225,8 @@ async function savePdfReport() {
         await updateLiveMasterSheetBatch(buildRaidersGroupSheetPayloads());
         const blob = doc.output('blob');
         await saveBlob(blob, filename, 'application/pdf');
+        // Automatically save a snapshot for each Raiders ice bath when generating a group report.
+        saveRaidersGroupSnapshots();
         return;
       }
 
@@ -6349,6 +6405,8 @@ async function savePdfReport() {
       await updateLiveMasterSheet(buildPoolSheetPayload());
       const blob = doc.output('blob');
       await saveBlob(blob, filename, 'application/pdf');
+      // Also store a visit snapshot for the selected pool whenever a PDF is saved.
+      savePoolVisitSnapshot();
     }
 
 
@@ -7264,10 +7322,11 @@ async function savePdfReport() {
       });
       qs('generateReportBtn').addEventListener('click', renderReport);
       qs('saveReportBtn').addEventListener('click', savePdfReport);
-      qs('saveVisitSnapshotBtn').addEventListener('click', savePoolVisitSnapshot);
       qs('generateClosedReportBtn').addEventListener('click', renderClosedLoopReport);
       qs('saveClosedReportBtn').addEventListener('click', saveClosedLoopPdfReport);
-      qs('saveClosedSnapshotBtn').addEventListener('click', saveClosedLoopSnapshot);
+      // Removed: separate snapshot buttons are no longer used because the report save functions automatically record snapshots.
+      // qs('saveVisitSnapshotBtn').addEventListener('click', savePoolVisitSnapshot);
+      // qs('saveClosedSnapshotBtn').addEventListener('click', saveClosedLoopSnapshot);
       qs('saveSiteMemoryBtn').addEventListener('click', saveCurrentSiteMemory);
       qs('saveInsightSnapshotBtn').addEventListener('click', savePoolVisitSnapshot);
       qs('noIssuesTodayBtn').addEventListener('click', applyNoIssuesTodayPreset);

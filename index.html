@@ -2644,6 +2644,7 @@
     const COST_SYNC_DEVICE_KEY = 'mbs-cost-sync-device-id-v1';
     const COST_SYNC_LAST_PULL_KEY = 'mbs-cost-sync-last-pull-v1';
     const TECHNICIAN_STORAGE_KEY = 'mbs-technician-names-v1';
+    const TECHNICIAN_PROFILE_STORAGE_KEY = 'mbs-technician-profile-v1';
     const COST_SYNC_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
     const DEFAULT_GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxim0-6TTC5IBLXUAG7vYDE8wf_criRVROl5uuDmAdWfe3rkWh-3wHitmbYEUjtjFkR/exec';
     let activeScreen = 'pools';
@@ -4532,8 +4533,53 @@
         .sort((a, b) => a.localeCompare(b));
     }
 
+    function ensureTechnicianOption(select, name) {
+      if (!select || !name) return;
+      if ([...select.options].some(option => option.value === name)) return;
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    }
+
+    function getPreferredTechnicianName() {
+      const profile = loadJson(TECHNICIAN_PROFILE_STORAGE_KEY, {});
+      return String((profile && profile.name) || '').trim();
+    }
+
+    function savePreferredTechnicianName(name) {
+      const cleanName = String(name || '').trim();
+      if (!cleanName) return;
+      saveJson(TECHNICIAN_PROFILE_STORAGE_KEY, { name: cleanName, savedAt: new Date().toISOString() });
+    }
+
+    function applyPreferredTechnicianName(options = {}) {
+      const name = getPreferredTechnicianName();
+      if (!name) return;
+      ['reportTechnician', 'closedTechnician'].forEach(id => {
+        const select = qs(id);
+        if (!select) return;
+        ensureTechnicianOption(select, name);
+        if (options.force || !select.value) select.value = name;
+      });
+    }
+
+    function handleTechnicianSelection(event) {
+      const selectedName = String((event && event.target && event.target.value) || '').trim();
+      if (!selectedName) return;
+      savePreferredTechnicianName(selectedName);
+      ['reportTechnician', 'closedTechnician'].forEach(id => {
+        const select = qs(id);
+        if (!select || select.value) return;
+        ensureTechnicianOption(select, selectedName);
+        select.value = selectedName;
+      });
+      saveState();
+    }
+
     function populateTechnicianSelects(names = []) {
-      const merged = normaliseTechnicianNames([...DEFAULT_TECHNICIAN_NAMES, ...names]);
+      const preferredName = getPreferredTechnicianName();
+      const merged = normaliseTechnicianNames([...DEFAULT_TECHNICIAN_NAMES, ...names, preferredName]);
       ['reportTechnician', 'closedTechnician'].forEach(id => {
         const select = qs(id);
         if (!select) return;
@@ -4542,6 +4588,7 @@
         select.innerHTML = '<option value="">Select technician</option>' + options.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
         if (current) select.value = current;
       });
+      applyPreferredTechnicianName();
     }
 
     function restoreTechnicianNames() {
@@ -8457,6 +8504,8 @@ async function savePdfReport() {
         input.addEventListener('input', handleInputChange);
         input.addEventListener('change', handleInputChange);
       });
+
+      ['reportTechnician', 'closedTechnician'].forEach(id => qs(id)?.addEventListener('change', handleTechnicianSelection));
 
       inputs.poolSelect.addEventListener('change', () => {
         loadPoolDefaults();

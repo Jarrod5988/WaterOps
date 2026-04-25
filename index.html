@@ -1842,7 +1842,7 @@
 
       .app-tabs {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         overflow: visible;
         gap: 8px;
       }
@@ -1916,6 +1916,10 @@
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 3v18h18v2H3a2 2 0 01-2-2V3h2zm13.242 2.757l2.707 2.707-6.485 6.485L9 11.242l-5 5L2.757 14.5l6.485-6.485L13 12.243l5.242-5.242z"/></svg>
         <span>Insights</span>
       </button>
+      <button class="tab-btn" type="button" data-screen="costCentre">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 3h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1zm2 4v2h12V7H6zm0 4v2h5v-2H6zm7 0v2h5v-2h-5zm-7 4v2h5v-2H6zm7 0v2h5v-2h-5z"/></svg>
+        <span>Cost centre</span>
+      </button>
       <button class="tab-btn" type="button" data-screen="admin">
         <!-- QR & setup icon (settings) -->
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.14 12.936c.047-.303.072-.615.072-.936 0-.321-.025-.633-.074-.936l2.113-1.654a.5.5 0 00.121-.625l-2-3.464a.5.5 0 00-.605-.212l-2.49 1a7.967 7.967 0 00-1.616-.936l-.375-2.65A.5.5 0 0014.7 3h-4a.5.5 0 00-.495.431l-.375 2.65a7.967 7.967 0 00-1.616.936l-2.49-1a.5.5 0 00-.605.212l-2 3.464a.5.5 0 00.121.625l2.113 1.654A7.94 7.94 0 004.786 12c0 .321.025.633.074.936L2.747 14.59a.5.5 0 00-.121.625l2 3.464a.5.5 0 00.605.212l2.49-1c.5.384 1.045.704 1.616.936l.375 2.65A.5.5 0 0010.7 21h4a.5.5 0 00.495-.431l.375-2.65c.571-.232 1.116-.552 1.616-.936l2.49 1a.5.5 0 00.605-.212l2-3.464a.5.5 0 00-.121-.625l-2.113-1.654zM12 15a3 3 0 110-6 3 3 0 010 6z"/></svg>
@@ -1929,6 +1933,7 @@
       <button class="tab-btn" type="button" data-screen="pools">Pool testing</button>
       <button class="tab-btn" type="button" data-screen="closedLoops">Closed loops</button>
       <button class="tab-btn" type="button" data-screen="insights">Insights & assets</button>
+      <button class="tab-btn" type="button" data-screen="costCentre">Cost centre</button>
     </div>
 
     <div id="screenPools" class="screen-panel active">
@@ -2304,6 +2309,16 @@
     </div>
   </div>
 
+
+  <div id="screenCostCentre" class="screen-panel">
+    <div class="grid">
+      <section class="card span-12">
+        <h2>Cost centre</h2>
+        <div class="mode-note">Supervisor chemical costing, ongoing site costs and quote projections from the stock-used log.</div>
+        <div id="costCentreContent"></div>
+      </section>
+    </div>
+  </div>
   <div id="screenClosedLoops" class="screen-panel">
     <div class="grid">
       <section class="card span-12">
@@ -4801,7 +4816,7 @@
     }
 
     function setActiveScreen(screen) {
-      const map = { pools: 'screenPools', closedLoops: 'screenClosedLoops', insights: 'screenInsights', admin: 'screenAdmin' };
+      const map = { pools: 'screenPools', closedLoops: 'screenClosedLoops', insights: 'screenInsights', costCentre: 'screenCostCentre', admin: 'screenAdmin' };
       if (!map[screen]) screen = 'pools';
       activeScreen = screen;
       localStorage.setItem(ACTIVE_SCREEN_STORAGE_KEY, screen);
@@ -4821,6 +4836,7 @@
       if (screen === 'closedLoops') renderClosedLoopTable();
       if (screen === 'insights') renderInsightsSection();
       if (screen === 'admin') renderQrSection();
+      if (screen === 'costCentre') renderCostCentreSection();
       if (screen === 'pools') { renderCombinedTable(); renderStockSection(); }
     }
 
@@ -4914,33 +4930,7 @@
             <div class="metric-chip">Entries saved: ${transactions.length}</div>
             ${summary || '<div class="metric-chip">No stock used recorded yet</div>'}
           </div>
-          <details class="subcard" style="margin-bottom: 12px;">
-            <summary style="cursor: pointer; font-weight: 800; color: var(--accent-strong); font-size: 16px; list-style-position: inside;">Cost centre report</summary>
-            <div style="margin-top: 12px;">
-              <div class="mode-note" style="margin-bottom: 10px;">Separate supervisor costing area. Uses the saved chemical stock-used log for this selected pool. Add rates to calculate costs for the supervisor report.</div>
-              <div class="asset-form-grid">
-                <div class="field"><label for="costCentreCode">Cost centre / job code</label><input id="costCentreCode" type="text" placeholder="e.g. CC-4021 / WO-12345" /></div>
-                <div class="field"><label for="costReportSupervisor">Supervisor</label><input id="costReportSupervisor" type="text" placeholder="Supervisor name" /></div>
-                <div class="field"><label for="costReportJobRef">Job reference</label><input id="costReportJobRef" type="text" placeholder="Optional work order" /></div>
-                <div class="field"><label for="costReportNotes">Cost notes</label><input id="costReportNotes" type="text" placeholder="Optional note for supervisor" /></div>
-              </div>
-              <div class="field-grid" style="margin: 12px 0;">
-                ${DOSE_KEYS.map(key => `
-                  <div class="field">
-                    <label for="costRate_${key}">${escapeHtml(chemicalNames[key])} ${escapeHtml(chemicalMeta[key].rateLabel || '$/unit')}</label>
-                    <input id="costRate_${key}" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" />
-                  </div>
-                `).join('')}
-              </div>
-              <div class="actions" style="margin-bottom: 12px;">
-                <button class="button secondary" id="saveCostSettingsBtn" type="button">Save cost settings</button>
-                <button class="button" id="generateCostReportBtn" type="button">Generate cost report PDF</button>
-              </div>
-              <div id="costReportPreview" class="summary"></div>
-              <div id="costProjectionPreview" class="summary" style="margin-top: 10px;"></div>
-            </div>
-          </details>
-          <div class="subcard" style="margin-bottom: 12px;">
+<div class="subcard" style="margin-bottom: 12px;">
             <h3 style="margin-bottom: 10px;">Additional bulk chemicals used</h3>
             <div class="mode-note" style="margin-bottom: 10px;">Preset 15 L drum top-up options are included for automatic dosing drums. Add unit cost when you need to price a chemical on the move.</div>
             <div class="actions" style="margin-bottom: 12px;">
@@ -5008,7 +4998,6 @@
       `;
       qs('recordDoseStockBtn').addEventListener('click', recordMarkedDosesToStockLog);
       qs('clearStockUsedBtn').addEventListener('click', clearCurrentPoolStockUsedLog);
-      bindCostCentreControls();
       qs('addExtraStockBtn').addEventListener('click', addExtraStockUsedEntry);
       qs('prefillChlorineTopUpBtn').addEventListener('click', () => prefillExtraStockUsedEntry({
         chemicalLabel: 'Liquid Chlorine Drum Top-up',
@@ -5027,6 +5016,38 @@
     }
 
 
+
+    function renderCostCentreSection() {
+      const wrap = qs('costCentreContent');
+      if (!wrap) return;
+      wrap.innerHTML = `
+        <div class="subcard" style="margin-top: 12px;">
+          <h3 style="margin-bottom: 10px;">Cost centre report</h3>
+          <div class="mode-note" style="margin-bottom: 10px;">Supervisor costing area. Uses the saved chemical stock-used log for the selected pool. Add rates to calculate reports, ongoing costs and quote projections.</div>
+          <div class="asset-form-grid">
+            <div class="field"><label for="costCentreCode">Cost centre / job code</label><input id="costCentreCode" type="text" placeholder="e.g. CC-4021 / WO-12345" /></div>
+            <div class="field"><label for="costReportSupervisor">Supervisor</label><input id="costReportSupervisor" type="text" placeholder="Supervisor name" /></div>
+            <div class="field"><label for="costReportJobRef">Job reference</label><input id="costReportJobRef" type="text" placeholder="Optional work order" /></div>
+            <div class="field"><label for="costReportNotes">Cost notes</label><input id="costReportNotes" type="text" placeholder="Optional note for supervisor" /></div>
+          </div>
+          <div class="field-grid" style="margin: 12px 0;">
+            ${DOSE_KEYS.map(key => `
+              <div class="field">
+                <label for="costRate_${key}">${escapeHtml(chemicalNames[key])} ${escapeHtml(chemicalMeta[key].rateLabel || '$/unit')}</label>
+                <input id="costRate_${key}" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" />
+              </div>
+            `).join('')}
+          </div>
+          <div class="actions" style="margin-bottom: 12px;">
+            <button class="button secondary" id="saveCostSettingsBtn" type="button">Save cost settings</button>
+            <button class="button" id="generateCostReportBtn" type="button">Generate cost report PDF</button>
+          </div>
+          <div id="costReportPreview" class="summary"></div>
+          <div id="costProjectionPreview" class="summary" style="margin-top: 10px;"></div>
+        </div>
+      `;
+      bindCostCentreControls();
+    }
     function getCostSettingsState() {
       return loadJson(COST_CENTRE_STORAGE_KEY, {});
     }

@@ -45,7 +45,7 @@
        --bad: #c94b4b;
        /* Softer azure tinted shadow */
        --shadow: 0 12px 28px rgba(0, 149, 209, 0.08);
-       --radius: 22px;
+       --radius: 8px;
     }
 
   /* Removed dark mode variables to simplify the theme.
@@ -1658,10 +1658,172 @@
         display: none;
       }
     }
+
+    /* Codex UX polish: calmer surfaces, stronger focus, and steadier mobile navigation. */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: linear-gradient(180deg, #f5fbfe 0%, #eef8fd 48%, #f7fbff 100%);
+    }
+
+    body::before,
+    .header::after,
+    .card::after {
+      display: none;
+    }
+
+    .skip-link {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      z-index: 2000;
+      transform: translateY(-140%);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #003a75;
+      color: #fff;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+      outline: 3px solid rgba(0, 161, 224, 0.35);
+    }
+
+    input:focus, select:focus, textarea:focus,
+    .button:focus-visible, .tab-btn:focus-visible,
+    .check-pill:focus-within, #backToTop:focus-visible {
+      outline: 3px solid rgba(0, 161, 224, 0.22);
+      border-color: rgba(0, 120, 180, 0.78);
+      box-shadow: 0 0 0 1px rgba(0, 120, 180, 0.18), 0 8px 18px rgba(0, 149, 209, 0.10);
+    }
+
+    .button,
+    .tab-btn,
+    input,
+    select,
+    textarea,
+    .preview-box,
+    .table-wrap,
+    .summary,
+    .hint,
+    .report-output,
+    .subcard,
+    .kpi,
+    .mini-pill,
+    .check-pill {
+      border-radius: 8px;
+    }
+
+    .button:hover,
+    .tab-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .button:active,
+    .tab-btn:active {
+      transform: translateY(0);
+    }
+
+    .app-tabs {
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .app-tabs .tab-btn {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .card h2 {
+      min-height: 32px;
+    }
+
+    .card h2:focus-visible {
+      outline: 3px solid rgba(0, 161, 224, 0.24);
+      outline-offset: 4px;
+      border-radius: 8px;
+    }
+
+    .app-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      z-index: 1600;
+      max-width: min(520px, calc(100vw - 32px));
+      transform: translate(-50%, 140%);
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #003a75;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.20);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .app-toast.show {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+
+    @media (min-width: 860px) {
+      .app {
+        max-width: calc(100vw - 240px);
+        margin-left: 220px;
+        margin-right: 16px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 8px;
+      }
+
+      .header {
+        padding: 10px;
+      }
+
+      .toolbar,
+      .button-row,
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .button,
+      .tab-btn {
+        width: 100%;
+      }
+
+      .card {
+        padding: 12px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="app">
+  <a class="skip-link" href="#mainContent">Skip to app content</a>
+  <main class="app" id="mainContent" tabindex="-1">
     <div class="header">
       <div class="brand brand-header-image">
         <div class="waterops-header-lockup">
@@ -1685,7 +1847,7 @@
       screens the side‑nav hides automatically and the existing horizontal tabs can still
       appear (see media queries in the CSS below).
     -->
-    <nav class="side-nav" id="sideNav">
+    <nav class="side-nav" id="sideNav" aria-label="Primary sections">
       <button class="tab-btn active" type="button" data-screen="pools">
         <!-- Pool testing icon -->
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C7.589 2 4 5.589 4 10s3.589 8 8 8 8-3.589 8-8-3.589-8-8-8zm0 2c1.654 0 3 1.346 3 3s-1.346 3-3 3-3-1.346-3-3S10.346 4 12 4zm0 12c-2.337 0-4.433-1.19-5.651-3h11.303C16.433 14.81 14.337 16 12 16z"/></svg>
@@ -1710,7 +1872,7 @@
 
     <!-- Hide the original horizontal tab bar on wider screens.  When the viewport is narrow (e.g. on mobile), the
          horizontal tabs remain visible to provide a compact navigation method. -->
-    <div class="app-tabs" id="appTabs">
+    <div class="app-tabs" id="appTabs" role="tablist" aria-label="Primary sections">
       <button class="tab-btn" type="button" data-screen="pools">Pool testing</button>
       <button class="tab-btn" type="button" data-screen="closedLoops">Closed loops</button>
       <button class="tab-btn" type="button" data-screen="insights">Insights & assets</button>
@@ -2355,7 +2517,8 @@
         <div class="hint">History, site memory, watch items, asset notes and stock used logs are stored in this browser right now. If you want live shared updates across staff phones, the next step is connecting the app to a shared backend such as Google Sheets, Firebase or Supabase.</div>
       </section>
     </div>
-  </div>
+  </main>
+  <div id="appToast" class="app-toast" role="status" aria-live="polite"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -3933,9 +4096,11 @@
       if (url) {
         localStorage.setItem(GOOGLE_SCRIPT_URL_STORAGE_KEY, url);
         setSheetStatus('Master sheet URL saved. PDF save will also send the visit log.', 'success');
+        showAppToast('Master sheet URL saved.');
       } else {
         localStorage.removeItem(GOOGLE_SCRIPT_URL_STORAGE_KEY);
         setSheetStatus('Master sheet URL is built in.', 'info');
+        showAppToast('Using the built-in sheet URL.');
       }
     }
 
@@ -4480,18 +4645,37 @@
     }
 
     function setActiveScreen(screen) {
+      const map = { pools: 'screenPools', closedLoops: 'screenClosedLoops', insights: 'screenInsights', admin: 'screenAdmin' };
+      if (!map[screen]) screen = 'pools';
       activeScreen = screen;
       localStorage.setItem(ACTIVE_SCREEN_STORAGE_KEY, screen);
-      const map = { pools: 'screenPools', closedLoops: 'screenClosedLoops', insights: 'screenInsights', admin: 'screenAdmin' };
       Object.entries(map).forEach(([key, id]) => {
         const el = qs(id);
-        if (el) el.classList.toggle('active', key === screen);
+        if (!el) return;
+        const isActive = key === screen;
+        el.classList.toggle('active', isActive);
+        el.toggleAttribute('hidden', !isActive);
       });
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.screen === screen));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const isActive = btn.dataset.screen === screen;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        btn.setAttribute('aria-current', isActive ? 'page' : 'false');
+      });
       if (screen === 'closedLoops') renderClosedLoopTable();
       if (screen === 'insights') renderInsightsSection();
       if (screen === 'admin') renderQrSection();
       if (screen === 'pools') { renderCombinedTable(); renderStockSection(); }
+    }
+
+    let appToastTimer = null;
+    function showAppToast(message) {
+      const toast = qs('appToast');
+      if (!toast || !message) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(appToastTimer);
+      appToastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
     }
 
     function initTabs() {
@@ -7208,7 +7392,7 @@ async function savePdfReport() {
       renderQrSection();
       renderClosedLoopTable();
       renderInsightsSection();
-      initTabs();
+      setActiveScreen(activeScreen || 'pools');
       renderInsightsSection();
       renderClosedLoopTable();
       if (qs('reportOutput')) qs('reportOutput').textContent = 'Tap Generate report to build the service report.';
@@ -7363,18 +7547,27 @@ async function savePdfReport() {
         saveBlob(blob, `mbs-app-data-${new Date().toISOString().slice(0,10)}.json`, 'application/json');
       });
       qs('clearHistoryBtn').addEventListener('click', () => {
+        if (!confirm('Clear all saved pool and closed loop visit history from this browser?')) return;
         localStorage.removeItem(HISTORY_STORAGE_KEY);
         localStorage.removeItem(CLOSED_LOOP_HISTORY_KEY);
         renderInsightsSection();
+        showAppToast('Visit history cleared.');
       });
       qs('clearAssetsBtn').addEventListener('click', () => {
+        if (!confirm('Clear the saved equipment register from this browser?')) return;
         localStorage.removeItem(ASSET_STORAGE_KEY);
         renderAssetSection();
+        showAppToast('Equipment register cleared.');
       });
-      qs('resetBtn').addEventListener('click', resetAll);
+      qs('resetBtn').addEventListener('click', () => {
+        if (!confirm('Reset the current pool test form? Saved history and assets will stay in place.')) return;
+        resetAll();
+        showAppToast('Pool test form reset.');
+      });
       qs('loadDefaultsBtn').addEventListener('click', () => {
         loadPoolDefaults();
         handleInputChange();
+        showAppToast('Pool defaults reloaded.');
       });
     }
 
@@ -7407,11 +7600,27 @@ async function savePdfReport() {
        exist. -->
   <script>
     (function() {
+      function setCollapsedState(card, heading, collapsed) {
+        card.classList.toggle('collapsed', collapsed);
+        heading.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      }
+
       function initCollapsibleCards() {
-        document.querySelectorAll('.card > h2').forEach(function(h) {
+        document.querySelectorAll('.card > h2').forEach(function(h, index) {
+          const card = h.closest('.card');
+          if (!card) return;
+          h.setAttribute('tabindex', '0');
+          h.setAttribute('role', 'button');
+          h.setAttribute('aria-expanded', card.classList.contains('collapsed') ? 'false' : 'true');
+          if (!h.id) h.id = 'cardHeading' + index;
+          card.setAttribute('aria-labelledby', h.id);
           h.addEventListener('click', function() {
-            const card = h.closest('.card');
-            if (card) card.classList.toggle('collapsed');
+            setCollapsedState(card, h, !card.classList.contains('collapsed'));
+          });
+          h.addEventListener('keydown', function(event) {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            setCollapsedState(card, h, !card.classList.contains('collapsed'));
           });
         });
       }

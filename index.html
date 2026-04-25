@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -2583,7 +2583,7 @@
           <div class="field">
             <label for="googleScriptUrl">Google Apps Script Web App URL</label>
             <input id="googleScriptUrl" type="url" placeholder="Paste your deployed /exec URL" />
-            <small>The deployed Apps Script web app URL is prefilled below. Generate and save PDF also sends the visit to the live master sheet.</small>
+            <small>The deployed Apps Script web app URL is prefilled below. Reports and cost centre changes can sync to the live master sheet once the Apps Script supports the cost tabs.</small>
           </div>
         </div>
         <div class="actions" style="margin-bottom: 12px;">
@@ -2600,7 +2600,7 @@
           <button class="button ghost" id="clearHistoryBtn" type="button">Clear visit history</button>
           <button class="button ghost" id="clearAssetsBtn" type="button">Clear equipment register</button>
         </div>
-        <div class="hint">History, site memory, watch items, asset notes and stock used logs are stored in this browser right now. If you want live shared updates across staff phones, the next step is connecting the app to a shared backend such as Google Sheets, Firebase or Supabase.</div>
+        <div class="hint">Visit history and asset notes are still local to this browser. Cost centre settings and stock-used logs can now be backed up to the Google Sheet and refreshed on other devices after the matching Apps Script is installed.</div>
       </section>
     </div>
   </main>
@@ -2639,6 +2639,8 @@
     const ACTIVE_SCREEN_STORAGE_KEY = 'mbs-active-screen-v1';
     const GOOGLE_SCRIPT_URL_STORAGE_KEY = 'mbs-google-script-url-v1';
     const SHEET_STATUS_STORAGE_KEY = 'mbs-sheet-status-v1';
+    const COST_SYNC_DEVICE_KEY = 'mbs-cost-sync-device-id-v1';
+    const COST_SYNC_LAST_PULL_KEY = 'mbs-cost-sync-last-pull-v1';
     const DEFAULT_GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxim0-6TTC5IBLXUAG7vYDE8wf_criRVROl5uuDmAdWfe3rkWh-3wHitmbYEUjtjFkR/exec';
     let activeScreen = 'pools';
     let activeHistoryTrendMetric = 'ph';
@@ -4366,6 +4368,161 @@
       }
     }
 
+    function getCostSyncDeviceId() {
+      let id = localStorage.getItem(COST_SYNC_DEVICE_KEY) || '';
+      if (!id) {
+        id = `waterops-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+        localStorage.setItem(COST_SYNC_DEVICE_KEY, id);
+      }
+      return id;
+    }
+
+    function createCostRecordId(poolKey = 'pool') {
+      return `${poolKey}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function getPoolSyncDetails(pool = getSelectedPool()) {
+      return {
+        key: pool.key || '',
+        site: pool.site || '',
+        poolName: pool.poolName || '',
+        volume: pool.volume || ''
+      };
+    }
+
+    function setCostSyncStatus(message, tone = 'info') {
+      const box = qs('costSyncStatus');
+      if (box) {
+        box.textContent = message;
+        box.style.color = tone === 'error' ? '#b91c1c' : tone === 'success' ? '#166534' : '#29557f';
+      }
+      setSheetStatus(message, tone);
+    }
+
+    function buildCostSyncPayload(action, data = {}) {
+      return {
+        app: 'WaterOps',
+        payloadType: 'costSync',
+        action,
+        deviceId: getCostSyncDeviceId(),
+        sentAt: new Date().toISOString(),
+        data
+      };
+    }
+
+    function ensureStockTransactionIds(state = loadStockState()) {
+      const next = state && typeof state === 'object' ? state : getEmptyStockState();
+      next.transactions = (next.transactions || []).map((tx, index) => ({
+        id: tx.id || `${tx.poolKey || 'pool'}-${tx.ts || 'legacy'}-${index}`,
+        ...tx
+      }));
+      return next;
+    }
+
+    function getCostSyncSnapshot() {
+      const stock = ensureStockTransactionIds(loadStockState());
+      saveStockState(stock);
+      return {
+        stock,
+        costSettings: getCostSettingsState(),
+        projection: buildCostProjectionModel(),
+        selectedPool: getPoolSyncDetails(),
+        capturedAt: new Date().toISOString()
+      };
+    }
+
+    async function sendCostSyncEvent(action, data = {}, options = {}) {
+      const payload = buildCostSyncPayload(action, data);
+      const result = await updateLiveMasterSheet(payload);
+      if (result && result.success && options.toast !== false) {
+        setCostSyncStatus('Cost centre data sent to the Google Sheet.', 'success');
+      }
+      return result;
+    }
+
+    async function backupCostDataToGoogleSheet() {
+      await sendCostSyncEvent('snapshot', getCostSyncSnapshot(), { toast: true });
+      showAppToast('Cost data backup sent.');
+    }
+
+    function requestGoogleJsonp(action) {
+      const url = getGoogleScriptUrl();
+      if (!url) return Promise.reject(new Error('Google Apps Script URL is blank.'));
+      return new Promise((resolve, reject) => {
+        const callbackName = `waterOpsCostSync_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const script = document.createElement('script');
+        const separator = url.includes('?') ? '&' : '?';
+        const timer = setTimeout(() => {
+          cleanup();
+          reject(new Error('Timed out waiting for Google Sheet sync.'));
+        }, 12000);
+        function cleanup() {
+          clearTimeout(timer);
+          delete window[callbackName];
+          script.remove();
+        }
+        window[callbackName] = response => {
+          cleanup();
+          resolve(response || {});
+        };
+        script.onerror = () => {
+          cleanup();
+          reject(new Error('Google Sheet sync script could not load.'));
+        };
+        script.src = `${url}${separator}action=${encodeURIComponent(action)}&callback=${encodeURIComponent(callbackName)}&deviceId=${encodeURIComponent(getCostSyncDeviceId())}`;
+        document.body.appendChild(script);
+      });
+    }
+
+    function applyCostSyncSnapshot(snapshot = {}) {
+      const incomingStock = snapshot.stock || {};
+      const incomingTransactions = Array.isArray(incomingStock.transactions) ? incomingStock.transactions : [];
+      const currentStock = ensureStockTransactionIds(loadStockState());
+      const mergedById = new Map((currentStock.transactions || []).map((tx, index) => [tx.id || `${tx.poolKey || 'pool'}-${tx.ts || index}`, tx]));
+      incomingTransactions.forEach((tx, index) => {
+        const id = tx.id || `${tx.poolKey || 'pool'}-${tx.ts || index}`;
+        mergedById.set(id, { id, ...tx });
+      });
+      const mergedTransactions = Array.from(mergedById.values()).sort((a, b) => String(a.ts || '').localeCompare(String(b.ts || '')));
+      saveStockState({ ...currentStock, transactions: mergedTransactions });
+      if (snapshot.costSettings && typeof snapshot.costSettings === 'object') {
+        saveCostSettingsState({ ...getCostSettingsState(), ...snapshot.costSettings });
+      }
+      localStorage.setItem(COST_SYNC_LAST_PULL_KEY, new Date().toISOString());
+      renderStockSection();
+      if (activeScreen === 'costCentre') renderCostCentreSection();
+      renderPriorityAlerts();
+    }
+
+    async function refreshCostDataFromGoogleSheet() {
+      try {
+        setCostSyncStatus('Refreshing cost centre data from Google Sheet...', 'info');
+        const response = await requestGoogleJsonp('costSnapshot');
+        if (!response || response.ok === false) throw new Error(response && response.error ? response.error : 'No cost snapshot returned.');
+        applyCostSyncSnapshot(response.snapshot || response.data || response);
+        setCostSyncStatus('Cost centre data refreshed from Google Sheet.', 'success');
+        showAppToast('Cost data refreshed.');
+      } catch (error) {
+        console.error('Cost sync refresh failed', error);
+        setCostSyncStatus(`Cost refresh failed: ${error.message || error}`, 'error');
+      }
+    }
+
+    function refreshCostDataFromGoogleSheetQuietly() {
+      const url = getGoogleScriptUrl();
+      if (!url) return;
+      setTimeout(async () => {
+        try {
+          const response = await requestGoogleJsonp('costSnapshot');
+          if (response && response.ok !== false) {
+            applyCostSyncSnapshot(response.snapshot || response.data || response);
+            setSheetStatus('Cost centre data refreshed from Google Sheet.', 'success');
+          }
+        } catch (error) {
+          console.info('Cost sync auto-refresh skipped', error);
+        }
+      }, 900);
+    }
     async function updateLiveMasterSheetBatch(payloads) {
       if (!Array.isArray(payloads) || !payloads.length) {
         return { attempted: false, success: false, count: 0 };
@@ -5040,10 +5197,13 @@
           </div>
           <div class="actions" style="margin-bottom: 12px;">
             <button class="button secondary" id="saveCostSettingsBtn" type="button">Save cost settings</button>
+            <button class="button ghost" id="backupCostDataBtn" type="button">Backup costs to Google Sheet</button>
+            <button class="button ghost" id="refreshCostDataBtn" type="button">Refresh costs from Google Sheet</button>
             <button class="button" id="generateCostReportBtn" type="button">Generate cost report PDF</button>
           </div>
           <div id="costReportPreview" class="summary"></div>
           <div id="costProjectionPreview" class="summary" style="margin-top: 10px;"></div>
+          <div id="costSyncStatus" class="hint" style="margin-top: 10px;">Cost sync is ready once the Google Apps Script cost tabs are installed.</div>
         </div>
       `;
       bindCostCentreControls();
@@ -5095,6 +5255,7 @@
       state[pool.key] = readCostCentreForm();
       saveCostSettingsState(state);
       renderCostReportPreview();
+      sendCostSyncEvent('cost_settings_saved', { pool: getPoolSyncDetails(pool), settings: state[pool.key] });
       showAppToast('Cost centre settings saved.');
     }
 
@@ -5251,6 +5412,8 @@
       applyCostSettingsToForm();
       renderCostReportPreview();
       qs('saveCostSettingsBtn')?.addEventListener('click', saveCurrentCostSettings);
+      qs('backupCostDataBtn')?.addEventListener('click', backupCostDataToGoogleSheet);
+      qs('refreshCostDataBtn')?.addEventListener('click', refreshCostDataFromGoogleSheet);
       qs('generateCostReportBtn')?.addEventListener('click', generateCostCentreReportPdf);
       ['costCentreCode', 'costReportSupervisor', 'costReportJobRef', 'costReportNotes', ...DOSE_KEYS.map(key => `costRate_${key}`)].forEach(id => {
         qs(id)?.addEventListener('input', renderCostReportPreview);
@@ -5315,6 +5478,7 @@
       const filenameBase = `${model.settings.costCentre || model.pool.poolName || 'cost-centre'}-chemical-costs`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const blob = doc.output('blob');
       await saveBlob(blob, `${filenameBase || 'chemical-cost-report'}-${getLocalDateInputValue(new Date())}.pdf`, 'application/pdf');
+      await sendCostSyncEvent('cost_report_generated', { report: model, projection: buildCostProjectionModel() }, { toast: false });
       showAppToast('Cost centre report generated.');
     }
     function clearCurrentPoolStockUsedLog() {
@@ -5323,6 +5487,7 @@
       state.transactions = (state.transactions || []).filter(tx => tx.poolKey !== pool.key);
       saveStockState(state);
       renderStockSection();
+      sendCostSyncEvent('stock_used_cleared', { pool: getPoolSyncDetails(pool), clearedAt: new Date().toISOString() }, { toast: false });
     }
 
     function saveStockLevelsFromScreen() {
@@ -5334,6 +5499,7 @@
       const pool = getSelectedPool();
       const { doses } = buildRecommendationRows();
       const state = loadStockState();
+      const newTransactions = [];
       let recorded = 0;
       DOSE_KEYS.forEach(key => {
         const snapshot = getDoseFieldSnapshot(key);
@@ -5342,7 +5508,8 @@
         const qty = snapshot.actualQty != null && snapshot.actualQty > 0 ? snapshot.actualQty : recommended;
         if (!(Number.isFinite(qty) && qty > 0)) return;
         const now = new Date();
-        state.transactions.push({
+        const transaction = {
+          id: createCostRecordId(pool.key),
           ts: now.toISOString(),
           date: `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
           poolKey: pool.key,
@@ -5354,11 +5521,14 @@
           qty,
           qtyText: `${formatNumber(qty, chemicalMeta[key].decimals)} ${chemicalMeta[key].unit}`,
           note: snapshot.note || ''
-        });
+        };
+        state.transactions.push(transaction);
+        newTransactions.push(transaction);
         recorded += 1;
       });
       saveStockState(state);
       renderStockSection();
+      if (recorded) sendCostSyncEvent('stock_used_added', { pool: getPoolSyncDetails(pool), transactions: newTransactions }, { toast: false });
       if (!recorded) alert('No marked doses were found to record. Mark Dosed = Yes on at least one chemical first.');
     }
 
@@ -5413,7 +5583,8 @@
       };
       const now = new Date();
       const state = loadStockState();
-      state.transactions.push({
+      const transaction = {
+        id: createCostRecordId(pool.key),
         ts: now.toISOString(),
         date: `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
         poolKey: pool.key,
@@ -5429,8 +5600,10 @@
         qtyText: `${formatNumber(qty, decimals)} ${unit}`,
         note,
         isManualExtra: true
-      });
+      };
+      state.transactions.push(transaction);
       saveStockState(state);
+      sendCostSyncEvent('stock_used_added', { pool: getPoolSyncDetails(pool), transactions: [transaction] }, { toast: false });
       if (chemicalField) chemicalField.value = '';
       if (sourceField) sourceField.value = '';
       if (qtyField) qtyField.value = '';
@@ -8130,6 +8303,7 @@ async function savePdfReport() {
       renderQrSection();
       renderPriorityAlerts();
       restoreSheetStatus();
+      refreshCostDataFromGoogleSheetQuietly();
       initTabs();
       renderDraftStatus();
       renderJobPhotoPreview();

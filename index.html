@@ -2138,7 +2138,7 @@
       </section>
 
 
-      
+
       <section class="card span-12 hidden" id="groupIceBathsCard">
         <h2>Raiders ice baths - all 3</h2>
         <div class="mode-note">Each ice bath is calculated separately at 6,000 L. Group view shown as 3 x 6,000 L = 18,000 L total.</div>
@@ -2327,11 +2327,14 @@
         <div class="field-grid quick-capture-grid" style="margin-bottom: 12px;">
           <div class="field">
             <label for="closedSite">Site</label>
-            <input id="closedSite" type="text" placeholder="Enter site" />
+            <select id="closedSite">
+              <option value="">Select preloaded site</option>
+              <option value="Canberra Raiders HQ">Canberra Raiders HQ</option>
+            </select>
           </div>
           <div class="field">
             <label for="closedSystemName">System / plant</label>
-            <input id="closedSystemName" type="text" placeholder="AHU, chiller plant, boiler loop" />
+            <input id="closedSystemName" type="text" placeholder="Select a site first" readonly />
           </div>
           <div class="field">
             <label for="closedTechnician">Technician</label>
@@ -2355,13 +2358,26 @@
             <input id="closedVisitInterval" type="number" min="1" step="1" value="30" />
           </div>
         </div>
+        <div class="hint" id="closedLoopSiteNote" style="margin: 0 0 12px;">Select a preloaded site to load its closed-loop systems.</div>
         <div class="field">
           <label for="closedNotes">Closed loop notes</label>
-          <textarea id="closedNotes" placeholder="Optional notes about dosing, bleed-off, filter changes, contamination, corrosion risk or actions taken"></textarea>
+          <textarea id="closedNotes" placeholder="Optional notes about dosing, make-up water, pressure, air ingress, leaks, filter changes, corrosion risk, glycol, odour/slime or actions taken"></textarea>
         </div>
       </section>
 
-      <section class="card span-6">
+      <section class="card span-12 hidden" id="closedLoopFieldChecksCard">
+        <h2>Closed loop field checks</h2>
+        <div class="field-grid">
+          <div class="field"><label for="closedMakeupStatus">Make-up / pressure</label><select id="closedMakeupStatus"><option value="Not checked">Not checked</option><option value="Stable">Stable</option><option value="High make-up or pressure issue">High make-up or pressure issue</option></select></div>
+          <div class="field"><label for="closedAirLeakStatus">Air / leak signs</label><select id="closedAirLeakStatus"><option value="Not checked">Not checked</option><option value="No issue observed">No issue observed</option><option value="Air or leak suspected">Air or leak suspected</option></select></div>
+          <div class="field"><label for="closedFilterStatus">Filter / strainer</label><select id="closedFilterStatus"><option value="Not checked">Not checked</option><option value="Clean">Clean</option><option value="Needs cleaning">Needs cleaning</option></select></div>
+          <div class="field"><label for="closedCorrosionStatus">Corrosion / debris</label><select id="closedCorrosionStatus"><option value="Not checked">Not checked</option><option value="Clear sample">Clear sample</option><option value="Discolouration or debris noted">Discolouration or debris noted</option></select></div>
+          <div class="field"><label for="closedMicroStatus">Odour / slime</label><select id="closedMicroStatus"><option value="Not checked">Not checked</option><option value="No issue observed">No issue observed</option><option value="Odour or slime noted">Odour or slime noted</option></select></div>
+          <div class="field"><label for="closedGlycolStatus">Glycol / freeze point</label><select id="closedGlycolStatus"><option value="Not applicable">Not applicable</option><option value="Checked in range">Checked in range</option><option value="Check required">Check required</option></select></div>
+        </div>
+      </section>
+
+      <section class="card span-6 closed-loop-system-card hidden" id="closedLoopHhwCard" data-closed-loop-card="HHW">
         <h2>HHW</h2>
         <div class="field-grid">
           <div class="field"><label for="hhwTds">TDS</label><input id="hhwTds" type="number" step="1" inputmode="decimal" placeholder="ppm" /></div>
@@ -2376,7 +2392,7 @@
         </div>
       </section>
 
-      <section class="card span-6">
+      <section class="card span-6 closed-loop-system-card hidden" id="closedLoopChwCard" data-closed-loop-card="CHW">
         <h2>CHW</h2>
         <div class="field-grid">
           <div class="field"><label for="chwTds">TDS</label><input id="chwTds" type="number" step="1" inputmode="decimal" placeholder="ppm" /></div>
@@ -2646,6 +2662,16 @@
     const TECHNICIAN_STORAGE_KEY = 'mbs-technician-names-v1';
     const TECHNICIAN_PROFILE_STORAGE_KEY = 'mbs-technician-profile-v1';
     const COST_SYNC_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+    const CLOSED_LOOP_SITES = [
+      {
+        site: 'Canberra Raiders HQ',
+        systemName: 'Canberra Raiders HQ - HHW and CHW',
+        loops: [
+          { key: 'hhw', label: 'HHW', name: 'Heating hot water', fieldPrefix: 'hhw', cardId: 'closedLoopHhwCard', ranges: { tds: [500, 1500], ph: [8.0, 10.0], inhibitor: [600, 1200] } },
+          { key: 'chw', label: 'CHW', name: 'Chilled water', fieldPrefix: 'chw', cardId: 'closedLoopChwCard', ranges: { tds: [250, 1200], ph: [7.5, 9.5], inhibitor: [600, 1200] } }
+        ]
+      }
+    ];
     const DEFAULT_GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxim0-6TTC5IBLXUAG7vYDE8wf_criRVROl5uuDmAdWfe3rkWh-3wHitmbYEUjtjFkR/exec';
     let activeScreen = 'pools';
     let activeHistoryTrendMetric = 'ph';
@@ -4907,15 +4933,95 @@
       return { label: 'In range', className: 'status-pill status-good' };
     }
 
+    function populateClosedLoopSiteSelect() {
+      const field = inputs.closedSite;
+      if (!field) return;
+      const current = field.value;
+      field.innerHTML = '<option value="">Select preloaded site</option>' + CLOSED_LOOP_SITES.map(site => `<option value="${escapeHtml(site.site)}">${escapeHtml(site.site)}</option>`).join('');
+      if (CLOSED_LOOP_SITES.some(site => site.site === current)) field.value = current;
+    }
+
+    function getClosedLoopSiteConfig() {
+      const selected = inputs.closedSite?.value || '';
+      return CLOSED_LOOP_SITES.find(site => site.site === selected) || null;
+    }
+
+    function getClosedLoopLoopDefinitions() {
+      return getClosedLoopSiteConfig()?.loops || [];
+    }
+
+    function setClosedLoopDefaultRange(loop, parameter, suffix, overwrite = true) {
+      const range = loop.ranges?.[parameter];
+      if (!range) return;
+      const minField = inputs[`${loop.fieldPrefix}${suffix}Min`];
+      const maxField = inputs[`${loop.fieldPrefix}${suffix}Max`];
+      if (minField && (overwrite || !minField.value)) minField.value = String(range[0]);
+      if (maxField && (overwrite || !maxField.value)) maxField.value = String(range[1]);
+    }
+
+    function applyClosedLoopSiteDefaults() {
+      const config = getClosedLoopSiteConfig();
+      if (!config) {
+        if (inputs.closedSystemName) inputs.closedSystemName.value = '';
+        return;
+      }
+      if (inputs.closedSystemName) inputs.closedSystemName.value = config.systemName;
+      config.loops.forEach(loop => {
+        setClosedLoopDefaultRange(loop, 'tds', 'Tds');
+        setClosedLoopDefaultRange(loop, 'ph', 'Ph');
+        setClosedLoopDefaultRange(loop, 'inhibitor', 'Inhibitor');
+      });
+    }
+
+    function syncClosedLoopSiteUi() {
+      const config = getClosedLoopSiteConfig();
+      const activeLoopLabels = new Set((config?.loops || []).map(loop => loop.label));
+      document.querySelectorAll('[data-closed-loop-card]').forEach(card => {
+        card.classList.toggle('hidden', !activeLoopLabels.has(card.dataset.closedLoopCard));
+      });
+      qs('closedLoopFieldChecksCard')?.classList.toggle('hidden', !config);
+      const note = qs('closedLoopSiteNote');
+      if (note) {
+        note.textContent = config
+          ? `${config.site} loaded: ${config.loops.map(loop => loop.label).join(' and ')}.`
+          : 'Select a preloaded site to load its closed-loop systems.';
+      }
+      if (config && inputs.closedSystemName && !inputs.closedSystemName.value) inputs.closedSystemName.value = config.systemName;
+      const systems = qs('closedLoopKpiSystems');
+      const systemsUnit = systems?.nextElementSibling;
+      if (systems) systems.textContent = config ? String(config.loops.length) : '0';
+      if (systemsUnit) systemsUnit.textContent = config ? config.loops.map(loop => loop.label).join(' and ') : 'select site';
+    }
+
+    function handleClosedLoopSiteSelectionChange() {
+      applyClosedLoopSiteDefaults();
+      syncClosedLoopSiteUi();
+      handleInputChange();
+    }
+
+    function requireClosedLoopSiteSelected() {
+      if (getClosedLoopSiteConfig()) return true;
+      alert('Select Canberra Raiders HQ before generating a closed loop report.');
+      return false;
+    }
+
     function buildClosedLoopRows() {
-      const fields = [
-        { loop: 'HHW', parameter: 'TDS', current: n(inputs.hhwTds.value), min: n(inputs.hhwTdsMin.value), max: n(inputs.hhwTdsMax.value), decimals: 0, unit: 'ppm' },
-        { loop: 'HHW', parameter: 'pH', current: n(inputs.hhwPh.value), min: n(inputs.hhwPhMin.value), max: n(inputs.hhwPhMax.value), decimals: 2, unit: '' },
-        { loop: 'HHW', parameter: 'Inhibitor', current: n(inputs.hhwInhibitor.value), min: n(inputs.hhwInhibitorMin.value), max: n(inputs.hhwInhibitorMax.value), decimals: 2, unit: '' },
-        { loop: 'CHW', parameter: 'TDS', current: n(inputs.chwTds.value), min: n(inputs.chwTdsMin.value), max: n(inputs.chwTdsMax.value), decimals: 0, unit: 'ppm' },
-        { loop: 'CHW', parameter: 'pH', current: n(inputs.chwPh.value), min: n(inputs.chwPhMin.value), max: n(inputs.chwPhMax.value), decimals: 2, unit: '' },
-        { loop: 'CHW', parameter: 'Inhibitor', current: n(inputs.chwInhibitor.value), min: n(inputs.chwInhibitorMin.value), max: n(inputs.chwInhibitorMax.value), decimals: 2, unit: '' }
+      const definitions = getClosedLoopLoopDefinitions();
+      const parameters = [
+        { parameter: 'TDS', key: 'tds', suffix: 'Tds', decimals: 0, unit: 'ppm' },
+        { parameter: 'pH', key: 'ph', suffix: 'Ph', decimals: 2, unit: '' },
+        { parameter: 'Inhibitor', key: 'inhibitor', suffix: 'Inhibitor', decimals: 2, unit: '' }
       ];
+      const fields = definitions.flatMap(loop => parameters.map(parameter => ({
+        loop: loop.label,
+        systemName: loop.name,
+        parameter: parameter.parameter,
+        current: n(inputs[`${loop.fieldPrefix}${parameter.suffix}`]?.value),
+        min: n(inputs[`${loop.fieldPrefix}${parameter.suffix}Min`]?.value),
+        max: n(inputs[`${loop.fieldPrefix}${parameter.suffix}Max`]?.value),
+        decimals: parameter.decimals,
+        unit: parameter.unit
+      })));
       return fields.map(item => {
         const status = closedLoopStatus(item.current, item.min, item.max);
         let action = status.action || 'Monitor to the next visit.';
@@ -4923,7 +5029,7 @@
           if (item.parameter === 'TDS' && item.current > item.max) action = 'High TDS - investigate contamination, bleed-off or dilution requirements and retest.';
           else if (item.parameter === 'TDS' && item.current < item.min) action = 'Low TDS - confirm make-up water condition and confirm treatment concentration.';
           else if (item.parameter === 'pH' && item.current > item.max) action = 'High pH - adjust downward as per the site treatment programme and retest.';
-          else if (item.parameter === 'pH' && item.current < item.min) action = 'Low pH - investigate corrosion risk and correct as per the site treatment programme.';
+          else if (item.parameter === 'pH' && item.current < item.min) action = 'Low pH - investigate corrosion risk, air ingress or dilution and correct as per the site treatment programme.';
           else if (item.parameter === 'Inhibitor' && item.current < item.min) action = 'Low inhibitor - top up inhibitor as per the treatment programme and verify system protection.';
           else if (item.parameter === 'Inhibitor' && item.current > item.max) action = 'High inhibitor - confirm dosing concentration and investigate overfeed.';
           else action = 'Within range - continue normal monitoring.';
@@ -4931,11 +5037,19 @@
         return { ...item, status, action };
       });
     }
-
     function renderClosedLoopTable() {
       const tbody = qs('closedLoopTableBody');
       if (!tbody) return;
+      syncClosedLoopSiteUi();
+      const config = getClosedLoopSiteConfig();
       const rows = buildClosedLoopRows();
+      if (!config) {
+        tbody.innerHTML = '<tr><td colspan="6">Select a preloaded site to load its closed-loop systems.</td></tr>';
+        qs('closedLoopKpiFlags').textContent = '0';
+        qs('closedLoopKpiForecast').textContent = 'Select site';
+        qs('closedLoopKpiReport').textContent = 'Draft';
+        return;
+      }
       tbody.innerHTML = rows.map(row => `
         <tr>
           <td><strong>${escapeHtml(row.loop)}</strong></td>
@@ -4947,28 +5061,40 @@
         </tr>
       `).join('');
       const flagged = rows.filter(row => row.status.label === 'Low' || row.status.label === 'High').length;
-      const forecast = flagged >= 3 ? 'Action' : flagged >= 1 ? 'Watch' : 'Stable';
+      const missing = rows.filter(row => row.status.label === 'Missing').length;
+      const forecast = flagged >= 3 ? 'Action' : flagged >= 1 ? 'Watch' : missing ? 'Incomplete' : 'Stable';
       qs('closedLoopKpiFlags').textContent = String(flagged);
       qs('closedLoopKpiForecast').textContent = forecast;
-      qs('closedLoopKpiReport').textContent = 'Live';
+      qs('closedLoopKpiReport').textContent = rows.length ? 'Live' : 'Draft';
+    }
+    function buildClosedLoopFieldChecks() {
+      return [
+        { label: 'Make-up / pressure', value: inputs.closedMakeupStatus?.value || 'Not checked' },
+        { label: 'Air / leak signs', value: inputs.closedAirLeakStatus?.value || 'Not checked' },
+        { label: 'Filter / strainer', value: inputs.closedFilterStatus?.value || 'Not checked' },
+        { label: 'Corrosion / debris', value: inputs.closedCorrosionStatus?.value || 'Not checked' },
+        { label: 'Odour / slime', value: inputs.closedMicroStatus?.value || 'Not checked' },
+        { label: 'Glycol / freeze point', value: inputs.closedGlycolStatus?.value || 'Not applicable' }
+      ];
     }
 
     function buildClosedLoopReportModel() {
       const rows = buildClosedLoopRows();
+      const siteConfig = getClosedLoopSiteConfig();
       return {
         title: 'Closed Loop Water Quality Testing Report',
         companyName: 'MBS Facility Management',
         companyLines: ['63 Tennant Street', 'Fyshwick ACT 2609', '(02) 6162 0216', 'info@mbsfm.com.au'],
-        site: inputs.closedSite.value || '-',
-        systemName: inputs.closedSystemName.value || '-',
+        site: siteConfig?.site || inputs.closedSite.value || '-',
+        systemName: inputs.closedSystemName.value || siteConfig?.systemName || '-',
         technician: inputs.closedTechnician.value || '-',
         date: formatDateDisplay(inputs.closedDate.value || ''),
         testTime: formatTimeDisplay(inputs.closedTime.value || ''),
         rows,
+        checks: buildClosedLoopFieldChecks(),
         notes: (inputs.closedNotes.value || '').trim() || 'No additional closed loop notes entered.'
       };
     }
-
     function buildClosedLoopReportHtml() {
       const model = buildClosedLoopReportModel();
       return `
@@ -5017,6 +5143,12 @@
               `).join('')}
             </tbody>
           </table>
+          <div class="report-section-bar">Field checks</div>
+          <table class="report-table">
+            <tbody>
+              ${model.checks.map(item => `<tr><td>${escapeHtml(item.label)}</td><td>${escapeHtml(item.value)}</td></tr>`).join('')}
+            </tbody>
+          </table>
           <div class="report-section-block">
             <div class="report-section-block-title">Technician notes</div>
             <div class="report-paragraph">${escapeHtml(model.notes)}</div>
@@ -5027,14 +5159,16 @@
     }
 
     function renderClosedLoopReport() {
+      if (!requireClosedLoopSiteSelected()) return false;
       const output = qs('closedReportOutput');
-      if (!output) return;
+      if (!output) return false;
       output.innerHTML = buildClosedLoopReportHtml();
       qs('closedLoopKpiReport').textContent = 'Ready';
+      return true;
     }
 
     async function saveClosedLoopPdfReport() {
-      renderClosedLoopReport();
+      if (!renderClosedLoopReport()) return;
       if (!window.jspdf || !window.jspdf.jsPDF) {
         alert('PDF library did not load. Please refresh and try again.');
         return;
@@ -5088,6 +5222,10 @@
         row.action
       ]);
       y = drawTable(doc, margin, y, [18, 28, 26, 35, 20, pageWidth - (margin * 2) - 18 - 28 - 26 - 35 - 20], ['Loop', 'Parameter', 'Current', 'Range', 'Status', 'Recommended action'], rows, { fontSize: 8, headerFontSize: 8, striped: true });
+      y += 4;
+      y = drawSectionBar('Field checks', y);
+      const checkRows = model.checks.map(item => [item.label, item.value]);
+      y = drawTable(doc, margin, y, [58, pageWidth - (margin * 2) - 58], ['Check', 'Result'], checkRows, { fontSize: 8, headerFontSize: 8, striped: true });
       y += 6;
       doc.setDrawColor(...borderBlue);
       doc.setFillColor(255, 255, 255);
@@ -5125,6 +5263,7 @@
         date: inputs.closedDate.value || '',
         time: inputs.closedTime.value || '',
         rows: buildClosedLoopRows(),
+        checks: buildClosedLoopFieldChecks(),
         notes: (inputs.closedNotes.value || '').trim()
       });
       while (history.length > 150) history.shift();
@@ -6762,7 +6901,7 @@
       return lines.join('\n');
     }
 
-    
+
 function buildReportHtml() {
       const model = buildReportModel();
       return `
@@ -7059,7 +7198,7 @@ function buildReportHtml() {
       return true;
     }
 
-    
+
 function drawTable(doc, startX, startY, columnWidths, headers, rows, options = {}) {
       const pageHeight = doc.internal.pageSize.getHeight();
       const marginBottom = options.marginBottom || 12;
@@ -7115,7 +7254,7 @@ function drawTable(doc, startX, startY, columnWidths, headers, rows, options = {
       return y;
     }
 
-    
+
 async function savePdfReport() {
       renderReport();
       if (!window.jspdf || !window.jspdf.jsPDF) {
@@ -8401,6 +8540,7 @@ async function savePdfReport() {
         }
       });
       populatePoolSelect();
+      populateClosedLoopSiteSelect();
       inputs.poolSelect.value = POOLS[0].key;
       photoDataUrl = '';
       currentPhotoFile = null;
@@ -8410,6 +8550,7 @@ async function savePdfReport() {
       setPhotoStatus('For best results, fill the photo with the blue Spin Touch screen, hold square-on, tap to focus, then read. The app reads in Spin Touch order: FCL, TCL, CCL, pH, ALK, HARD, CYA, COPPER, PHOS, SALT.');
       setDefaultDateTime();
       loadPoolDefaults();
+      syncClosedLoopSiteUi();
       renderQuickActions();
       restoreQuickActions();
       renderCombinedTable();
@@ -8468,6 +8609,7 @@ async function savePdfReport() {
         'ctxOwnerChemicals', 'ctxNoCirculation', 'ctxHeavySun', 'ctxHighBatherLoad', 'ctxRainDilution', 'ctxTopUpOff',
         'assetType', 'assetId', 'assetLocation', 'assetStatus', 'assetNote',
         'closedSite', 'closedSystemName', 'closedTechnician', 'closedDate', 'closedTime', 'closedVisitInterval', 'closedNotes',
+        'closedMakeupStatus', 'closedAirLeakStatus', 'closedFilterStatus', 'closedCorrosionStatus', 'closedMicroStatus', 'closedGlycolStatus',
         'hhwTds', 'hhwTdsMin', 'hhwTdsMax', 'hhwPh', 'hhwPhMin', 'hhwPhMax', 'hhwInhibitor', 'hhwInhibitorMin', 'hhwInhibitorMax',
         'chwTds', 'chwTdsMin', 'chwTdsMax', 'chwPh', 'chwPhMin', 'chwPhMax', 'chwInhibitor', 'chwInhibitorMin', 'chwInhibitorMax',
         'iceBath1Clarity', 'iceBath1Ph', 'iceBath1Fc', 'iceBath1Tc', 'iceBath1Alk', 'iceBath1Calcium', 'iceBath1Temp', 'iceBath1Phosphates', 'iceBath1Note',
@@ -8479,12 +8621,14 @@ async function savePdfReport() {
       });
 
       populatePoolSelect();
+      populateClosedLoopSiteSelect();
       setDefaultDateTime();
       inputs.poolSelect.value = POOLS[0].key;
       loadState();
       applyUrlSelection();
       if (!inputs.poolSelect.value) inputs.poolSelect.value = POOLS[0].key;
       loadPoolDefaults();
+      syncClosedLoopSiteUi();
       renderQuickActions();
       restoreQuickActions();
       renderCombinedTable();
@@ -8500,12 +8644,13 @@ async function savePdfReport() {
 
       Object.values(inputs).forEach(input => {
         if (!input) return;
-        if (input.id === 'poolVolumeAuto' || input.id === 'activeVolume') return;
+        if (input.id === 'poolVolumeAuto' || input.id === 'activeVolume' || input.id === 'closedSite') return;
         input.addEventListener('input', handleInputChange);
         input.addEventListener('change', handleInputChange);
       });
 
       ['reportTechnician', 'closedTechnician'].forEach(id => qs(id)?.addEventListener('change', handleTechnicianSelection));
+      inputs.closedSite?.addEventListener('change', handleClosedLoopSiteSelectionChange);
 
       inputs.poolSelect.addEventListener('change', () => {
         loadPoolDefaults();

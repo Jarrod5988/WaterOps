@@ -1957,6 +1957,303 @@
         animation-iteration-count: 1 !important;
       }
     }
+    /* Modern WaterOps UI polish */
+    :root {
+      --brand: #009fe3;
+      --blue: #009fe3;
+      --blue-dark: #075985;
+      --blue-light: rgba(0, 159, 227, 0.10);
+      --line: rgba(7, 89, 133, 0.16);
+      --text: #12263a;
+      --muted: #60758d;
+      --bg: #f4f9fc;
+      --card: #ffffff;
+      --shadow: 0 10px 28px rgba(15, 65, 100, 0.09);
+      --radius: 8px;
+    }
+
+    html, body {
+      background: linear-gradient(180deg, #f7fbfe 0%, #edf7fc 44%, #f7fbfe 100%);
+      color: var(--text);
+    }
+
+    body::before,
+    .header::after,
+    .card::after {
+      display: none;
+    }
+
+    .app {
+      max-width: 1120px;
+    }
+
+    .header,
+    .card,
+    .app-tabs {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(7, 89, 133, 0.14);
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(15, 65, 100, 0.08);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .header {
+      padding: 14px 16px;
+      gap: 14px;
+    }
+
+    .brand.brand-header-image {
+      gap: 14px;
+    }
+
+    .waterops-brand-mark {
+      gap: 10px;
+    }
+
+    .waterops-header-lockup .waterops-brand-icon {
+      width: 40px;
+      height: 40px;
+      flex-basis: 40px;
+      max-width: 40px;
+      filter: drop-shadow(0 8px 14px rgba(0, 113, 175, 0.16));
+    }
+
+    .waterops-brand-name {
+      color: #08385f;
+      font-size: clamp(23px, 4.8vw, 31px);
+    }
+
+    .waterops-brand-name span {
+      color: #009fe3;
+    }
+
+    .brand-copy-center p {
+      color: #617790;
+      font-size: clamp(15px, 2.1vw, 18px);
+      line-height: 1.38;
+    }
+
+    .access-status,
+    .hint,
+    .summary,
+    .report-output,
+    .preview-box,
+    .subcard,
+    .mini-pill,
+    .icebath-result-card,
+    .icebath-compact-card,
+    .icebath-reference-card,
+    .dose-row,
+    .qr-card,
+    .log-table-wrap {
+      background: #ffffff;
+      border: 1px solid rgba(7, 89, 133, 0.14);
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(15, 65, 100, 0.05);
+    }
+
+    .card {
+      padding: 16px;
+    }
+
+    .card h2 {
+      color: #102a43;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .card h2::before {
+      width: 9px;
+      height: 9px;
+      background: #5fd3ff;
+      box-shadow: 0 0 0 4px rgba(0, 159, 227, 0.10);
+    }
+
+    .field label,
+    .icebath-compact-controls .field label {
+      color: #006fae;
+      letter-spacing: 0;
+    }
+
+    input,
+    select,
+    textarea {
+      border: 1px solid rgba(8, 84, 130, 0.18);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.9), inset 0 1px 2px rgba(15, 65, 100, 0.04);
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+    }
+
+    input[readonly] {
+      background: #f2f7fb;
+      color: #33506b;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus,
+    .button:focus-visible,
+    .tab-btn:focus-visible,
+    .check-pill:focus-within,
+    #backToTop:focus-visible {
+      outline: 3px solid rgba(0, 159, 227, 0.18);
+      border-color: rgba(0, 118, 180, 0.62);
+      box-shadow: 0 0 0 1px rgba(0, 159, 227, 0.16), 0 8px 18px rgba(0, 113, 175, 0.08);
+    }
+
+    .button,
+    #resetBtn {
+      border-radius: 8px;
+      background: linear-gradient(180deg, #25b8ed 0%, #0095d6 100%);
+      border: 1px solid rgba(0, 118, 180, 0.20);
+      box-shadow: 0 10px 18px rgba(0, 122, 185, 0.16);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .button:hover,
+    #resetBtn:hover,
+    .tab-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 22px rgba(0, 122, 185, 0.16);
+    }
+
+    .button.secondary,
+    .button.ghost,
+    #resetBtn {
+      color: #0b4775;
+      background: #e8f5fc;
+      border-color: rgba(0, 118, 180, 0.24);
+      box-shadow: none;
+    }
+
+    .button.secondary:hover,
+    .button.ghost:hover,
+    #resetBtn:hover,
+    #resetBtn:focus {
+      color: #08385f;
+      background: #dff1fb;
+      box-shadow: 0 8px 18px rgba(0, 122, 185, 0.10);
+    }
+
+    .app-tabs {
+      padding: 8px;
+      gap: 8px;
+    }
+
+    .tab-btn,
+    .app-tabs .tab-btn {
+      border-radius: 8px;
+      border: 1px solid rgba(7, 89, 133, 0.16);
+      background: #ffffff;
+      color: #0b4775;
+      box-shadow: none;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .tab-btn.active {
+      color: #ffffff;
+      background: linear-gradient(180deg, #28b9ee 0%, #0095d6 100%);
+      border-color: rgba(0, 118, 180, 0.18);
+      box-shadow: 0 10px 20px rgba(0, 122, 185, 0.18);
+    }
+
+    .screen-panel.active {
+      box-shadow: none;
+    }
+
+    .kpi {
+      border: 1px solid rgba(7, 89, 133, 0.14);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 8px 18px rgba(15, 65, 100, 0.05);
+    }
+
+    .kpi .value,
+    .icebath-compact-dose,
+    .icebath-reference-value {
+      color: #0d426c;
+    }
+
+    .icebath-compact-title,
+    .icebath-compact-facts,
+    .icebath-reference-card strong,
+    .subcard h3,
+    .qr-card h3 {
+      color: #113b63;
+    }
+
+    .table-wrap,
+    .log-table-wrap {
+      overflow-x: auto;
+    }
+
+    table,
+    .stock-table {
+      border-radius: 8px;
+      border-color: rgba(7, 89, 133, 0.14);
+    }
+
+    th,
+    .stock-table th {
+      background: #075985;
+      letter-spacing: 0.04em;
+    }
+
+    td,
+    .stock-table td {
+      border-bottom-color: #e4edf5;
+    }
+
+    .status-pill,
+    .metric-chip,
+    .mini-pill,
+    .check-pill {
+      border-radius: 999px;
+    }
+
+    #backToTop {
+      background: linear-gradient(180deg, #28b9ee 0%, #0095d6 100%);
+      box-shadow: 0 12px 24px rgba(0, 122, 185, 0.22);
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 8px;
+      }
+
+      .header,
+      .card {
+        padding: 14px;
+      }
+
+      .brand.brand-header-image {
+        align-items: flex-start;
+      }
+
+      .header .toolbar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+      }
+
+      .header .toolbar .button {
+        min-height: 44px;
+        padding: 10px 8px;
+        font-size: 14px;
+        line-height: 1.18;
+      }
+
+      .app-tabs {
+        border-radius: 8px;
+      }
+
+      .app-tabs .tab-btn {
+        min-height: 46px;
+        font-size: 15px;
+      }
+    }
   </style>
 </head>
 <body>

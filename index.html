@@ -5117,12 +5117,13 @@
     }
 
     function getCurrentAccessRole() {
-      if (!hasTechnicianAccessRules()) return 'admin';
+      if (!hasTechnicianAccessRules()) return '';
       const preferred = getPreferredTechnicianName();
       const access = getTechnicianAccess(preferred);
-      if (access && access.active && !access.pinRequired) return access.role;
+      if (!access || !access.active) return '';
+      if (!access.pinRequired) return access.role || '';
       const auth = getCurrentTechnicianAuth();
-      if (auth && auth.role) return auth.role;
+      if (auth && auth.role && auth.pinRequired === true) return auth.role;
       return '';
     }
 
@@ -5173,9 +5174,9 @@
       const isAdmin = role === 'admin';
       const preferred = getPreferredTechnicianName();
       document.querySelectorAll('[data-screen="admin"]').forEach(btn => {
-        btn.classList.toggle('hidden', hasRules && !isAdmin);
+        btn.classList.toggle('hidden', !isAdmin);
       });
-      if (activeScreen === 'admin' && hasRules && !isAdmin) {
+      if (activeScreen === 'admin' && !isAdmin) {
         activeScreen = 'pools';
         setActiveScreen('pools');
         return;
@@ -5184,7 +5185,7 @@
       if (box) {
         box.innerHTML = hasRules
           ? `<strong>Access:</strong> ${escapeHtml(preferred || 'Select technician')} - ${escapeHtml(roleLabel(role))}${isAdmin ? ' access' : ''}`
-          : '<strong>Access:</strong> setup unlocked until technician roles are loaded from Google Sheets.';
+          : '<strong>Access:</strong> admin locked until technician roles are loaded from Google Sheets.';
       }
     }
 
@@ -5192,7 +5193,7 @@
       const cleanName = String(name || '').trim();
       if (!cleanName || !hasTechnicianAccessRules()) {
         applyAccessControls();
-        return true;
+        return false;
       }
       const access = getTechnicianAccess(cleanName);
       if (!access || !access.active) {
@@ -5202,12 +5203,12 @@
         return false;
       }
       if (!access.pinRequired) {
-        saveJson(TECHNICIAN_AUTH_STORAGE_KEY, { name: cleanName, role: access.role || '', verifiedAt: new Date().toISOString() });
+        saveJson(TECHNICIAN_AUTH_STORAGE_KEY, { name: cleanName, role: access.role || '', pinRequired: false, verifiedAt: new Date().toISOString() });
         applyAccessControls();
         return true;
       }
       const existing = getCurrentTechnicianAuth();
-      if (existing && existing.name === cleanName && existing.role) {
+      if (existing && existing.name === cleanName && existing.role && existing.pinRequired === true) {
         applyAccessControls();
         return true;
       }
@@ -5221,7 +5222,7 @@
         if (!response || response.ok === false || !response.verified) {
           throw new Error(response && response.error ? response.error : 'PIN not verified.');
         }
-        saveJson(TECHNICIAN_AUTH_STORAGE_KEY, { name: cleanName, role: response.role || access.role || 'tech', verifiedAt: new Date().toISOString() });
+        saveJson(TECHNICIAN_AUTH_STORAGE_KEY, { name: cleanName, role: response.role || access.role || 'tech', pinRequired: true, verifiedAt: new Date().toISOString() });
         applyAccessControls();
         showAppToast(`${cleanName} verified as ${roleLabel(response.role || access.role || 'tech')}.`);
         return true;
@@ -6171,7 +6172,7 @@
     function setActiveScreen(screen) {
       const map = { pools: 'screenPools', closedLoops: 'screenClosedLoops', insights: 'screenInsights', costCentre: 'screenCostCentre', admin: 'screenAdmin' };
       if (!map[screen]) screen = 'pools';
-      if (screen === 'admin' && hasTechnicianAccessRules() && !isAdminUnlocked()) {
+      if (screen === 'admin' && !isAdminUnlocked()) {
         showAppToast('Admin setup is locked for this technician.');
         screen = 'pools';
       }

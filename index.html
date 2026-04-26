@@ -4422,12 +4422,12 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body
         });
-        setSheetStatus('Update sent to the live master sheet.', 'success');
+        setSheetStatus(payload && payload.payloadType === 'closedLoopVisit' ? 'Closed loop update sent to the live master sheet.' : 'Update sent to the live master sheet.', 'success');
         return { attempted: true, success: true };
       } catch (error) {
         try {
           await submitPayloadViaHiddenForm(url, body);
-          setSheetStatus('Update sent to the live master sheet.', 'success');
+          setSheetStatus(payload && payload.payloadType === 'closedLoopVisit' ? 'Closed loop update sent to the live master sheet.' : 'Update sent to the live master sheet.', 'success');
           return { attempted: true, success: true };
         } catch (fallbackError) {
           console.error('Google Sheet update failed', fallbackError);
@@ -4892,13 +4892,36 @@
     }
 
     function buildClosedLoopSheetPayload() {
+      const rows = buildClosedLoopRows();
+      const checks = buildClosedLoopFieldChecks();
+      const flaggedCount = rows.filter(row => row.status.label === 'Low' || row.status.label === 'High').length;
+      const missingCount = rows.filter(row => row.status.label === 'Missing').length;
+      const forecast = flaggedCount >= 3 ? 'Action' : flaggedCount >= 1 ? 'Watch' : missingCount ? 'Incomplete' : 'Stable';
+      const sheetRows = rows.map(row => ({
+        loop: row.loop,
+        systemName: row.systemName || '',
+        parameter: row.parameter,
+        current: row.current ?? '',
+        min: row.min ?? '',
+        max: row.max ?? '',
+        unit: row.unit || '',
+        status: row.status.label,
+        action: row.action
+      }));
       return {
+        payloadType: 'closedLoopVisit',
+        sentAt: new Date().toISOString(),
+        deviceId: getCostSyncDeviceId(),
+        visitId: `closed-loop-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         technician: inputs.closedTechnician.value || '',
         serviceType: 'Closed loop service',
         site: inputs.closedSite.value || '',
         assetName: inputs.closedSystemName.value || '',
         volumeLitres: '',
         system: 'Closed loop',
+        serviceDate: inputs.closedDate.value || '',
+        serviceTime: inputs.closedTime.value || '',
+        nextServiceDays: n(inputs.closedVisitInterval.value) ?? '',
         testTime: `${inputs.closedDate.value || ''} ${inputs.closedTime.value || ''}`.trim(),
         ph: '',
         freeChlorine: '',
@@ -4914,6 +4937,13 @@
         chwPh: n(inputs.chwPh.value) ?? '',
         chwTds: n(inputs.chwTds.value) ?? '',
         chwInhibitor: n(inputs.chwInhibitor.value) ?? '',
+        fieldChecks: checks,
+        checks,
+        closedLoopRows: sheetRows,
+        rows: sheetRows,
+        flaggedCount,
+        missingCount,
+        forecast,
         acidAddedMl: '',
         chlorineAddedG: '',
         bicarbAddedKg: '',

@@ -1918,7 +1918,7 @@
       </button>
       <button class="tab-btn" type="button" data-screen="costCentre">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 3h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1zm2 4v2h12V7H6zm0 4v2h5v-2H6zm7 0v2h5v-2h-5zm-7 4v2h5v-2H6zm7 0v2h5v-2h-5z"/></svg>
-        <span>Cost centre</span>
+        <span>Site costs</span>
       </button>
       <button class="tab-btn" type="button" data-screen="admin">
         <!-- QR & setup icon (settings) -->
@@ -1933,7 +1933,7 @@
       <button class="tab-btn" type="button" data-screen="pools">Pool testing</button>
       <button class="tab-btn" type="button" data-screen="closedLoops">Closed loops</button>
       <button class="tab-btn" type="button" data-screen="insights">Insights & assets</button>
-      <button class="tab-btn" type="button" data-screen="costCentre">Cost centre</button>
+      <button class="tab-btn" type="button" data-screen="costCentre">Site costs</button>
     </div>
 
     <div id="screenPools" class="screen-panel active">
@@ -2314,7 +2314,7 @@
   <div id="screenCostCentre" class="screen-panel">
     <div class="grid">
       <section class="card span-12">
-        <h2>Cost centre</h2>
+        <h2>Site costs</h2>
         <div class="mode-note">Supervisor chemical costing, ongoing site costs and quote projections from the stock-used log.</div>
         <div id="costCentreContent"></div>
       </section>
@@ -2630,7 +2630,7 @@
           <div class="field">
             <label for="googleScriptUrl">Google Apps Script Web App URL</label>
             <input id="googleScriptUrl" type="url" placeholder="Paste your deployed /exec URL" />
-            <small>The deployed Apps Script web app URL is prefilled below. Reports and cost centre changes can sync to the live master sheet once the Apps Script supports the cost tabs.</small>
+            <small>The deployed Apps Script web app URL is prefilled below. Reports and site costs changes can sync to the live master sheet once the Apps Script supports the cost tabs.</small>
           </div>
         </div>
         <div class="actions" style="margin-bottom: 12px;">
@@ -2647,7 +2647,7 @@
           <button class="button ghost" id="clearHistoryBtn" type="button">Clear visit history</button>
           <button class="button ghost" id="clearAssetsBtn" type="button">Clear equipment register</button>
         </div>
-        <div class="hint">Visit history and asset notes are still local to this browser. Cost centre settings and stock-used logs can now be backed up to the Google Sheet and refreshed on other devices after the matching Apps Script is installed.</div>
+        <div class="hint">Visit history and asset notes are still local to this browser. Site costs settings and stock-used logs can now be backed up to the Google Sheet and refreshed on other devices after the matching Apps Script is installed.</div>
       </section>
     </div>
   </main>
@@ -4538,7 +4538,7 @@
       const payload = buildCostSyncPayload(action, data);
       const result = await updateLiveMasterSheet(payload);
       if (result && result.success && options.toast !== false) {
-        setCostSyncStatus('Cost centre data sent to the Google Sheet.', 'success');
+        setCostSyncStatus('Site costs data sent to the Google Sheet.', 'success');
       }
       return result;
     }
@@ -4691,11 +4691,11 @@
 
     async function refreshCostDataFromGoogleSheet() {
       try {
-        setCostSyncStatus('Refreshing cost centre data from Google Sheet...', 'info');
+        setCostSyncStatus('Refreshing site costs data from Google Sheet...', 'info');
         const response = await requestGoogleJsonp('costSnapshot');
         if (!response || response.ok === false) throw new Error(response && response.error ? response.error : 'No cost snapshot returned.');
         applyCostSyncSnapshot(response.snapshot || response.data || response);
-        setCostSyncStatus('Cost centre data refreshed from Google Sheet.', 'success');
+        setCostSyncStatus('Site costs data refreshed from Google Sheet.', 'success');
         showAppToast('Cost data refreshed.');
       } catch (error) {
         console.error('Cost sync refresh failed', error);
@@ -4712,7 +4712,7 @@
           const response = await requestGoogleJsonp('costSnapshot');
           if (response && response.ok !== false) {
             applyCostSyncSnapshot(response.snapshot || response.data || response);
-            setSheetStatus('Cost centre data refreshed from Google Sheet.', 'success');
+            setSheetStatus('Site costs data refreshed from Google Sheet.', 'success');
           }
         } catch (error) {
           console.info('Cost sync auto-refresh skipped', error);
@@ -5787,10 +5787,10 @@
       if (!wrap) return;
       wrap.innerHTML = `
         <div class="subcard" style="margin-top: 12px;">
-          <h3 style="margin-bottom: 10px;">Cost centre report</h3>
+          <h3 style="margin-bottom: 10px;">Site costs report</h3>
           <div class="mode-note" style="margin-bottom: 10px;">Supervisor costing area. Uses the saved chemical stock-used log for the selected pool. Add rates to calculate reports, ongoing costs and quote projections.</div>
           <div class="asset-form-grid">
-            <div class="field"><label for="costCentreCode">Cost centre / job code</label><input id="costCentreCode" type="text" placeholder="e.g. CC-4021 / WO-12345" /></div>
+            <div class="field"><label for="costCentreCode">Site cost / job code</label><input id="costCentreCode" type="text" placeholder="e.g. CC-4021 / WO-12345" /></div>
             <div class="field"><label for="costReportSupervisor">Supervisor</label><input id="costReportSupervisor" type="text" placeholder="Supervisor name" /></div>
             <div class="field"><label for="costReportJobRef">Job reference</label><input id="costReportJobRef" type="text" placeholder="Optional work order" /></div>
             <div class="field"><label for="costReportNotes">Cost notes</label><input id="costReportNotes" type="text" placeholder="Optional note for supervisor" /></div>
@@ -5866,7 +5866,7 @@
       saveCostSettingsState(state);
       renderCostReportPreview();
       sendCostSyncEvent('cost_settings_saved', { pool: getPoolSyncDetails(pool), settings: state[pool.key] });
-      showAppToast('Cost centre settings saved.');
+      showAppToast('Site costs settings saved.');
     }
 
     function getCostRateKey(tx) {
@@ -6055,11 +6055,11 @@
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...blue);
       doc.setFontSize(15);
-      doc.text('Chemical Cost Centre Report', margin + 66, 20);
+      doc.text('Chemical Site Costs Report', margin + 66, 20);
       doc.setFontSize(9);
       doc.text(`Site: ${model.pool.site || inputs.reportSite.value || '-'}`, margin + 66, 28);
       doc.text(`Pool: ${model.pool.poolName || inputs.reportPoolName.value || '-'}`, margin + 66, 35);
-      doc.text(`Cost centre: ${model.settings.costCentre || '-'}`, pageWidth - 86, 20);
+      doc.text(`Site cost code: ${model.settings.costCentre || '-'}`, pageWidth - 86, 20);
       doc.text(`Supervisor: ${model.settings.supervisor || '-'}`, pageWidth - 86, 28);
       doc.text(`Job ref: ${model.settings.jobRef || '-'}`, pageWidth - 86, 35);
       doc.setTextColor(0, 0, 0);
@@ -6085,11 +6085,11 @@
       doc.text(`${model.unpricedCount} line(s) pending rates. Generated ${model.generatedAt.toLocaleDateString()} ${model.generatedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`, margin, y + 6);
       if (model.settings.notes) doc.text(doc.splitTextToSize(`Notes: ${model.settings.notes}`, pageWidth - (margin * 2)), margin, y + 12);
       doc.text('Generated from WaterOps chemical stock used log.', pageWidth - margin, pageHeight - 10, { align: 'right' });
-      const filenameBase = `${model.settings.costCentre || model.pool.poolName || 'cost-centre'}-chemical-costs`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const filenameBase = `${model.settings.costCentre || model.pool.poolName || 'site-costs'}-chemical-costs`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const blob = doc.output('blob');
       await saveBlob(blob, `${filenameBase || 'chemical-cost-report'}-${getLocalDateInputValue(new Date())}.pdf`, 'application/pdf');
       await sendCostSyncEvent('cost_report_generated', { report: model, projection: buildCostProjectionModel() }, { toast: false });
-      showAppToast('Cost centre report generated.');
+      showAppToast('Site costs report generated.');
     }
 
     async function generateStandaloneCostReportPdf() {

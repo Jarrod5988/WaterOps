@@ -57,7 +57,7 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-       /* Use azure‑tinted radial accents and a soft sky gradient for the page background */
+       /* Use azureâ€‘tinted radial accents and a soft sky gradient for the page background */
        background:
          radial-gradient(circle at top left, rgba(0, 161, 224, 0.12), transparent 34%),
          radial-gradient(circle at top right, rgba(0, 190, 240, 0.09), transparent 30%),
@@ -171,7 +171,7 @@
      * width ensures the header remains compact and balanced. */
     .waterops-header-lockup img {
       display: block;
-      /* Reduce the maximum width of the droplet logo so it doesn’t dominate
+      /* Reduce the maximum width of the droplet logo so it doesnâ€™t dominate
        * the header.  Using !important ensures this rule overrides any
        * inline dimensions on the embedded image. */
       max-width: 90px !important;
@@ -230,7 +230,7 @@
     }
 
     .brand-copy-center p {
-      /* Remove the centering and max‑width so the copy flows naturally
+      /* Remove the centering and maxâ€‘width so the copy flows naturally
        * next to the logo.  A slightly smaller font size improves
        * hierarchy and prevents the tagline from dominating the header. */
       margin: 0;
@@ -940,7 +940,7 @@
      * Give users control over long forms by allowing each card to be collapsed.
      * When collapsed, only the heading remains visible. Clicking the heading
      * toggles the collapsed state. A small arrow on the heading conveys
-     * whether the section is open (▲) or closed (▼). These rules hide all
+     * whether the section is open (â–²) or closed (â–¼). These rules hide all
      * immediate children of a card except its <h2> when the card has the
      * `.collapsed` class. The arrow icons are added via the ::after pseudo
      * element and swap depending on the collapsed state.
@@ -987,7 +987,7 @@
 
     /* Dark mode overrides for ice bath cards.  Deep gradients and
        softened border colours provide separation while maintaining a
-       low‑contrast look suitable for night viewing. */
+       lowâ€‘contrast look suitable for night viewing. */
     [data-theme="dark"] .icebath-result-card {
       background: linear-gradient(180deg, rgba(24, 37, 58, 0.95) 0%, rgba(20, 32, 55, 0.93) 100%);
       border-color: rgba(80, 120, 170, 0.35);
@@ -1897,7 +1897,7 @@
       Side navigation bar to improve discoverability of the main application modules.  A vertical
       menu anchors to the left of the page on larger screens and replaces the original
       horizontal tab bar.  Each button has an icon and descriptive label.  On smaller
-      screens the side‑nav hides automatically and the existing horizontal tabs can still
+      screens the sideâ€‘nav hides automatically and the existing horizontal tabs can still
       appear (see media queries in the CSS below).
     -->
     <nav class="side-nav" id="sideNav" aria-label="Primary sections">
@@ -2123,7 +2123,7 @@
           </div>
           <div class="field">
             <label for="temperature">Water temperature</label>
-            <input id="temperature" type="number" inputmode="decimal" step="0.1" placeholder="°C" />
+            <input id="temperature" type="number" inputmode="decimal" step="0.1" placeholder="Â°C" />
           </div>
           <div class="field">
             <label for="copper">Copper</label>
@@ -2298,7 +2298,7 @@
         <div class="actions" style="margin-bottom: 12px;">
           <button class="button" id="generateReportBtn" type="button">Generate report</button>
           <!-- Updated: the save and generate button now also records a visit snapshot automatically -->
-          <button class="button secondary" id="saveReportBtn" type="button">Save report (PDF + snapshot)</button>
+          <button class="button secondary" id="saveReportBtn" type="button">Save report (PDFÂ +Â snapshot)</button>
           <button class="button ghost" id="generateMainCostReportBtn" type="button">Generate cost report PDF</button>
 
           <!-- Removed: separate save snapshot button is redundant because the PDF save now records a snapshot -->
@@ -2365,6 +2365,36 @@
         </div>
       </section>
 
+
+      <section class="card span-12 hidden" id="closedEquipmentPlateCard">
+        <h2>Equipment plate reader</h2>
+        <div class="actions" style="margin-bottom: 12px;">
+          <label class="button" for="closedPlateCameraInput">Take plate photo</label>
+          <label class="button secondary" for="closedPlateInput">Add plate photo</label>
+          <button class="button ghost" id="scanClosedPlateBtn" type="button">Read plate</button>
+          <button class="button ghost" id="clearClosedPlateBtn" type="button">Clear plate</button>
+          <input id="closedPlateCameraInput" type="file" accept="image/*" capture="environment" class="hidden" />
+          <input id="closedPlateInput" type="file" accept="image/*" class="hidden" />
+        </div>
+        <div class="preview-box" id="closedPlatePreviewBox" style="min-height:160px;">
+          <div class="placeholder">No equipment plate photo attached.</div>
+        </div>
+        <div id="closedPlateOcrStatus" class="photo-note">Use a square-on, close photo of the boiler, chiller, heat exchanger or pump plate.</div>
+        <div class="field-grid" style="margin-top: 12px;">
+          <div class="field"><label for="closedEquipmentManufacturer">Manufacturer</label><input id="closedEquipmentManufacturer" type="text" placeholder="e.g. Carrier, Bosch, Alfa Laval" /></div>
+          <div class="field"><label for="closedEquipmentModel">Model</label><input id="closedEquipmentModel" type="text" placeholder="Model / type" /></div>
+          <div class="field"><label for="closedEquipmentSerial">Serial</label><input id="closedEquipmentSerial" type="text" placeholder="Serial number" /></div>
+          <div class="field"><label for="closedEquipmentType">Equipment type</label><input id="closedEquipmentType" type="text" placeholder="Boiler, chiller, plate heat exchanger" /></div>
+          <div class="field"><label for="closedHeatExchangerMaterial">Heat exchanger material</label><select id="closedHeatExchangerMaterial"><option value="Unknown">Unknown</option><option value="Stainless steel">Stainless steel</option><option value="Carbon steel">Carbon steel</option><option value="Cast iron">Cast iron</option><option value="Copper">Copper</option><option value="Cupronickel">Cupronickel</option><option value="Aluminium">Aluminium</option><option value="Titanium">Titanium</option><option value="Other">Other / confirm manually</option></select></div>
+          <div class="field"><label for="closedManufacturerParameterSource">Manufacturer source</label><input id="closedManufacturerParameterSource" type="text" placeholder="Manual name, document link or page" /></div>
+        </div>
+        <div class="field" style="margin-top: 12px;">
+          <label for="closedManufacturerParameterNote">Manufacturer recommended parameters</label>
+          <textarea id="closedManufacturerParameterNote" placeholder="Paste verified manufacturer limits here, for example pH, conductivity/TDS, chloride, hardness, glycol, inhibitor or water-quality notes from the manual."></textarea>
+        </div>
+        <div class="hint" style="margin-top: 12px;">The photo reader can identify plate text and material clues. Confirm manufacturer limits from the actual manual before changing site ranges.</div>
+      </section>
+
       <section class="card span-12 hidden" id="closedLoopFieldChecksCard">
         <h2>Closed loop field checks</h2>
         <div class="field-grid">
@@ -2429,7 +2459,7 @@
         <div class="actions" style="margin-bottom: 12px;">
           <button class="button" id="generateClosedReportBtn" type="button">Generate report</button>
           <!-- Updated: this button now generates the PDF and stores a closed loop snapshot -->
-          <button class="button secondary" id="saveClosedReportBtn" type="button">Save report (PDF + snapshot)</button>
+          <button class="button secondary" id="saveClosedReportBtn" type="button">Save report (PDFÂ +Â snapshot)</button>
 
           <!-- Removed: separate closed loop snapshot button is redundant because the PDF save now records a snapshot -->
           <!-- <button class="button ghost" id="saveClosedSnapshotBtn" type="button">Save closed loop snapshot</button> -->
@@ -2452,7 +2482,7 @@
           </div>
           <div class="field">
             <label for="siteMemoryText">Site memory</label>
-            <textarea id="siteMemoryText" class="memory-box" placeholder="Store the pool's personality here — common faults, usual pH drift, owner habits, sensor quirks, preferred doses, Enviroswim notes"></textarea>
+            <textarea id="siteMemoryText" class="memory-box" placeholder="Store the pool's personality here â€” common faults, usual pH drift, owner habits, sensor quirks, preferred doses, Enviroswim notes"></textarea>
           </div>
         </div>
         <div class="actions" style="margin-bottom: 12px;">
@@ -2819,6 +2849,8 @@
     const iceBathPhotoData = { 1: '', 2: '', 3: '' };
     const iceBathPhotoFiles = { 1: null, 2: null, 3: null };
     let jobPhotoAttachments = [];
+    let closedPlatePhotoDataUrl = '';
+    let closedPlatePhotoFile = null;
 
     function qs(id) {
       return document.getElementById(id);
@@ -3369,7 +3401,7 @@
                 <div class="icebath-compact-dose">${formatRecommendedDose(item.chemical.value, item.chemical.unit)}</div>
               </div>
               <div class="icebath-compact-facts">
-                <strong>${escapeHtml(item.result.status.label)}</strong> • ${item.result.current == null ? '-' : formatNumber(item.result.current, item.result.decimals)} → ${item.result.target == null ? '-' : formatNumber(item.result.target, item.result.decimals)} • ${escapeHtml(item.result.rangeLabel || '-')}
+                <strong>${escapeHtml(item.result.status.label)}</strong> â€¢ ${item.result.current == null ? '-' : formatNumber(item.result.current, item.result.decimals)} â†’ ${item.result.target == null ? '-' : formatNumber(item.result.target, item.result.decimals)} â€¢ ${escapeHtml(item.result.rangeLabel || '-')}
               </div>
               <div class="icebath-compact-controls">
                 <div class="field">
@@ -4020,7 +4052,7 @@
         { label: 'Metric', value: config.label },
         { label: 'Latest', value: formatTrendMetricValue(latest, config) },
         { label: 'Average', value: formatTrendMetricValue(average, config) },
-        { label: 'Range', value: `${formatTrendMetricValue(minValue, config)} → ${formatTrendMetricValue(maxValue, config)}` },
+        { label: 'Range', value: `${formatTrendMetricValue(minValue, config)} â†’ ${formatTrendMetricValue(maxValue, config)}` },
         { label: 'Trend', value: trendDirection },
         { label: 'Status', value: statusText }
       ].map(item => `<div class="mini-pill"><strong>${escapeHtml(item.label)}</strong>${escapeHtml(item.value)}</div>`).join('');
@@ -4219,7 +4251,7 @@
       }
       return items.map(item => {
         const stamp = item.ts ? ` (${formatDateDisplay(String(item.ts).slice(0, 10))})` : '';
-        return `<strong>${escapeHtml(item.severity || 'Info')}</strong> • ${escapeHtml(item.text || '')}${escapeHtml(stamp)}`;
+        return `<strong>${escapeHtml(item.severity || 'Info')}</strong> â€¢ ${escapeHtml(item.text || '')}${escapeHtml(stamp)}`;
       });
     }
 
@@ -4234,7 +4266,7 @@
         const pool = getSelectedPool();
         const items = getPoolWatchItems(pool.key);
         adminWrap.innerHTML = items.length
-          ? items.slice().reverse().map(item => `<div class="insight-item"><strong>${escapeHtml(item.severity || 'Info')}</strong> • ${escapeHtml(item.text || '')}${item.ts ? ` <span class="subtle">(${escapeHtml(formatSavedDateTime(item.ts))})</span>` : ''}</div>`).join('')
+          ? items.slice().reverse().map(item => `<div class="insight-item"><strong>${escapeHtml(item.severity || 'Info')}</strong> â€¢ ${escapeHtml(item.text || '')}${item.ts ? ` <span class="subtle">(${escapeHtml(formatSavedDateTime(item.ts))})</span>` : ''}</div>`).join('')
           : '<div class="insight-item">No saved watch items for this pool yet.</div>';
       }
     }
@@ -4256,7 +4288,7 @@
           const sign = delta > 0 ? '+' : '';
           deltaText = ` (${sign}${formatNumber(delta, decimals)})`;
         }
-        return `${label}: ${previousText} → ${currentText}${deltaText}`;
+        return `${label}: ${previousText} â†’ ${currentText}${deltaText}`;
       };
       return [
         `Last snapshot: ${formatDateDisplay(last.date || '')} ${last.time || ''}`.trim(),
@@ -4891,9 +4923,184 @@
       });
     }
 
+
+    function setClosedPlateStatus(message, tone = 'info') {
+      const el = qs('closedPlateOcrStatus');
+      if (!el) return;
+      const colors = { info: 'var(--muted)', success: 'var(--good)', error: 'var(--bad)' };
+      el.textContent = message;
+      el.style.color = colors[tone] || colors.info;
+    }
+
+    function normalisePlateLine(line) {
+      return String(line || '').replace(/[^A-Za-z0-9 ._#:\/-]/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function cleanPlateValue(value) {
+      return normalisePlateLine(value).replace(new RegExp('\\b(model|mod|type|serial|ser|s/n|sn)\\b.*$', 'i'), '').trim();
+    }
+
+    function extractPlateValue(lines, labels) {
+      for (const line of lines) {
+        for (const label of labels) {
+          const pattern = new RegExp('^' + label + '\\s*(?:no\\.?|number|#)?\\s*[:#-]?\\s*(.+)$', 'i');
+          const match = line.match(pattern);
+          if (match && match[1]) return cleanPlateValue(match[1]);
+        }
+      }
+      return '';
+    }
+
+    function detectPlateManufacturer(lines, text) {
+      const known = ['Alfa Laval', 'Trane', 'Carrier', 'York', 'Daikin', 'Mitsubishi', 'Bosch', 'Rinnai', 'Rheem', 'Raypak', 'Lochinvar', 'Viessmann', 'Baxi', 'Hoval', 'Laars', 'Fulton', 'Cleaver-Brooks', 'A.O. Smith', 'Kelvion', 'Danfoss', 'SWEP', 'Thermax', 'Aermec', 'Clivet', 'Grundfos', 'Wilo'];
+      const lower = text.toLowerCase();
+      const found = known.find(name => lower.includes(name.toLowerCase()));
+      if (found) return found;
+      return lines.find(line => /[A-Za-z]/.test(line) && !/^(model|serial|type|no|kw|volt|hz|date|made|max|min|pressure|temperature)\b/i.test(line)) || '';
+    }
+
+    function detectEquipmentType(text) {
+      const lower = text.toLowerCase();
+      if (/plate\s+heat\s+exchanger|heat\s+exchanger|exchanger|brazed\s+plate/.test(lower)) return 'Heat exchanger';
+      if (/boiler|water\s+heater/.test(lower)) return 'Boiler';
+      if (/chiller|chilled/.test(lower)) return 'Chiller';
+      if (/pump/.test(lower)) return 'Pump';
+      if (/ahu|air\s+handling/.test(lower)) return 'Air handling unit';
+      return '';
+    }
+
+    function detectHeatExchangerMaterial(text) {
+      const lower = text.toLowerCase();
+      if (/titanium|\bti\b/.test(lower)) return 'Titanium';
+      if (/cupronickel|cu-ni|cuni|90\/10|70\/30/.test(lower)) return 'Cupronickel';
+      if (/stainless|inox|aisi\s*304|aisi\s*316|\bss\b|316l|304l/.test(lower)) return 'Stainless steel';
+      if (/cast\s+iron|\bci\b/.test(lower)) return 'Cast iron';
+      if (/aluminium|aluminum|\bal\b/.test(lower)) return 'Aluminium';
+      if (/carbon\s+steel|mild\s+steel|black\s+steel/.test(lower)) return 'Carbon steel';
+      if (/copper|\bcu\b/.test(lower)) return 'Copper';
+      return 'Unknown';
+    }
+
+    function buildMaterialGuidance(material) {
+      const base = 'Confirm exact pH, conductivity/TDS, chloride, hardness, glycol and inhibitor limits from the manufacturer manual before applying ranges.';
+      const guidance = {
+        'Stainless steel': 'Material clue: stainless steel. Pay close attention to chloride limits and avoid stagnant, oxygenated top-up conditions. ' + base,
+        'Copper': 'Material clue: copper. Confirm pH, ammonia, chloride, sulphate and velocity limits from the manual; copper alloys can be sensitive to aggressive water. ' + base,
+        'Cupronickel': 'Material clue: cupronickel. Confirm chloride, sulphide/ammonia, pH and flow limits from the manual. ' + base,
+        'Carbon steel': 'Material clue: carbon steel. Closed-loop protection usually depends on oxygen control, stable pH, inhibitor residual and low make-up water. ' + base,
+        'Cast iron': 'Material clue: cast iron. Confirm pH/inhibitor requirements and avoid untreated fresh-water make-up. ' + base,
+        'Aluminium': 'Material clue: aluminium. Aluminium heat exchangers commonly have a narrower pH window; verify manufacturer limits before dosing. ' + base,
+        'Titanium': 'Material clue: titanium. Confirm any manufacturer limits, especially around water chemistry outside normal HVAC closed-loop conditions. ' + base,
+        'Unknown': 'No confident material found on the plate. Use the model/serial to confirm heat exchanger material and manufacturer water-quality limits. ' + base
+      };
+      return guidance[material] || guidance.Unknown;
+    }
+
+    function parseEquipmentPlateText(rawText) {
+      const lines = String(rawText || '').split(/\r?\n/).map(normalisePlateLine).filter(Boolean);
+      const text = lines.join('\n');
+      const flatText = lines.join(' ');
+      return {
+        rawText: text,
+        manufacturer: detectPlateManufacturer(lines, flatText),
+        model: extractPlateValue(lines, ['model', 'mod', 'type']) || '',
+        serial: extractPlateValue(lines, ['serial', 'ser', 's/n', 'sn']) || '',
+        equipmentType: detectEquipmentType(flatText),
+        material: detectHeatExchangerMaterial(flatText),
+        guidance: buildMaterialGuidance(detectHeatExchangerMaterial(flatText))
+      };
+    }
+
+    function buildClosedLoopEquipmentModel() {
+      return {
+        manufacturer: inputs.closedEquipmentManufacturer?.value || '',
+        model: inputs.closedEquipmentModel?.value || '',
+        serial: inputs.closedEquipmentSerial?.value || '',
+        equipmentType: inputs.closedEquipmentType?.value || '',
+        material: inputs.closedHeatExchangerMaterial?.value || 'Unknown',
+        source: inputs.closedManufacturerParameterSource?.value || '',
+        parameterNote: (inputs.closedManufacturerParameterNote?.value || '').trim()
+      };
+    }
+
+    function applyEquipmentPlateResult(result) {
+      if (!result) return;
+      if (inputs.closedEquipmentManufacturer && result.manufacturer && !inputs.closedEquipmentManufacturer.value) inputs.closedEquipmentManufacturer.value = result.manufacturer;
+      if (inputs.closedEquipmentModel && result.model && !inputs.closedEquipmentModel.value) inputs.closedEquipmentModel.value = result.model;
+      if (inputs.closedEquipmentSerial && result.serial && !inputs.closedEquipmentSerial.value) inputs.closedEquipmentSerial.value = result.serial;
+      if (inputs.closedEquipmentType && result.equipmentType && !inputs.closedEquipmentType.value) inputs.closedEquipmentType.value = result.equipmentType;
+      if (inputs.closedHeatExchangerMaterial && result.material) inputs.closedHeatExchangerMaterial.value = result.material;
+      if (inputs.closedManufacturerParameterNote && result.guidance && !inputs.closedManufacturerParameterNote.value) inputs.closedManufacturerParameterNote.value = result.guidance;
+      saveState();
+    }
+
+    async function runEquipmentPlateOcrFromFile(file, setStatus, button) {
+      if (!file) return null;
+      if (!window.Tesseract) throw new Error('The photo reader could not load. Refresh the page and try again.');
+      const originalLabel = button ? button.textContent : '';
+      if (button) { button.disabled = true; button.textContent = 'Reading plate...'; }
+      try {
+        setStatus('Reading equipment plate text...');
+        const img = await readImageFile(file);
+        const sourceCanvas = canvasFromImage(img, 1800);
+        const blob = await canvasToBlob(sourceCanvas);
+        const { data } = await window.Tesseract.recognize(blob, 'eng', {
+          tessedit_pageseg_mode: 6,
+          preserve_interword_spaces: '1'
+        });
+        const rawText = (data && data.text ? data.text : '') + '\\n' + buildOcrTextFromWordRows(data && data.words);
+        return parseEquipmentPlateText(rawText);
+      } finally {
+        if (button) { button.disabled = false; button.textContent = originalLabel; }
+      }
+    }
+
+    async function scanClosedPlatePhoto() {
+      const file = closedPlatePhotoFile || (qs('closedPlateInput')?.files && qs('closedPlateInput').files[0]) || (qs('closedPlateCameraInput')?.files && qs('closedPlateCameraInput').files[0]);
+      if (!file) {
+        setClosedPlateStatus('Add an equipment plate photo first, then try again.', 'error');
+        return;
+      }
+      try {
+        const result = await runEquipmentPlateOcrFromFile(file, setClosedPlateStatus, qs('scanClosedPlateBtn'));
+        applyEquipmentPlateResult(result);
+        const found = [result.manufacturer, result.model, result.serial, result.material !== 'Unknown' ? result.material : ''].filter(Boolean);
+        setClosedPlateStatus(found.length ? 'Plate read complete. Found: ' + found.join(', ') + '.' : 'Plate read complete, but no clear make/model/material was found. Fill the details manually or try a closer photo.', found.length ? 'success' : 'error');
+      } catch (error) {
+        console.error('Equipment plate OCR failed', error);
+        setClosedPlateStatus(error.message || 'Could not read that plate photo. Try a clearer, closer, square-on photo.', 'error');
+      }
+    }
+
+    function handleClosedPlatePhotoUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      closedPlatePhotoFile = file;
+      const otherInputId = event.target.id === 'closedPlateInput' ? 'closedPlateCameraInput' : 'closedPlateInput';
+      const otherInput = qs(otherInputId);
+      if (otherInput) otherInput.value = '';
+      const reader = new FileReader();
+      reader.onload = () => {
+        closedPlatePhotoDataUrl = reader.result;
+        qs('closedPlatePreviewBox').innerHTML = '<img src="' + closedPlatePhotoDataUrl + '" alt="Equipment plate photo" />';
+        setClosedPlateStatus('Plate photo added. Tap Read plate to extract make, model, serial and material clues.');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearClosedPlatePhoto() {
+      closedPlatePhotoDataUrl = '';
+      closedPlatePhotoFile = null;
+      ['closedPlateInput', 'closedPlateCameraInput'].forEach(id => { const field = qs(id); if (field) field.value = ''; });
+      const preview = qs('closedPlatePreviewBox');
+      if (preview) preview.innerHTML = '<div class="placeholder">No equipment plate photo attached.</div>';
+      setClosedPlateStatus('Use a square-on, close photo of the boiler, chiller, heat exchanger or pump plate.');
+    }
+
     function buildClosedLoopSheetPayload() {
       const rows = buildClosedLoopRows();
       const checks = buildClosedLoopFieldChecks();
+      const equipment = buildClosedLoopEquipmentModel();
       const flaggedCount = rows.filter(row => row.status.label === 'Low' || row.status.label === 'High').length;
       const missingCount = rows.filter(row => row.status.label === 'Missing').length;
       const forecast = flaggedCount >= 3 ? 'Action' : flaggedCount >= 1 ? 'Watch' : missingCount ? 'Incomplete' : 'Stable';
@@ -4915,6 +5122,7 @@
         visitId: `closed-loop-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         technician: inputs.closedTechnician.value || '',
         serviceType: 'Closed loop service',
+        equipment,
         site: inputs.closedSite.value || '',
         assetName: inputs.closedSystemName.value || '',
         volumeLitres: '',
@@ -5007,6 +5215,7 @@
       document.querySelectorAll('[data-closed-loop-card]').forEach(card => {
         card.classList.toggle('hidden', !activeLoopLabels.has(card.dataset.closedLoopCard));
       });
+      qs('closedEquipmentPlateCard')?.classList.toggle('hidden', !config);
       qs('closedLoopFieldChecksCard')?.classList.toggle('hidden', !config);
       const note = qs('closedLoopSiteNote');
       if (note) {
@@ -5118,6 +5327,7 @@
         testTime: formatTimeDisplay(inputs.closedTime.value || ''),
         rows,
         checks: buildClosedLoopFieldChecks(),
+        equipment: buildClosedLoopEquipmentModel(),
         notes: (inputs.closedNotes.value || '').trim() || 'No additional closed loop notes entered.'
       };
     }
@@ -5151,6 +5361,15 @@
               </div>
             </div>
           </div>
+          <div class="report-section-bar">Equipment plate</div>
+          <table class="report-table">
+            <tbody>
+              <tr><td>Manufacturer</td><td>${escapeHtml(model.equipment.manufacturer || "-")}</td><td>Model</td><td>${escapeHtml(model.equipment.model || "-")}</td></tr>
+              <tr><td>Serial</td><td>${escapeHtml(model.equipment.serial || "-")}</td><td>Material</td><td>${escapeHtml(model.equipment.material || "Unknown")}</td></tr>
+              <tr><td>Source</td><td colspan="3">${escapeHtml(model.equipment.source || "Manual/source not entered")}</td></tr>
+              <tr><td>Manufacturer limits</td><td colspan="3">${escapeHtml(model.equipment.parameterNote || "Confirm manufacturer water-quality limits before applying ranges.")}</td></tr>
+            </tbody>
+          </table>
           <div class="report-section-bar">Closed loop test results</div>
           <table class="report-table">
             <thead>
@@ -5238,6 +5457,15 @@
       doc.setTextColor(0, 0, 0);
 
       let y = 51;
+      y = drawSectionBar('Equipment plate', y);
+      const equipmentRows = [
+        ['Manufacturer', model.equipment.manufacturer || '-', 'Model', model.equipment.model || '-'],
+        ['Serial', model.equipment.serial || '-', 'Material', model.equipment.material || 'Unknown'],
+        ['Source', model.equipment.source || 'Manual/source not entered', 'Type', model.equipment.equipmentType || '-'],
+        ['Manufacturer limits', model.equipment.parameterNote || 'Confirm manufacturer water-quality limits before applying ranges.', '', '']
+      ];
+      y = drawTable(doc, margin, y, [34, 78, 34, pageWidth - (margin * 2) - 34 - 78 - 34], ['', '', '', ''], equipmentRows, { fontSize: 7.6, headerFontSize: 7.6, striped: true });
+      y += 4;
       y = drawSectionBar('Closed loop test results', y);
       const rows = model.rows.map(row => [
         row.loop,
@@ -5290,6 +5518,7 @@
         time: inputs.closedTime.value || '',
         rows: buildClosedLoopRows(),
         checks: buildClosedLoopFieldChecks(),
+        equipment: buildClosedLoopEquipmentModel(),
         notes: (inputs.closedNotes.value || '').trim()
       });
       while (history.length > 150) history.shift();
@@ -6388,7 +6617,7 @@
                 <div class="icebath-compact-dose">${formatRecommendedDose(item.chemical.value, item.chemical.unit)}</div>
               </div>
               <div class="icebath-compact-facts">
-                <strong>${escapeHtml(item.result.status.label)}</strong> • ${item.result.current == null ? '-' : formatNumber(item.result.current, item.result.decimals)} → ${item.result.target == null ? '-' : formatNumber(item.result.target, item.result.decimals)} • ${escapeHtml(item.result.rangeLabel || '-')}
+                <strong>${escapeHtml(item.result.status.label)}</strong> â€¢ ${item.result.current == null ? '-' : formatNumber(item.result.current, item.result.decimals)} â†’ ${item.result.target == null ? '-' : formatNumber(item.result.target, item.result.decimals)} â€¢ ${escapeHtml(item.result.rangeLabel || '-')}
               </div>
               <div class="icebath-compact-controls">
                 <div class="field">
@@ -6417,7 +6646,7 @@
           <div class="icebath-reference-card">
             <strong>${escapeHtml(row.parameter)}</strong>
             <div class="icebath-reference-value">${row.current == null ? '-' : formatNumber(row.current, row.decimals)}</div>
-            <div class="subtle">${escapeHtml(row.status.label)} • ${escapeHtml(row.rangeLabel || '-')}</div>
+            <div class="subtle">${escapeHtml(row.status.label)} â€¢ ${escapeHtml(row.rangeLabel || '-')}</div>
           </div>
         `).join('');
       }
@@ -7690,7 +7919,7 @@ async function savePdfReport() {
         .replace(/[\u201C\u201D]/g, '"')
         .replace(/[\u2013\u2014]/g, '-')
         .replace(/[\u00A0]/g, ' ')
-        .replace(/[°]/g, ' ')
+        .replace(/[Â°]/g, ' ')
         .replace(/[,]/g, '.')
         .replace(/\r/g, '\n')
         .replace(/[ \t]+/g, ' ');
@@ -8635,6 +8864,7 @@ async function savePdfReport() {
         'ctxOwnerChemicals', 'ctxNoCirculation', 'ctxHeavySun', 'ctxHighBatherLoad', 'ctxRainDilution', 'ctxTopUpOff',
         'assetType', 'assetId', 'assetLocation', 'assetStatus', 'assetNote',
         'closedSite', 'closedSystemName', 'closedTechnician', 'closedDate', 'closedTime', 'closedVisitInterval', 'closedNotes',
+        'closedEquipmentManufacturer', 'closedEquipmentModel', 'closedEquipmentSerial', 'closedEquipmentType', 'closedHeatExchangerMaterial', 'closedManufacturerParameterSource', 'closedManufacturerParameterNote',
         'closedMakeupStatus', 'closedFilterStatus', 'closedCorrosionStatus', 'closedGlycolStatus',
         'hhwTds', 'hhwTdsMin', 'hhwTdsMax', 'hhwPh', 'hhwPhMin', 'hhwPhMax', 'hhwInhibitor', 'hhwInhibitorMin', 'hhwInhibitorMax',
         'chwTds', 'chwTdsMin', 'chwTdsMax', 'chwPh', 'chwPhMin', 'chwPhMax', 'chwInhibitor', 'chwInhibitorMin', 'chwInhibitorMax',
@@ -8685,6 +8915,10 @@ async function savePdfReport() {
 
       qs('photoInput').addEventListener('change', handlePhotoUpload);
       qs('photoInputCamera').addEventListener('change', handlePhotoUpload);
+      qs('closedPlateInput')?.addEventListener('change', handleClosedPlatePhotoUpload);
+      qs('closedPlateCameraInput')?.addEventListener('change', handleClosedPlatePhotoUpload);
+      qs('scanClosedPlateBtn')?.addEventListener('click', scanClosedPlatePhoto);
+      qs('clearClosedPlateBtn')?.addEventListener('click', clearClosedPlatePhoto);
       qs('jobPhotoInput').addEventListener('change', handleJobPhotoUpload);
       qs('jobPhotoCameraInput').addEventListener('change', handleJobPhotoUpload);
       qs('clearJobPhotosBtn').addEventListener('click', clearJobPhotoAttachments);

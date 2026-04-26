@@ -268,6 +268,7 @@ function appendVisitPayload_(payload) {
 function appendClosedLoopPayload_(payload) {
   var rows = payload.rows || payload.closedLoopRows || [];
   var checks = payload.checks || payload.fieldChecks || [];
+  var equipment = payload.equipment || {};
   var flaggedCount = payload.flaggedCount;
   var missingCount = payload.missingCount;
   if (flaggedCount === '' || flaggedCount == null) flaggedCount = countClosedLoopStatus_(rows, ['Low', 'High']);
@@ -284,6 +285,13 @@ function appendClosedLoopPayload_(payload) {
       payload.assetName || '',
       payload.system || 'Closed loop',
       payload.technician || '',
+      equipment.manufacturer || '',
+      equipment.model || '',
+      equipment.serial || '',
+      equipment.equipmentType || '',
+      equipment.material || '',
+      equipment.source || '',
+      equipment.parameterNote || '',
       payload.serviceDate || '',
       payload.serviceTime || '',
       payload.nextServiceDays || '',
@@ -314,6 +322,7 @@ function appendClosedLoopPayload_(payload) {
 function closedLoopHeader_() {
   return [
     'receivedAt', 'sentAt', 'deviceId', 'visitId', 'site', 'systemName', 'system', 'technician',
+    'manufacturer', 'model', 'serial', 'equipmentType', 'heatExchangerMaterial', 'manufacturerSource', 'manufacturerParameterNote',
     'serviceDate', 'serviceTime', 'nextServiceDays',
     'hhwTds', 'hhwPh', 'hhwInhibitor', 'chwTds', 'chwPh', 'chwInhibitor',
     'makeupPressure', 'filterStrainer', 'corrosionDebris', 'glycolFreezePoint',
@@ -424,6 +433,12 @@ function appendRows_(sheetName, rowsWithHeader) {
 
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(header);
+  } else if (header.length > sheet.getLastColumn()) {
+    var existing = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    for (var h = 0; h < header.length; h += 1) {
+      if (!existing[h]) existing[h] = header[h];
+    }
+    sheet.getRange(1, 1, 1, header.length).setValues([existing]);
   }
 
   if (rows.length) {

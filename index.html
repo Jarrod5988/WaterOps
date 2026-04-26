@@ -2265,15 +2265,39 @@
           <div class="waterops-brand-mark" aria-label="WaterOps">
             <svg class="waterops-brand-icon" viewBox="0 0 64 64" role="img" aria-hidden="true">
               <defs>
-                <linearGradient id="wateropsDrop" x1="16" y1="7" x2="48" y2="58" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#19b7f2" />
-                  <stop offset="1" stop-color="#006aa6" />
+                <linearGradient id="wateropsDropBody" x1="18" y1="5" x2="47" y2="58" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#b8fbff" />
+                  <stop offset="0.28" stop-color="#32d3f8" />
+                  <stop offset="0.68" stop-color="#0797d6" />
+                  <stop offset="1" stop-color="#00598f" />
                 </linearGradient>
+                <radialGradient id="wateropsDropGlass" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(23 18) rotate(55) scale(31 22)">
+                  <stop stop-color="#ffffff" stop-opacity="0.88" />
+                  <stop offset="0.36" stop-color="#d7fbff" stop-opacity="0.42" />
+                  <stop offset="1" stop-color="#00a1e0" stop-opacity="0" />
+                </radialGradient>
+                <linearGradient id="wateropsCheckGlow" x1="22" y1="39" x2="46" y2="25" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#ffffff" />
+                  <stop offset="1" stop-color="#d7fbff" />
+                </linearGradient>
+                <filter id="wateropsDropShadow" x="3" y="2" width="58" height="61" filterUnits="userSpaceOnUse">
+                  <feDropShadow dx="0" dy="6" stdDeviation="4.5" flood-color="#003e63" flood-opacity="0.32" />
+                </filter>
+                <clipPath id="wateropsDropClip">
+                  <path d="M32 4.5C23.7 15.7 14.5 27 14.5 39.1C14.5 49.6 22.3 57.5 32 57.5S49.5 49.6 49.5 39.1C49.5 27 40.3 15.7 32 4.5Z" />
+                </clipPath>
               </defs>
-              <path d="M32 5C24 16 15 27 15 39c0 10 7.6 18 17 18s17-8 17-18C49 27 40 16 32 5Z" fill="url(#wateropsDrop)" />
-              <path d="M22 38.5 29 45l14-18" fill="none" stroke="#fff" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M21 49c5.4 4.3 16.7 4.3 22 0" fill="none" stroke="#8be4ff" stroke-width="3" stroke-linecap="round" opacity="0.9" />
-              <circle cx="22" cy="24" r="3" fill="#b9f1ff" opacity="0.95" />
+              <path filter="url(#wateropsDropShadow)" d="M32 4.5C23.7 15.7 14.5 27 14.5 39.1C14.5 49.6 22.3 57.5 32 57.5S49.5 49.6 49.5 39.1C49.5 27 40.3 15.7 32 4.5Z" fill="url(#wateropsDropBody)" />
+              <g clip-path="url(#wateropsDropClip)">
+                <path d="M32 4.5C23.7 15.7 14.5 27 14.5 39.1C14.5 49.6 22.3 57.5 32 57.5S49.5 49.6 49.5 39.1C49.5 27 40.3 15.7 32 4.5Z" fill="url(#wateropsDropGlass)" />
+                <path d="M45 18C38.5 31 38.6 44.8 48.5 54.8L56 46C53.2 32.5 50 23.2 45 18Z" fill="#003e75" opacity="0.13" />
+                <path d="M19.2 32.5C20.6 24.7 25.3 18.1 30.7 10.6" fill="none" stroke="#ffffff" stroke-width="3.1" stroke-linecap="round" opacity="0.45" />
+                <path d="M19.5 49.6C25.1 54.1 38.6 54.5 45.7 45.8" fill="none" stroke="#a7f0ff" stroke-width="3" stroke-linecap="round" opacity="0.72" />
+              </g>
+              <path d="M21 38.8 29.2 46.3 44.7 26.3" fill="none" stroke="#00659c" stroke-opacity="0.28" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M21 38.8 29.2 46.3 44.7 26.3" fill="none" stroke="url(#wateropsCheckGlow)" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="23" cy="22.8" r="3.2" fill="#ddfbff" opacity="0.95" />
+              <circle cx="18.8" cy="31.4" r="1.5" fill="#ffffff" opacity="0.72" />
             </svg>
             <span class="waterops-brand-name">Water<span>Ops</span></span>
           </div>

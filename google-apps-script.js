@@ -264,14 +264,21 @@ function ensureTechnicianHeader_(sheet) {
 }
 
 function normaliseRole_(role) {
-  var clean = String(role || 'tech').trim().toLowerCase();
+  var clean = String(role || '').trim().toLowerCase();
   if (clean === 'admin' || clean === 'supervisor' || clean === 'tech') return clean;
-  return 'tech';
+  return '';
 }
 
 function isActiveTechnician_(value) {
   var clean = String(value == null ? 'yes' : value).trim().toLowerCase();
   return !(clean === 'no' || clean === 'false' || clean === 'inactive' || clean === '0');
+}
+
+function getHeaderIndex_(headers, names, fallback) {
+  for (var i = 0; i < names.length; i += 1) {
+    if (headers[names[i]] != null) return headers[names[i]];
+  }
+  return fallback;
 }
 
 function buildTechnicianAccess_() {
@@ -285,10 +292,10 @@ function buildTechnicianAccess_() {
   for (var h = 0; h < values[0].length; h += 1) {
     headers[String(values[0][h] || '').trim().toLowerCase()] = h;
   }
-  var nameIndex = headers.name != null ? headers.name : 0;
-  var roleIndex = headers.role != null ? headers.role : 1;
-  var pinIndex = headers.pin != null ? headers.pin : 2;
-  var activeIndex = headers.active != null ? headers.active : 3;
+  var nameIndex = getHeaderIndex_(headers, ['name', 'technician_name', 'technician'], 0);
+  var roleIndex = getHeaderIndex_(headers, ['role', 'access_role'], -1);
+  var pinIndex = getHeaderIndex_(headers, ['pin', 'access_pin'], -1);
+  var activeIndex = getHeaderIndex_(headers, ['active', 'enabled'], -1);
   var technicians = [];
   var seen = {};
   for (var i = 1; i < values.length; i += 1) {
@@ -300,9 +307,9 @@ function buildTechnicianAccess_() {
     seen[key] = true;
     technicians.push({
       name: name,
-      role: normaliseRole_(row[roleIndex]),
-      pinRequired: String(row[pinIndex] || '').trim() !== '',
-      active: isActiveTechnician_(row[activeIndex])
+      role: normaliseRole_(roleIndex >= 0 ? row[roleIndex] : ''),
+      pinRequired: pinIndex >= 0 && String(row[pinIndex] || '').trim() !== '',
+      active: activeIndex >= 0 ? isActiveTechnician_(row[activeIndex]) : true
     });
   }
   technicians.sort(function(a, b) { return a.name.localeCompare(b.name); });
@@ -329,21 +336,21 @@ function verifyTechnician_(name, pin) {
   for (var h = 0; h < values[0].length; h += 1) {
     headers[String(values[0][h] || '').trim().toLowerCase()] = h;
   }
-  var nameIndex = headers.name != null ? headers.name : 0;
-  var roleIndex = headers.role != null ? headers.role : 1;
-  var pinIndex = headers.pin != null ? headers.pin : 2;
-  var activeIndex = headers.active != null ? headers.active : 3;
+  var nameIndex = getHeaderIndex_(headers, ['name', 'technician_name', 'technician'], 0);
+  var roleIndex = getHeaderIndex_(headers, ['role', 'access_role'], -1);
+  var pinIndex = getHeaderIndex_(headers, ['pin', 'access_pin'], -1);
+  var activeIndex = getHeaderIndex_(headers, ['active', 'enabled'], -1);
   for (var i = 1; i < values.length; i += 1) {
     var row = values[i];
     if (String(row[nameIndex] || '').trim().toLowerCase() !== cleanName.toLowerCase()) continue;
-    if (!isActiveTechnician_(row[activeIndex])) return { ok: false, verified: false, error: 'Technician is inactive.' };
-    var storedPin = String(row[pinIndex] || '').trim();
+    if (activeIndex >= 0 && !isActiveTechnician_(row[activeIndex])) return { ok: false, verified: false, error: 'Technician is inactive.' };
+    var storedPin = pinIndex >= 0 ? String(row[pinIndex] || '').trim() : '';
     if (storedPin && String(pin || '').trim() !== storedPin) return { ok: false, verified: false, error: 'Incorrect PIN.' };
     return {
       ok: true,
       verified: true,
       name: String(row[nameIndex] || '').trim(),
-      role: normaliseRole_(row[roleIndex])
+      role: normaliseRole_(roleIndex >= 0 ? row[roleIndex] : '')
     };
   }
   return { ok: false, verified: false, error: 'Technician was not found.' };

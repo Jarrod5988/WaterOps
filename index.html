@@ -4683,10 +4683,10 @@
       return (Array.isArray(list) ? list : [])
         .map(item => {
           const name = typeof item === 'string' ? item : item && item.name;
-          const role = String((item && item.role) || 'tech').trim().toLowerCase();
+          const role = String((item && item.role) || '').trim().toLowerCase();
           return {
             name: String(name || '').trim(),
-            role: ['admin', 'supervisor', 'tech'].includes(role) ? role : 'tech',
+            role: ['admin', 'supervisor', 'tech'].includes(role) ? role : '',
             pinRequired: !!(item && item.pinRequired),
             active: item && item.active === false ? false : true
           };
@@ -4774,7 +4774,7 @@
         return false;
       }
       if (!access.pinRequired) {
-        saveJson(TECHNICIAN_AUTH_STORAGE_KEY, { name: cleanName, role: access.role, verifiedAt: new Date().toISOString() });
+        saveJson(TECHNICIAN_AUTH_STORAGE_KEY, { name: cleanName, role: access.role || '', verifiedAt: new Date().toISOString() });
         applyAccessControls();
         return true;
       }

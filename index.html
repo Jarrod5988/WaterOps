@@ -6633,7 +6633,7 @@
       const state = loadJson(AUTO_DOSING_DRUM_STORAGE_KEY, getEmptyAutoDosingDrumState());
       if (!state || typeof state !== 'object') return getEmptyAutoDosingDrumState();
       if (!state.pools || typeof state.pools !== 'object') state.pools = {};
-      if (!state.leahEmail) state.leahEmail = DEFAULT_LEAH_PO_EMAIL;
+      if (!state.leahEmail || /@example\.com$/i.test(String(state.leahEmail))) state.leahEmail = DEFAULT_LEAH_PO_EMAIL;
       return state;
     }
 
@@ -6690,7 +6690,7 @@
       const lines = [
         'Hi Leah,',
         '',
-        `Could you please raise a PO for ${item.label} for ${pool.site || pool.poolName || 'the site'} from ${item.supplier}?`,
+        `Could you please raise a purchase order for ${item.supplier} for ${item.label} at ${pool.site || pool.poolName || 'the site'}?`,
         '',
         `Site: ${pool.site || '-'}`,
         `Pool: ${pool.poolName || '-'}`,
@@ -6803,7 +6803,7 @@
               <strong>${low ? 'PO trigger reached' : 'Drum status'}</strong><br />
               ${escapeHtml(status)}
               <div class="drum-meter" style="--level:${Math.max(0, Math.min(100, Number(drum.remainingPercent || 0)))}%;"><span></span></div>
-              ${low ? `<div class="actions" style="margin-top: 10px;"><button class="button secondary onsite-po-email-btn" data-chemical="${item.key}" type="button">Open Hydroquip PO email draft</button></div>` : ''}
+              ${low ? `<div class="actions" style="margin-top: 10px;"><button class="button secondary onsite-po-email-btn" data-chemical="${item.key}" type="button">Open Mail app PO draft</button></div>` : ''}
             </div>
           </div>
         `;
@@ -6812,7 +6812,7 @@
         <div class="field" style="margin-bottom: 12px;">
           <label for="leahPoEmail">Leah PO email</label>
           <input id="leahPoEmail" type="email" inputmode="email" placeholder="leahm@mbsfm.com.au" value="${escapeHtml(state.leahEmail || DEFAULT_LEAH_PO_EMAIL)}" ${disabled} />
-          <small>Used only to open a draft email. Your phone/browser chooses the email app; if prompted, choose Always to make it the default.</small>
+          <small>Opens a draft in the device Mail app/default email app. If your phone asks which app to use, choose Mail and Always.</small>
         </div>
         ${isTrainingMode() ? '<div class="hint" style="margin-bottom: 12px;">Training mode is on, so onsite drum changes are not saved.</div>' : ''}
         <div class="onsite-drum-grid">${cards}</div>

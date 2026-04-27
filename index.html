@@ -290,6 +290,41 @@
       color: var(--ink);
     }
 
+    .training-banner {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(176, 116, 0, 0.32);
+      border-radius: 10px;
+      background: #fff7df;
+      color: #684500;
+      font-size: 12px;
+      line-height: 1.35;
+      box-shadow: 0 8px 20px rgba(176, 116, 0, 0.08);
+    }
+
+    .training-banner.hidden {
+      display: none;
+    }
+
+    .button.training-toggle.active {
+      background: #fff0bf;
+      color: #684500;
+      border-color: rgba(176, 116, 0, 0.42);
+    }
+
+    body.training-mode .card h2::after {
+      content: 'Training';
+      margin-left: 8px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #fff0bf;
+      color: #684500;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0;
+      vertical-align: middle;
+    }
+
     .pin-backdrop {
       position: fixed;
       inset: 0;
@@ -2309,9 +2344,11 @@
       <div class="toolbar">
         <button class="button ghost" id="resetBtn" type="button">Reset last test</button>
         <button class="button secondary" id="loadDefaultsBtn" type="button">Reload pool defaults</button>
+        <button class="button ghost training-toggle" id="trainingModeBtn" type="button" aria-pressed="false">Training mode off</button>
         <!-- Dark mode toggle removed -->
       </div>
       <div class="access-status" id="accessStatusBox">Access: setup unlocked until technician roles are loaded.</div>
+      <div class="training-banner hidden" id="trainingModeBanner">Training mode is on. Practise freely: job records, stock logs, snapshots, site memory, cost settings and Google Sheet updates will not be saved.</div>
     </div>
 
     <!--
@@ -3128,6 +3165,7 @@
     const TECHNICIAN_PROFILE_STORAGE_KEY = 'mbs-technician-profile-v1';
     const TECHNICIAN_ACCESS_STORAGE_KEY = 'mbs-technician-access-v1';
     const TECHNICIAN_AUTH_STORAGE_KEY = 'mbs-technician-auth-v1';
+    const TRAINING_MODE_STORAGE_KEY = 'mbs-training-mode-v1';
     const COST_SYNC_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
     const CLOSED_LOOP_SITES = [
       {
@@ -3307,6 +3345,43 @@
 
     function saveJson(key, value) {
       localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function isTrainingMode() {
+      return localStorage.getItem(TRAINING_MODE_STORAGE_KEY) === 'true';
+    }
+
+    function updateTrainingModeUi() {
+      const enabled = isTrainingMode();
+      document.body.classList.toggle('training-mode', enabled);
+      const button = qs('trainingModeBtn');
+      if (button) {
+        button.classList.toggle('active', enabled);
+        button.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+        button.textContent = enabled ? 'Training mode on' : 'Training mode off';
+      }
+      const banner = qs('trainingModeBanner');
+      if (banner) banner.classList.toggle('hidden', !enabled);
+    }
+
+    function setTrainingMode(enabled, options = {}) {
+      localStorage.setItem(TRAINING_MODE_STORAGE_KEY, enabled ? 'true' : 'false');
+      updateTrainingModeUi();
+      if (!options.silent) {
+        showAppToast(enabled
+          ? 'Training mode on: records and Google Sheet updates will be skipped.'
+          : 'Training mode off: live records will save normally.');
+      }
+    }
+
+    function toggleTrainingMode() {
+      setTrainingMode(!isTrainingMode());
+    }
+
+    function skipTrainingRecord(label, options = {}) {
+      if (!isTrainingMode()) return false;
+      if (!options.silent) showAppToast(`Training mode: ${label} not saved.`);
+      return true;
     }
 
 
@@ -3948,6 +4023,7 @@
     }
 
     function saveCurrentSiteMemory() {
+      if (skipTrainingRecord('site memory')) return;
       if (!inputs.siteMemoryText) return;
       const pool = getSelectedPool();
       const memory = getSiteMemoryState();
@@ -4018,6 +4094,7 @@
     }
 
     function savePoolVisitSnapshot() {
+      if (skipTrainingRecord('visit snapshot')) return;
       if (isRaidersGroupMode()) {
         alert('Use the grouped report for the Raiders ice baths. Switch to a single pool if you want a single-pool history snapshot.');
         return;
@@ -4034,6 +4111,7 @@
   // the dosing recommendations and notes, and persists them to the history alongside
   // single-pool snapshots.  This makes the history charts and insights reflect group reports.
   function saveRaidersGroupSnapshots() {
+    if (skipTrainingRecord('Raiders group snapshots')) return;
     const now = new Date();
     const site = inputs.reportSite.value || 'Raiders';
     const date = inputs.reportDate.value || getLocalDateInputValue(now);
@@ -4290,6 +4368,7 @@
     }
 
     function saveAsset() {
+      if (skipTrainingRecord('equipment register entry')) return;
       const pool = getSelectedPool();
       const payload = {
         type: inputs.assetType.value.trim(),
@@ -4886,6 +4965,10 @@
     }
 
     async function updateLiveMasterSheet(payload) {
+      if (isTrainingMode()) {
+        setSheetStatus('Training mode is on. Google Sheet update skipped.', 'info');
+        return { attempted: false, success: false, training: true };
+      }
       const url = getGoogleScriptUrl();
       if (!url) {
         setSheetStatus('Master sheet URL is blank. PDF still saved, but nothing was sent to the live sheet.', 'info');
@@ -4987,6 +5070,7 @@
     }
 
     async function backupCostDataToGoogleSheet() {
+      if (skipTrainingRecord('cost data backup')) return;
       await sendCostSyncEvent('snapshot', getCostSyncSnapshot(), { toast: true });
       showAppToast('Cost data backup sent.');
     }
@@ -5358,6 +5442,10 @@
       });
     }
     async function updateLiveMasterSheetBatch(payloads) {
+      if (isTrainingMode()) {
+        setSheetStatus('Training mode is on. Google Sheet batch update skipped.', 'info');
+        return { attempted: false, success: false, count: 0, training: true };
+      }
       if (!Array.isArray(payloads) || !payloads.length) {
         return { attempted: false, success: false, count: 0 };
       }
@@ -6183,6 +6271,7 @@
     }
 
     function saveClosedLoopSnapshot() {
+      if (skipTrainingRecord('closed loop snapshot')) return;
       const history = getClosedLoopHistoryState();
       history.push({
         ts: new Date().toISOString(),
@@ -6491,6 +6580,7 @@
     }
 
     function saveCurrentCostSettings() {
+      if (skipTrainingRecord('site cost settings')) return;
       if (!isAdminUnlocked()) {
         showAppToast('Only admins can save site cost settings.');
         return;
@@ -6738,6 +6828,7 @@
       await generateCostCentreReportPdf();
     }
     function clearCurrentPoolStockUsedLog() {
+      if (skipTrainingRecord('stock-used changes')) return;
       const pool = getSelectedPool();
       const state = loadStockState();
       state.transactions = (state.transactions || []).filter(tx => tx.poolKey !== pool.key);
@@ -6763,6 +6854,10 @@
     }
 
     function recordMarkedDosesToStockLog(options = {}) {
+      if (isTrainingMode()) {
+        if (!options.silent) showAppToast('Training mode: stock used log not saved.');
+        return 0;
+      }
       if (isRaidersGroupMode()) return 0;
       const pool = getSelectedPool();
       const { doses } = buildRecommendationRows();
@@ -8117,7 +8212,7 @@ function buildReportHtml() {
     }
 
     function renderReport() {
-      if (!isRaidersGroupMode()) recordMarkedDosesToStockLog({ silent: true });
+      if (!isRaidersGroupMode() && !isTrainingMode()) recordMarkedDosesToStockLog({ silent: true });
       qs('reportOutput').innerHTML = isRaidersGroupMode() ? buildRaidersGroupReportHtml() : buildReportHtml();
       qs('kpiReport').textContent = 'Ready';
     }
@@ -9589,6 +9684,7 @@ async function savePdfReport() {
       renderQrSection();
       renderPriorityAlerts();
       restoreSheetStatus();
+      updateTrainingModeUi();
       applyAccessControls();
       verifyTechnicianAccess(getPreferredTechnicianName());
       startCostSyncAutoRefresh();
@@ -9641,6 +9737,7 @@ async function savePdfReport() {
         if (scanBtn) scanBtn.addEventListener('click', () => scanSpinTouchPhotoForIceBath(index));
         if (clearBtn) clearBtn.addEventListener('click', () => clearIceBathPhoto(index));
       });
+      qs('trainingModeBtn')?.addEventListener('click', toggleTrainingMode);
       qs('generateReportBtn').addEventListener('click', renderReport);
       qs('saveReportBtn').addEventListener('click', savePdfReport);
       qs('generateMainCostReportBtn')?.addEventListener('click', generateStandaloneCostReportPdf);
@@ -9685,6 +9782,7 @@ async function savePdfReport() {
         saveBlob(blob, `mbs-app-data-${new Date().toISOString().slice(0,10)}.json`, 'application/json');
       });
       qs('clearHistoryBtn').addEventListener('click', () => {
+        if (skipTrainingRecord('history clearing')) return;
         if (!confirm('Clear all saved pool and closed loop visit history from this browser?')) return;
         localStorage.removeItem(HISTORY_STORAGE_KEY);
         localStorage.removeItem(CLOSED_LOOP_HISTORY_KEY);
@@ -9692,6 +9790,7 @@ async function savePdfReport() {
         showAppToast('Visit history cleared.');
       });
       qs('clearAssetsBtn').addEventListener('click', () => {
+        if (skipTrainingRecord('equipment register clearing')) return;
         if (!confirm('Clear the saved equipment register from this browser?')) return;
         localStorage.removeItem(ASSET_STORAGE_KEY);
         renderAssetSection();

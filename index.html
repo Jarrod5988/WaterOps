@@ -2893,7 +2893,7 @@
 
       <section class="card span-12" id="autoDosingDrumsCard">
         <h2>Onsite dosing drums</h2>
-        <div class="mode-note">Record acid/chlorine drum levels for pools with onsite dosing systems. At 15% or lower, WaterOps can open a draft Hydroquip PO request for Leah.</div>
+        <div class="mode-note">Record acid/chlorine drum levels for pools with onsite dosing systems. At 15% or lower, WaterOps can open a draft purchase order request for Leah.</div>
         <div id="autoDosingDrumsContent"></div>
       </section>
 
@@ -6631,6 +6631,8 @@
       return state;
     }
 
+    const ONSITE_PO_SUPPLIERS = ['Hydroquip', 'Bunnings'];
+
     const ONSITE_DOSING_DRUMS = [
       { key: 'acid', label: 'Hydrochloric Acid 32%', shortLabel: 'acid', supplier: 'Hydroquip', defaultContainerL: 15 },
       { key: 'chlorine', label: 'Liquid Chlorine 12.5%', shortLabel: 'chlorine', supplier: 'Hydroquip', defaultContainerL: 15 }
@@ -6656,6 +6658,7 @@
       return {
         applicable: false,
         containerL: item.defaultContainerL || 15,
+        supplier: item.supplier || ONSITE_PO_SUPPLIERS[0],
         strength: '50',
         remainingPercent: 100
       };
@@ -6681,6 +6684,11 @@
       return values.map(value => `<option value="${value}" ${String(value) === current ? 'selected' : ''}>${value}%</option>`).join('');
     }
 
+    function renderSupplierOptions(selected) {
+      const current = String(selected || ONSITE_PO_SUPPLIERS[0]);
+      return ONSITE_PO_SUPPLIERS.map(name => `<option value="${escapeHtml(name)}" ${name === current ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('');
+    }
+
     function renderStrengthOptions(item, selected) {
       return ['100', '75', '50', '25'].map(value => `<option value="${value}" ${String(selected || '50') === value ? 'selected' : ''}>${escapeHtml(getStrengthLabel(item, value))}</option>`).join('');
     }
@@ -6698,17 +6706,18 @@
       const technician = (inputs.reportTechnician && inputs.reportTechnician.value) || getPreferredTechnicianName() || '';
       const litresLeft = getDrumLitresLeft(drum);
       const simproJob = getSimproJobNumber();
-      const subject = `PO request - ${item.label} for ${pool.site || pool.poolName || 'site'}${simproJob ? ` - Simpro ${simproJob}` : ''}`;
+      const supplier = drum.supplier || item.supplier || ONSITE_PO_SUPPLIERS[0];
+      const subject = `Purchase order request - ${item.label} for ${pool.site || pool.poolName || 'site'}${simproJob ? ` - Simpro ${simproJob}` : ''}`;
       const lines = [
         'Hi Leah,',
         '',
-        `Could you please raise a purchase order for ${item.supplier} for ${item.label} at ${pool.site || pool.poolName || 'the site'}?`,
+        `Could you please raise a purchase order request for ${item.label} at ${pool.site || pool.poolName || 'the site'}?`,
         '',
         `Site: ${pool.site || '-'}`,
         `Pool: ${pool.poolName || '-'}`,
         `Simpro job #: ${simproJob || '-'}`,
         `Chemical: ${item.label}`,
-        `Supplier: ${item.supplier}`,
+        `Supplier: ${supplier}`,
         `Container size: ${formatNumber(Number(drum.containerL || 0), 0)} L`,
         `Mix strength: ${getStrengthLabel(item, drum.strength)}`,
         `Remaining: ${formatNumber(Number(drum.remainingPercent || 0), 0)}% (${formatNumber(litresLeft, 1)} L left)`,
@@ -6800,6 +6809,12 @@
                 <small>Litres</small>
               </div>
               <div class="field">
+                <label for="drumSupplier_${item.key}">Supplier</label>
+                <select id="drumSupplier_${item.key}" class="onsite-drum-input" data-chemical="${item.key}" data-field="supplier" ${disabled}>
+                  ${renderSupplierOptions(drum.supplier || item.supplier)}
+                </select>
+              </div>
+              <div class="field">
                 <label for="drumStrength_${item.key}">Strength / mix</label>
                 <select id="drumStrength_${item.key}" class="onsite-drum-input" data-chemical="${item.key}" data-field="strength" ${disabled}>
                   ${renderStrengthOptions(item, drum.strength)}
@@ -6816,7 +6831,7 @@
               <strong>${low ? 'PO trigger reached' : 'Drum status'}</strong><br />
               ${escapeHtml(status)}
               <div class="drum-meter" style="--level:${Math.max(0, Math.min(100, Number(drum.remainingPercent || 0)))}%;"><span></span></div>
-              ${low ? `<div class="actions" style="margin-top: 10px;"><button class="button secondary onsite-po-email-btn" data-chemical="${item.key}" type="button">Open Mail app PO draft</button></div>` : ''}
+              ${low ? `<div class="actions" style="margin-top: 10px;"><button class="button secondary onsite-po-email-btn" data-chemical="${item.key}" type="button">Open Mail app purchase order request</button></div>` : ''}
             </div>
           </div>
         `;

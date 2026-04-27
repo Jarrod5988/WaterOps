@@ -1,42 +1,28 @@
-﻿# Cloudflare Pages setup for WaterOps
+﻿# Cloudflare Pages / Workers deployment for WaterOps
 
 Recommended no-cost public app URL:
 
 https://waterops.pages.dev
 
-If `waterops` is already taken in Cloudflare Pages, use a close project name such as:
+## Current build settings
 
-- waterops-mbs
-- waterops-mbsfm
-- waterops-app
+Cloudflare is running this as a Workers Static Assets deployment using `npx wrangler deploy`.
 
-## One-time Cloudflare setup
-
-1. Open Cloudflare Dashboard.
-2. Go to Workers & Pages.
-3. Select Create application.
-4. Select Pages.
-5. Select Import an existing Git repository.
-6. Connect GitHub if Cloudflare asks.
-7. Select the repository: Jarrod5988/WaterOps.
-8. Use these build settings:
+Use these settings:
 
 | Setting | Value |
 | --- | --- |
-| Project name | waterops |
 | Production branch | main |
-| Framework preset | None |
-| Build command | exit 0 |
+| Framework preset | None / Static |
+| Build command | leave blank or `exit 0` |
+| Deploy command | `npx wrangler deploy` |
 | Build output directory | . |
 | Root directory | leave blank / repository root |
 
-9. Select Save and deploy.
+## Files that matter
 
-Cloudflare will then auto-deploy the app each time the GitHub `main` branch is updated.
+- `wrangler.jsonc` tells Wrangler to deploy this repo as static assets and use `index.html` for app navigation fallback.
+- `.assetsignore` stops Wrangler uploading repo internals such as `.git`, `.wrangler`, docs, and setup files.
+- `_redirects` was removed because Cloudflare rejected the catch-all rule as an infinite loop.
 
-## Notes
-
-- `_headers` keeps the service worker, manifest, and index file fresh so app updates are picked up more reliably.
-- `_redirects` sends unknown app routes back to `index.html`.
-- The app is a static PWA-style app, so no paid developer account is required for this hosting option.
-- Google Sheets sync still uses the existing Google Apps Script web app URL configured in WaterOps.
+After this commit is deployed, press **Retry build** in Cloudflare.

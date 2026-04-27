@@ -1,0 +1,14 @@
+.git
+.git/**
+.wrangler
+.wrangler/**
+node_modules
+node_modules/**
+README.md
+CLOUDFLARE_PAGES.md
+google-apps-script.js
+index .html
+wrangler.jsonc
+.assetsignore
+_headers
+_redirects

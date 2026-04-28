@@ -9025,33 +9025,59 @@ function buildReportHtml() {
 
 
 function drawTable(doc, startX, startY, columnWidths, headers, rows, options = {}) {
+      const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       const marginBottom = options.marginBottom || 12;
       const baseFontSize = options.fontSize || 8.5;
       const headerFontSize = options.headerFontSize || 8.5;
-      let y = startY;
+      const safeStartX = Number.isFinite(Number(startX)) ? Number(startX) : 10;
+      let y = Number.isFinite(Number(startY)) ? Number(startY) : 14;
+      const bodyRows = Array.isArray(rows) ? rows : [];
+      const rowArrays = bodyRows.map(row => Array.isArray(row) ? row : [row]);
+      const headerCells = Array.isArray(headers) ? headers : [headers];
+      const maxCells = Math.max(1, headerCells.length, ...rowArrays.map(row => row.length));
+      const usableWidth = Math.max(30, pageWidth - safeStartX - 10);
+      let widths = Array.from({ length: maxCells }, (_, idx) => {
+        const raw = Array.isArray(columnWidths) ? Number(columnWidths[idx]) : NaN;
+        return Number.isFinite(raw) && raw > 0 ? raw : usableWidth / maxCells;
+      });
+      const widthTotal = widths.reduce((sum, width) => sum + width, 0);
+      if (Number.isFinite(widthTotal) && widthTotal > usableWidth) {
+        const scale = usableWidth / widthTotal;
+        widths = widths.map(width => Math.max(8, width * scale));
+      }
+
+      const normaliseCells = cells => {
+        const arr = Array.isArray(cells) ? cells.slice(0, maxCells) : [cells];
+        while (arr.length < maxCells) arr.push('');
+        return arr;
+      };
 
       const ensureSpace = needed => {
-        if (y + needed > pageHeight - marginBottom) {
+        const safeNeeded = Number.isFinite(Number(needed)) ? Number(needed) : 7;
+        if (y + safeNeeded > pageHeight - marginBottom) {
           doc.addPage('a4', 'landscape');
           y = 14;
         }
       };
 
       const drawRow = (cells, isHeader = false, rowIndex = 0) => {
+        const safeCells = normaliseCells(cells);
         doc.setFont('helvetica', isHeader ? 'bold' : 'normal');
         doc.setFontSize(isHeader ? headerFontSize : baseFontSize);
 
-        const splitCells = cells.map((cell, idx) => {
+        const splitCells = safeCells.map((cell, idx) => {
           const text = String(cell == null ? '' : cell);
-          const width = Math.max(8, columnWidths[idx] - 3);
-          return doc.splitTextToSize(text, width);
+          const cellWidth = Number.isFinite(widths[idx]) && widths[idx] > 0 ? widths[idx] : Math.max(8, usableWidth / maxCells);
+          return doc.splitTextToSize(text, Math.max(8, cellWidth - 3));
         });
-        const rowHeight = Math.max(7, ...splitCells.map(lines => (lines.length * 3.6) + 3));
+        const rowHeight = Math.max(7, ...splitCells.map(lines => (Array.isArray(lines) ? lines.length : 1) * 3.6 + 3));
         ensureSpace(rowHeight);
 
-        let x = startX;
+        let x = safeStartX;
         splitCells.forEach((lines, idx) => {
+          const cellWidth = Number.isFinite(widths[idx]) && widths[idx] > 0 ? widths[idx] : Math.max(8, usableWidth / maxCells);
+          const safeRowHeight = Number.isFinite(rowHeight) && rowHeight > 0 ? rowHeight : 7;
           const isStriped = !isHeader && options.striped && rowIndex % 2 === 1;
           if (isHeader) {
             doc.setDrawColor(142, 184, 223);
@@ -9066,16 +9092,16 @@ function drawTable(doc, startX, startY, columnWidths, headers, rows, options = {
             doc.setFillColor(255, 255, 255);
             doc.setTextColor(15, 23, 42);
           }
-          doc.rect(x, y, columnWidths[idx], rowHeight, 'FD');
+          doc.rect(x, y, cellWidth, safeRowHeight, 'FD');
           doc.text(lines, x + 1.5, y + 4);
-          x += columnWidths[idx];
+          x += cellWidth;
         });
         y += rowHeight;
         doc.setTextColor(0, 0, 0);
       };
 
-      drawRow(headers, true);
-      rows.forEach((row, idx) => drawRow(row, false, idx));
+      drawRow(headerCells, true);
+      rowArrays.forEach((row, idx) => drawRow(row, false, idx));
       return y;
     }
 

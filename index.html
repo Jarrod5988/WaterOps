@@ -9742,8 +9742,42 @@ async function buildAndSavePdfReport() {
       return candidates;
     }
 
-    function buildOcrTextFromWordRows(words) {
-      const usable = (words || [])
+    function getSpinTouchKeyFromLabelText(text) {
+      const compact = cleanOcrLabelText(text).replace(/\s+/g, '');
+      if (!compact) return '';
+      const fixed = compact
+        .replace(/0/g, 'o')
+        .replace(/1/g, 'l')
+        .replace(/5/g, 's');
+      const map = {
+        fcl: 'freeChlorine',
+        fel: 'freeChlorine',
+        fc: 'freeChlorine',
+        tcl: 'totalChlorine',
+        tel: 'totalChlorine',
+        tc: 'totalChlorine',
+        ccl: 'combinedChlorine',
+        cc: 'combinedChlorine',
+        ph: 'ph',
+        alk: 'alkalinity',
+        aik: 'alkalinity',
+        alx: 'alkalinity',
+        hard: 'calciumHardness',
+        haro: 'calciumHardness',
+        cya: 'cyanuricAcid',
+        cva: 'cyanuricAcid',
+        copper: 'copper',
+        phos: 'phosphates',
+        pho: 'phosphates',
+        salt: 'salt',
+        sait: 'salt',
+        sakt: 'salt'
+      };
+      return map[compact] || map[fixed] || '';
+    }
+
+    function normaliseOcrWordItems(words) {
+      return (words || [])
         .map(word => {
           const box = word.bbox || {};
           const text = String(word.text || '').trim();
@@ -9753,14 +9787,16 @@ async function buildAndSavePdfReport() {
           const y0 = Number(box.y0);
           const y1 = Number(box.y1);
           if (![x0, x1, y0, y1].every(Number.isFinite)) return null;
-          return { text, x: (x0 + x1) / 2, y: (y0 + y1) / 2, height: Math.max(8, y1 - y0) };
+          return { text, x: (x0 + x1) / 2, y: (y0 + y1) / 2, height: Math.max(8, y1 - y0), width: Math.max(1, x1 - x0) };
         })
         .filter(Boolean)
         .sort((a, b) => a.y - b.y || a.x - b.x);
+    }
 
+    function groupOcrWordsIntoRows(words) {
       const rows = [];
-      usable.forEach(word => {
-        const row = rows.find(item => Math.abs(item.y - word.y) <= Math.max(12, word.height * 0.65));
+      normaliseOcrWordItems(words).forEach(word => {
+        const row = rows.find(item => Math.abs(item.y - word.y) <= Math.max(12, word.height * 0.7));
         if (row) {
           row.words.push(word);
           row.y = (row.y + word.y) / 2;
@@ -9768,10 +9804,39 @@ async function buildAndSavePdfReport() {
           rows.push({ y: word.y, words: [word] });
         }
       });
-
       return rows
         .sort((a, b) => a.y - b.y)
-        .map(row => row.words.sort((a, b) => a.x - b.x).map(word => word.text).join(' '))
+        .map(row => ({ ...row, words: row.words.sort((a, b) => a.x - b.x) }));
+    }
+
+    function parseSpinTouchWordsByPosition(words) {
+      const results = {};
+      const rows = groupOcrWordsIntoRows(words);
+      rows.forEach(row => {
+        const rowWords = row.words || [];
+        rowWords.forEach((word, index) => {
+          const key = getSpinTouchKeyFromLabelText(word.text);
+          if (!key) return;
+          const valueParts = [];
+          for (let nextIndex = index + 1; nextIndex < rowWords.length; nextIndex += 1) {
+            const next = rowWords[nextIndex];
+            if (getSpinTouchKeyFromLabelText(next.text)) break;
+            if (/[0-9OoQqIl|.]/.test(next.text)) valueParts.push(next.text);
+            if (valueParts.length >= 3) break;
+          }
+          const rawValue = valueParts.join('');
+          if (!rawValue) return;
+          const numeric = normaliseNumericTokenForKey(rawValue, key);
+          const chosen = chooseBestValue(key, [numeric]);
+          if (chosen != null) results[key] = chosen;
+        });
+      });
+      return results;
+    }
+
+    function buildOcrTextFromWordRows(words) {
+      return groupOcrWordsIntoRows(words)
+        .map(row => row.words.map(word => word.text).join(' '))
         .join('\n');
     }
     function parseSpinTouchTwoColumnLayout(text) {
@@ -9858,15 +9923,15 @@ async function buildAndSavePdfReport() {
       rawTexts.forEach(text => Object.assign(merged, parseSpinTouchTwoColumnLayout(text), parseKnownSpinTouchPairs(text)));
       Object.keys(OCR_LABELS).forEach(key => {
         const allCandidates = [];
+        resultSets.forEach(set => {
+          if (set && set[key] != null) allCandidates.push(set[key]);
+        });
         rawTexts.forEach(text => {
           extractCandidatesForKey(text, key).forEach(value => allCandidates.push(value));
           const layoutResults = parseSpinTouchTwoColumnLayout(text);
           if (layoutResults[key] != null) allCandidates.push(layoutResults[key]);
           const pairResults = parseKnownSpinTouchPairs(text);
           if (pairResults[key] != null) allCandidates.push(pairResults[key]);
-        });
-        resultSets.forEach(set => {
-          if (set && set[key] != null) allCandidates.push(set[key]);
         });
         const chosen = chooseBestValue(key, allCandidates);
         if (chosen != null) merged[key] = chosen;
@@ -10291,9 +10356,10 @@ async function buildAndSavePdfReport() {
           });
           const rawText = data && data.text ? data.text : '';
           const rowText = buildOcrTextFromWordRows(data && data.words);
+          const wordResults = parseSpinTouchWordsByPosition(data && data.words);
           rawTexts.push(rawText, rowText);
           const parsed = parseSpinTouchResults(`${rawText}\n${rowText}`);
-          resultSets.push(parsed);
+          resultSets.push(Object.assign({}, parsed, wordResults));
           results = mergeSpinTouchResults(resultSets, rawTexts);
           if (hasStrongSpinTouchResults(results)) {
             const score = scoreSpinTouchResults(results);

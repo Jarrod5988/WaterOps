@@ -9923,8 +9923,9 @@ async function buildAndSavePdfReport() {
       rawTexts.forEach(text => Object.assign(merged, parseSpinTouchTwoColumnLayout(text), parseKnownSpinTouchPairs(text)));
       Object.keys(OCR_LABELS).forEach(key => {
         const allCandidates = [];
-        resultSets.forEach(set => {
-          if (set && set[key] != null) allCandidates.push(set[key]);
+        resultSets.slice().reverse().forEach(set => {
+          const cleanSet = sanitiseSpinTouchResults(set);
+          if (cleanSet && cleanSet[key] != null) allCandidates.push(cleanSet[key]);
         });
         rawTexts.forEach(text => {
           extractCandidatesForKey(text, key).forEach(value => allCandidates.push(value));
@@ -10216,17 +10217,43 @@ async function buildAndSavePdfReport() {
       ];
     }
 
+    function isPlausibleSpinTouchValue(key, value) {
+      if (value == null || !Number.isFinite(Number(value))) return false;
+      const nValue = Number(value);
+      if (key === 'freeChlorine' || key === 'totalChlorine') return nValue >= 0 && nValue <= 10;
+      if (key === 'combinedChlorine') return nValue >= 0 && nValue <= 5;
+      if (key === 'ph') return nValue >= 5 && nValue <= 10;
+      if (key === 'alkalinity') return nValue >= 10 && nValue <= 400;
+      if (key === 'calciumHardness') return nValue >= 20 && nValue <= 1500;
+      if (key === 'cyanuricAcid') return nValue >= 0 && nValue <= 300;
+      if (key === 'copper') return nValue >= 0 && nValue <= 1.2;
+      if (key === 'phosphates') return nValue >= 0 && nValue <= 10000;
+      if (key === 'salt') return nValue === 0 || nValue >= 100;
+      if (key === 'temperature') return nValue >= 0 && nValue <= 60;
+      return true;
+    }
+
+    function sanitiseSpinTouchResults(results) {
+      const clean = {};
+      Object.entries(results || {}).forEach(([key, value]) => {
+        if (isPlausibleSpinTouchValue(key, value)) clean[key] = value;
+      });
+      return clean;
+    }
+
     function scoreSpinTouchResults(results) {
+      const clean = sanitiseSpinTouchResults(results);
       const keys = SPIN_TOUCH_SCREEN_ORDER.map(item => item.key);
-      const present = keys.filter(key => results && results[key] != null);
+      const present = keys.filter(key => clean[key] != null);
       const core = ['freeChlorine', 'totalChlorine', 'combinedChlorine', 'ph', 'alkalinity'];
-      const coreCount = core.filter(key => results && results[key] != null).length;
+      const coreCount = core.filter(key => clean[key] != null).length;
       return { count: present.length, coreCount };
     }
 
     function hasStrongSpinTouchResults(results) {
-      const score = scoreSpinTouchResults(results);
-      return score.coreCount >= 4 && score.count >= 8;
+      const clean = sanitiseSpinTouchResults(results);
+      const score = scoreSpinTouchResults(clean);
+      return score.coreCount >= 5 && score.count >= 8 && clean.ph != null && clean.alkalinity != null;
     }
 
     function canvasToBlob(canvas) {
@@ -10363,12 +10390,16 @@ async function buildAndSavePdfReport() {
           results = mergeSpinTouchResults(resultSets, rawTexts);
           if (hasStrongSpinTouchResults(results)) {
             const score = scoreSpinTouchResults(results);
-            setStatus(`Spin Touch read found ${score.count} fields. Finishing...`);
+            setStatus(`Spin Touch read found ${score.count} reliable fields. Finishing...`);
             break;
+          } else if (i === 0) {
+            setStatus('Fast read looked unreliable. Running fallback checks...');
           }
         }
 
-        results = mergeSpinTouchResults(resultSets, rawTexts);
+        results = sanitiseSpinTouchResults(mergeSpinTouchResults(resultSets, rawTexts));
+        const finalScore = scoreSpinTouchResults(results);
+        if (finalScore.coreCount < 3 || finalScore.count < 5) results = {};
         return { populated: 0, results, assessment };
       } finally {
         if (button) {

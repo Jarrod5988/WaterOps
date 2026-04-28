@@ -2677,74 +2677,77 @@
       <section class="card span-8" id="singleResultsCard">
         <h2>Current test results and targets</h2>
         <div class="field-grid">
+          <div class="span-12 mode-note" style="grid-column: 1 / -1;">Spin Touch readings - enter in screen order: FCL, TCL, CCL, pH, ALK, HARD, CYA, COPPER, PHOS, SALT.</div>
           <div class="field">
-            <label for="ph">Current pH</label>
-            <input id="ph" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 7.8" />
-          </div>
-          <div class="field">
-            <label for="targetPh">Target pH</label>
-            <input id="targetPh" type="number" inputmode="decimal" step="0.01" placeholder="7.2" />
-          </div>
-          <div class="field">
-            <label for="freeChlorine">Current free chlorine</label>
+            <label for="freeChlorine">FCL / free chlorine</label>
             <input id="freeChlorine" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
           </div>
           <div class="field">
-            <label for="targetFreeChlorine">Target free chlorine</label>
-            <input id="targetFreeChlorine" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="totalChlorine">Total chlorine</label>
+            <label for="totalChlorine">TCL / total chlorine</label>
             <input id="totalChlorine" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
           </div>
           <div class="field">
-            <label for="combinedChlorine">Combined chlorine</label>
+            <label for="combinedChlorine">CCL / combined chlorine</label>
             <input id="combinedChlorine" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
           </div>
-          <div class="span-12 mode-note" style="grid-column: 1 / -1; margin-top: -4px;">Chlorine dosing is calculated from free chlorine only. Total and combined chlorine are recorded as reference readings.</div>
           <div class="field">
-            <label for="alkalinity">Current alkalinity</label>
+            <label for="ph">pH</label>
+            <input id="ph" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 7.8" />
+          </div>
+          <div class="field">
+            <label for="alkalinity">ALK / alkalinity</label>
             <input id="alkalinity" type="number" inputmode="decimal" step="1" placeholder="ppm" />
           </div>
           <div class="field">
-            <label for="targetAlkalinity">Target alkalinity</label>
-            <input id="targetAlkalinity" type="number" inputmode="decimal" step="1" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="calciumHardness">Current calcium hardness</label>
+            <label for="calciumHardness">HARD / calcium hardness</label>
             <input id="calciumHardness" type="number" inputmode="decimal" step="1" placeholder="ppm" />
           </div>
           <div class="field">
-            <label for="targetCalcium">Target calcium hardness</label>
-            <input id="targetCalcium" type="number" inputmode="decimal" step="1" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="cyanuricAcid">Current CYA</label>
+            <label for="cyanuricAcid">CYA</label>
             <input id="cyanuricAcid" type="number" inputmode="decimal" step="1" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="targetCya">Target CYA</label>
-            <input id="targetCya" type="number" inputmode="decimal" step="1" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="salt">Current salt</label>
-            <input id="salt" type="number" inputmode="decimal" step="1" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="targetSalt">Target salt</label>
-            <input id="targetSalt" type="number" inputmode="decimal" step="1" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="temperature">Water temperature</label>
-            <input id="temperature" type="number" inputmode="decimal" step="0.1" placeholder="deg C" />
           </div>
           <div class="field">
             <label for="copper">Copper</label>
             <input id="copper" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
           </div>
           <div class="field">
-            <label for="phosphates">Phosphates</label>
+            <label for="phosphates">PHOS / phosphates</label>
             <input id="phosphates" type="number" inputmode="decimal" step="1" placeholder="ppb" />
+          </div>
+          <div class="field">
+            <label for="salt">Salt</label>
+            <input id="salt" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="span-12 mode-note" style="grid-column: 1 / -1; margin-top: -4px;">Chlorine dosing is calculated from free chlorine only. Total and combined chlorine are recorded as reference readings.</div>
+          <div class="span-12 mode-note" style="grid-column: 1 / -1;">Targets</div>
+          <div class="field">
+            <label for="targetFreeChlorine">Target free chlorine</label>
+            <input id="targetFreeChlorine" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="targetPh">Target pH</label>
+            <input id="targetPh" type="number" inputmode="decimal" step="0.01" placeholder="7.2" />
+          </div>
+          <div class="field">
+            <label for="targetAlkalinity">Target alkalinity</label>
+            <input id="targetAlkalinity" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="targetCalcium">Target calcium hardness</label>
+            <input id="targetCalcium" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="targetCya">Target CYA</label>
+            <input id="targetCya" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="field">
+            <label for="targetSalt">Target salt</label>
+            <input id="targetSalt" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+          </div>
+          <div class="span-12 mode-note" style="grid-column: 1 / -1;">Other reading</div>
+          <div class="field">
+            <label for="temperature">Water temperature</label>
+            <input id="temperature" type="number" inputmode="decimal" step="0.1" placeholder="deg C" />
           </div>
         </div>
 
@@ -8499,17 +8502,17 @@
       const summaryItems = [
         { label: 'Water Clarity', value: inputs.waterClarity.value || '-' },
         { label: 'Volume (L)', value: formatNumber(volume, 0) },
-        { label: 'Free Chlorine', value: rowsMap.chlorine && rowsMap.chlorine.current != null ? formatNumber(rowsMap.chlorine.current, 2) : '-' },
-        { label: 'Total Chlorine', value: rowsMap.totalChlorine && rowsMap.totalChlorine.current != null ? formatNumber(rowsMap.totalChlorine.current, 2) : '-' },
-        { label: 'Combined Chlorine', value: rowsMap.combinedChlorine && rowsMap.combinedChlorine.current != null ? formatNumber(rowsMap.combinedChlorine.current, 2) : '-' },
+        { label: 'FCL', value: rowsMap.chlorine && rowsMap.chlorine.current != null ? formatNumber(rowsMap.chlorine.current, 2) : '-' },
+        { label: 'TCL', value: rowsMap.totalChlorine && rowsMap.totalChlorine.current != null ? formatNumber(rowsMap.totalChlorine.current, 2) : '-' },
+        { label: 'CCL', value: rowsMap.combinedChlorine && rowsMap.combinedChlorine.current != null ? formatNumber(rowsMap.combinedChlorine.current, 2) : '-' },
         { label: 'pH', value: rowsMap.acid && rowsMap.acid.current != null ? formatNumber(rowsMap.acid.current, 2) : '-' },
-        { label: 'Alkalinity', value: rowsMap.bicarb && rowsMap.bicarb.current != null ? formatNumber(rowsMap.bicarb.current, 0) : '-' },
-        { label: 'Calcium', value: rowsMap.calcium && rowsMap.calcium.current != null ? formatNumber(rowsMap.calcium.current, 0) : '-' },
+        { label: 'ALK', value: rowsMap.bicarb && rowsMap.bicarb.current != null ? formatNumber(rowsMap.bicarb.current, 0) : '-' },
+        { label: 'HARD', value: rowsMap.calcium && rowsMap.calcium.current != null ? formatNumber(rowsMap.calcium.current, 0) : '-' },
         { label: 'CYA', value: rowsMap.stabiliser && rowsMap.stabiliser.current != null ? formatNumber(rowsMap.stabiliser.current, 0) : '-' },
-        { label: 'Salt', value: rowsMap.salt && rowsMap.salt.current != null ? formatNumber(rowsMap.salt.current, 0) : '-' },
-        { label: 'Temperature', value: n(inputs.temperature.value) != null ? formatNumber(n(inputs.temperature.value), 1) : '-' },
-        { label: 'Copper', value: n(inputs.copper.value) != null ? formatNumber(n(inputs.copper.value), 2) : '-' },
-        { label: 'Phosphates', value: n(inputs.phosphates.value) != null ? formatNumber(n(inputs.phosphates.value), 0) : '-' }
+        { label: 'COPPER', value: n(inputs.copper.value) != null ? formatNumber(n(inputs.copper.value), 2) : '-' },
+        { label: 'PHOS', value: n(inputs.phosphates.value) != null ? formatNumber(n(inputs.phosphates.value), 0) : '-' },
+        { label: 'SALT', value: rowsMap.salt && rowsMap.salt.current != null ? formatNumber(rowsMap.salt.current, 0) : '-' },
+        { label: 'Temperature', value: n(inputs.temperature.value) != null ? formatNumber(n(inputs.temperature.value), 1) : '-' }
       ];
 
       const spinTouchRows = getSpinTouchRowsFromInputs();
@@ -9570,11 +9573,34 @@ async function buildAndSavePdfReport() {
       return Number.isFinite(value) ? value : null;
     }
 
-    function extractNumbersFromText(text) {
+    function normaliseNumericTokenForKey(raw, key) {
+      const rawText = String(raw || '').trim();
+      const cleaned = rawText
+        .replace(/[OoQq]/g, '0')
+        .replace(/[lI|]/g, '1')
+        .replace(/[^0-9.\-]/g, '');
+      if (!cleaned) return null;
+      if (!cleaned.includes('.') && /^0+\d+$/.test(cleaned)) {
+        const digits = cleaned.replace(/^0+/, '') || '0';
+        if (['freeChlorine', 'totalChlorine', 'combinedChlorine'].includes(key)) {
+          return digits.length >= 3 ? Number(digits) / 100 : Number(`0.${digits}`);
+        }
+        if (key === 'copper') {
+          return Number(`0.${digits}`);
+        }
+      }
+      return normaliseNumericToken(cleaned);
+    }
+
+    function extractNumericTokensFromText(text) {
       const matches = [...String(text || '').matchAll(/(?:\d*\.\d+|\d+)/g)];
       return matches
-        .map(match => normaliseNumericToken(match[0]))
-        .filter(value => Number.isFinite(value));
+        .map(match => ({ raw: match[0], value: normaliseNumericToken(match[0]) }))
+        .filter(item => Number.isFinite(item.value));
+    }
+
+    function extractNumbersFromText(text) {
+      return extractNumericTokensFromText(text).map(item => item.value);
     }
 
     function chooseBestValue(key, values) {
@@ -9690,11 +9716,11 @@ async function buildAndSavePdfReport() {
         const beforeRegex = new RegExp(`([0-9OoQqIl|.]{1,12})[^a-zA-Z0-9\\n\\r]{0,12}${labelPattern}`, 'ig');
         let match;
         while ((match = afterRegex.exec(normalised)) !== null) {
-          const value = normaliseNumericToken(match[1]);
+          const value = normaliseNumericTokenForKey(match[1], key);
           if (value != null) candidates.push(value);
         }
         while ((match = beforeRegex.exec(normalised)) !== null) {
-          const value = normaliseNumericToken(match[1]);
+          const value = normaliseNumericTokenForKey(match[1], key);
           if (value != null) candidates.push(value);
         }
       });
@@ -9763,15 +9789,18 @@ async function buildAndSavePdfReport() {
       ];
       const results = {};
       const numericRows = rows
-        .map(line => extractNumbersFromText(line))
-        .filter(numbers => numbers.length >= 2)
+        .map(line => extractNumericTokensFromText(line))
+        .filter(tokens => tokens.length >= 2)
         .slice(0, layoutRows.length);
 
-      numericRows.forEach((numbers, rowIndex) => {
+      numericRows.forEach((tokens, rowIndex) => {
         const keys = layoutRows[rowIndex];
         if (!keys) return;
         keys.forEach((key, index) => {
-          const value = chooseBestValue(key, [numbers[index]]);
+          const token = tokens[index];
+          if (!token) return;
+          const rawValue = normaliseNumericTokenForKey(token.raw, key);
+          const value = chooseBestValue(key, [rawValue]);
           if (value != null) results[key] = value;
         });
       });
@@ -9807,7 +9836,7 @@ async function buildAndSavePdfReport() {
         const label = String(match[1] || '').toLowerCase();
         const key = labelMap[label];
         if (!key) continue;
-        const value = normaliseNumericToken(match[2]);
+        const value = normaliseNumericTokenForKey(match[2], key);
         const chosen = chooseBestValue(key, [value]);
         if (chosen != null) results[key] = chosen;
       }

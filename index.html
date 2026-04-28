@@ -10139,16 +10139,29 @@ async function buildAndSavePdfReport() {
         height: screenCanvas.height * 0.84
       });
 
-      const originalScaled = scaleCanvas(resultsOnly, 2.6);
+      const originalScaled = scaleCanvas(resultsOnly, 2.2);
       const highContrast = createHighContrastCanvas(originalScaled);
-      const looseScaled = scaleCanvas(resultsLoose, 2.3);
+      const looseScaled = scaleCanvas(resultsLoose, 2.0);
 
       return [
-        { canvas: originalScaled, psm: 6, label: 'screen pass' },
-        { canvas: originalScaled, psm: 11, label: 'screen sparse pass' },
-        { canvas: highContrast, psm: 6, label: 'high contrast pass' },
-        { canvas: looseScaled, psm: 11, label: 'loose crop pass' }
+        { canvas: originalScaled, psm: 6, label: 'fast screen pass', fallback: false },
+        { canvas: highContrast, psm: 6, label: 'contrast fallback', fallback: true },
+        { canvas: originalScaled, psm: 11, label: 'sparse fallback', fallback: true },
+        { canvas: looseScaled, psm: 11, label: 'loose fallback', fallback: true }
       ];
+    }
+
+    function scoreSpinTouchResults(results) {
+      const keys = SPIN_TOUCH_SCREEN_ORDER.map(item => item.key);
+      const present = keys.filter(key => results && results[key] != null);
+      const core = ['freeChlorine', 'totalChlorine', 'combinedChlorine', 'ph', 'alkalinity'];
+      const coreCount = core.filter(key => results && results[key] != null).length;
+      return { count: present.length, coreCount };
+    }
+
+    function hasStrongSpinTouchResults(results) {
+      const score = scoreSpinTouchResults(results);
+      return score.coreCount >= 4 && score.count >= 8;
     }
 
     function canvasToBlob(canvas) {
@@ -10264,10 +10277,12 @@ async function buildAndSavePdfReport() {
         const resultSets = [];
         const rawTexts = [];
 
+        let results = {};
         for (let i = 0; i < ocrJobs.length; i += 1) {
           const job = ocrJobs[i];
           const prefix = assessment && !assessment.looksGood ? 'Tips noted. ' : '';
-          setStatus(`${prefix}Reading the Spin Touch photo... pass ${i + 1} of ${ocrJobs.length}.`);
+          const passLabel = job.fallback ? 'fallback' : 'fast pass';
+          setStatus(`${prefix}Reading the Spin Touch photo... ${passLabel} ${i + 1} of ${ocrJobs.length}.`);
           const blob = await canvasToBlob(job.canvas);
           if (!blob) continue;
           const { data } = await window.Tesseract.recognize(blob, 'eng', {
@@ -10279,9 +10294,15 @@ async function buildAndSavePdfReport() {
           rawTexts.push(rawText, rowText);
           const parsed = parseSpinTouchResults(`${rawText}\n${rowText}`);
           resultSets.push(parsed);
+          results = mergeSpinTouchResults(resultSets, rawTexts);
+          if (hasStrongSpinTouchResults(results)) {
+            const score = scoreSpinTouchResults(results);
+            setStatus(`Spin Touch read found ${score.count} fields. Finishing...`);
+            break;
+          }
         }
 
-        const results = mergeSpinTouchResults(resultSets, rawTexts);
+        results = mergeSpinTouchResults(resultSets, rawTexts);
         return { populated: 0, results, assessment };
       } finally {
         if (button) {

@@ -2917,6 +2917,11 @@
         <div class="mode-note">Record acid/chlorine drum levels for pools with onsite dosing systems. At 15% or lower, WaterOps can open a draft purchase order request for Leah.</div>
         <div id="autoDosingDrumsContent"></div>
       </section>
+      <section class="card span-12" id="blueRiiotAdvisorCard">
+        <h2>BlueRiiot & pump runtime advisor</h2>
+        <div class="mode-note">Use BlueRiiot Plus trend readings with manual test results to suggest safer Grid Connect acid pump and Enviroswim runtime settings. This is advisory only; confirm before changing timers.</div>
+        <div id="blueRiiotAdvisorContent"></div>
+      </section>
 
       <section class="card span-12" id="stockLogCard">
         <h2>Chemical stock used</h2>
@@ -3314,6 +3319,7 @@
     const STORAGE_KEY = 'mbs-pool-dosing-combined-v3';
     const STOCK_STORAGE_KEY = 'mbs-pool-stock-v1';
     const AUTO_DOSING_DRUM_STORAGE_KEY = 'mbs-auto-dosing-drums-v1';
+    const BLUERIIOT_ADVISOR_STORAGE_KEY = 'mbs-blueriiot-advisor-v1';
     const DEFAULT_LEAH_PO_EMAIL = 'leahm@mbsfm.com.au';
     const COST_CENTRE_STORAGE_KEY = 'mbs-cost-centre-settings-v1';
     const DOSE_KEYS = ['acid', 'chlorine', 'bicarb', 'calcium', 'stabiliser', 'salt'];
@@ -6686,7 +6692,7 @@
       if (screen === 'insights') renderInsightsSection();
       if (screen === 'admin') renderQrSection();
       if (screen === 'costCentre') renderCostCentreSection();
-      if (screen === 'pools') { renderCombinedTable(); renderAutoDosingDrumsSection(); renderStockSection(); }
+      if (screen === 'pools') { renderCombinedTable(); renderAutoDosingDrumsSection(); renderBlueRiiotAdvisorSection(); renderStockSection(); }
       applyAccessControls();
     }
 
@@ -7024,6 +7030,237 @@
       wrap.querySelectorAll('.onsite-po-email-btn').forEach(button => {
         button.addEventListener('click', () => openOnsiteDrumPoEmail(button.dataset.chemical));
       });
+    }
+    function loadBlueRiiotAdvisorState() {
+      const state = loadJson(BLUERIIOT_ADVISOR_STORAGE_KEY, { pools: {} });
+      state.pools = state.pools || {};
+      return state;
+    }
+
+    function saveBlueRiiotAdvisorState(state) {
+      saveJson(BLUERIIOT_ADVISOR_STORAGE_KEY, state);
+    }
+
+    function getBlueRiiotSettingsForPool(state, poolKey) {
+      const existing = (state.pools && state.pools[poolKey]) || {};
+      return {
+        enabled: existing.enabled || 'manual',
+        deviceName: existing.deviceName || '',
+        bridgeUrl: existing.bridgeUrl || '',
+        latestPh: existing.latestPh ?? '',
+        previousPh: existing.previousPh ?? '',
+        readingAgeHours: existing.readingAgeHours ?? '',
+        previousAgeHours: existing.previousAgeHours ?? '',
+        orp: existing.orp ?? '',
+        temperature: existing.temperature ?? '',
+        salinity: existing.salinity ?? '',
+        acidPumpMlMin: existing.acidPumpMlMin ?? '',
+        currentAcidMinDay: existing.currentAcidMinDay ?? '',
+        acidDoseDays: existing.acidDoseDays ?? '3',
+        enviroswimHoursDay: existing.enviroswimHoursDay ?? '',
+        filterHoursDay: existing.filterHoursDay ?? '',
+        notes: existing.notes || ''
+      };
+    }
+
+    function getBlueRiiotNumeric(settings, key) {
+      return n(settings[key]);
+    }
+
+    function buildBlueRiiotAdvice(settings, pool) {
+      const volume = getActiveVolume() || pool.volume || 0;
+      const targetPh = n(inputs.targetPh && inputs.targetPh.value) ?? pool.defaults?.ph ?? 7.2;
+      const targetSalt = n(inputs.targetSalt && inputs.targetSalt.value) ?? pool.defaults?.salt ?? 0;
+      const latestPh = getBlueRiiotNumeric(settings, 'latestPh');
+      const previousPh = getBlueRiiotNumeric(settings, 'previousPh');
+      const readingAge = getBlueRiiotNumeric(settings, 'readingAgeHours');
+      const previousAge = getBlueRiiotNumeric(settings, 'previousAgeHours');
+      const orp = getBlueRiiotNumeric(settings, 'orp');
+      const salinity = getBlueRiiotNumeric(settings, 'salinity');
+      const acidPumpMlMin = getBlueRiiotNumeric(settings, 'acidPumpMlMin');
+      const currentAcidMinDay = getBlueRiiotNumeric(settings, 'currentAcidMinDay');
+      const acidDoseDays = Math.max(1, Math.min(7, Math.round(getBlueRiiotNumeric(settings, 'acidDoseDays') || 3)));
+      const enviroswimHoursDay = getBlueRiiotNumeric(settings, 'enviroswimHoursDay');
+      const filterHoursDay = getBlueRiiotNumeric(settings, 'filterHoursDay');
+      const alkForDose = n(inputs.alkalinity && inputs.alkalinity.value) ?? n(inputs.targetAlkalinity && inputs.targetAlkalinity.value) ?? pool.defaults?.alk ?? 80;
+      const messages = [];
+      const chips = [];
+
+      if (settings.enabled === 'cloud') {
+        messages.push('Cloud bridge selected. Once the bridge endpoint is added, use it to pull latest BlueRiiot readings into these fields and log them to Google Sheets.');
+      } else if (settings.enabled === 'off') {
+        messages.push('BlueRiiot monitoring is marked as not used for this pool.');
+      } else {
+        messages.push('Manual mode: paste the latest BlueRiiot Plus reading here until the bridge is connected.');
+      }
+
+      if (readingAge != null && readingAge > 24) {
+        chips.push({ label: 'Stale reading', text: `${formatNumber(readingAge, 0)} h old`, tone: 'bad' });
+        messages.push('BlueRiiot reading is older than 24 hours. Confirm the device has signal before changing pump timers.');
+      } else if (readingAge != null) {
+        chips.push({ label: 'Reading age', text: `${formatNumber(readingAge, 0)} h`, tone: 'good' });
+      }
+
+      if (latestPh == null) {
+        messages.push('Enter latest BlueRiiot pH to calculate acid pump runtime advice.');
+      } else {
+        const phDelta = round(latestPh - targetPh, 2);
+        chips.push({ label: 'pH vs target', text: `${phDelta >= 0 ? '+' : ''}${formatNumber(phDelta, 2)}`, tone: Math.abs(phDelta) <= 0.15 ? 'good' : 'warn' });
+        if (latestPh > targetPh + 0.15) {
+          const acidMl = acidDoseMl(volume, latestPh, targetPh, alkForDose);
+          if (acidPumpMlMin && acidPumpMlMin > 0 && acidMl > 0) {
+            const totalMinutes = Math.ceil(acidMl / acidPumpMlMin);
+            const dailyMinutes = Math.max(1, Math.ceil(totalMinutes / acidDoseDays));
+            const scheduleText = currentAcidMinDay == null
+              ? `${dailyMinutes} min/day for ${acidDoseDays} day${acidDoseDays === 1 ? '' : 's'}`
+              : `${Math.max(0, currentAcidMinDay + dailyMinutes)} min/day for ${acidDoseDays} day${acidDoseDays === 1 ? '' : 's'} or add a separate short timer`;
+            messages.push(`pH is high. Estimated acid demand is ${formatChemicalQuantity(acidMl, 'mL')}. With a pump rate of ${formatNumber(acidPumpMlMin, 0)} mL/min, suggest about ${totalMinutes} total pump minute${totalMinutes === 1 ? '' : 's'} split as ${scheduleText}, then retest.`);
+          } else if (acidMl > 0) {
+            messages.push(`pH is high. Estimated acid demand is ${formatChemicalQuantity(acidMl, 'mL')}. Add the acid pump flow rate to convert this into Grid Connect run time.`);
+          } else {
+            messages.push('pH is slightly high, but no acid runtime increase is calculated from the current target and alkalinity. Retest before changing timers.');
+          }
+        } else if (latestPh < targetPh - 0.15) {
+          messages.push('pH is below target. Do not increase acid runtime. Consider reducing/suspending the acid timer and manually raise pH if site practice requires it.');
+        } else {
+          messages.push('pH is close to target. Keep the acid pump schedule unchanged unless the trend shows ongoing drift.');
+        }
+      }
+
+      if (latestPh != null && previousPh != null && previousAge != null && readingAge != null && previousAge > readingAge) {
+        const days = Math.max((previousAge - readingAge) / 24, 0.25);
+        const driftPerDay = round((latestPh - previousPh) / days, 2);
+        chips.push({ label: 'pH drift', text: `${driftPerDay >= 0 ? '+' : ''}${formatNumber(driftPerDay, 2)}/day`, tone: Math.abs(driftPerDay) <= 0.05 ? 'good' : 'warn' });
+        if (driftPerDay > 0.08) messages.push('pH is climbing quickly. Consider adding a small daily acid timer rather than one long correction dose.');
+        if (driftPerDay < -0.08) messages.push('pH is falling quickly. Reduce acid timer and check probe calibration/chemical strength.');
+      }
+
+      if (orp != null) {
+        chips.push({ label: 'ORP', text: `${formatNumber(orp, 0)} mV`, tone: orp >= 650 && orp <= 800 ? 'good' : 'warn' });
+        if (orp < 650) {
+          if (latestPh != null && latestPh > targetPh + 0.15) {
+            messages.push('ORP is low while pH is high. Correct pH first, then review Enviroswim output/runtime.');
+          } else {
+            messages.push('ORP is low. If manual tests confirm poor sanitation, consider increasing Enviroswim/runtime in small steps and recheck.');
+          }
+        } else if (orp > 800) {
+          messages.push('ORP is high. Check manual chlorine/oxidiser reading before increasing Enviroswim runtime.');
+        } else {
+          messages.push('ORP is in a reasonable monitoring band. Keep Enviroswim runtime steady if manual tests also look good.');
+        }
+      }
+
+      if (salinity != null && targetSalt != null) {
+        const saltDelta = salinity - targetSalt;
+        chips.push({ label: 'Salt trend', text: `${saltDelta >= 0 ? '+' : ''}${formatNumber(saltDelta, 0)} ppm`, tone: Math.abs(saltDelta) <= 200 ? 'good' : 'warn' });
+        if (salinity < targetSalt - 200) messages.push('Salt/conductivity is below target. Confirm with a manual salt test before adding salt.');
+        if (salinity > targetSalt + 200) messages.push('Salt/conductivity is above target. Avoid adding salt and check for probe calibration or evaporation/concentration.');
+      }
+
+      if (enviroswimHoursDay != null && filterHoursDay != null && enviroswimHoursDay > filterHoursDay) {
+        messages.push('Enviroswim runtime is higher than filter runtime. The cell can only be effective while water is moving, so align runtimes.');
+      }
+      if (filterHoursDay != null && filterHoursDay < 6) {
+        messages.push('Filter runtime is low. For problem trends, review circulation time before relying only on chemical timer changes.');
+      }
+
+      return { messages, chips };
+    }
+
+    function saveBlueRiiotAdvisorField(event) {
+      if (isTrainingMode()) {
+        showAppToast('Training mode: BlueRiiot advisor changes not saved.');
+        renderBlueRiiotAdvisorSection();
+        return;
+      }
+      const pool = getSelectedPool();
+      const state = loadBlueRiiotAdvisorState();
+      const current = getBlueRiiotSettingsForPool(state, pool.key);
+      const field = event.target;
+      const key = field.dataset.field;
+      if (!key) return;
+      state.pools[pool.key] = { ...current, [key]: field.value };
+      saveBlueRiiotAdvisorState(state);
+      renderBlueRiiotAdvisorSection();
+    }
+
+    function copyManualPhToBlueRiiot() {
+      const pool = getSelectedPool();
+      const manualPh = n(inputs.ph && inputs.ph.value);
+      if (manualPh == null) {
+        showAppToast('Enter the manual pH first.');
+        return;
+      }
+      const state = loadBlueRiiotAdvisorState();
+      const current = getBlueRiiotSettingsForPool(state, pool.key);
+      state.pools[pool.key] = { ...current, latestPh: String(manualPh), readingAgeHours: '0' };
+      saveBlueRiiotAdvisorState(state);
+      renderBlueRiiotAdvisorSection();
+    }
+
+    function renderBlueRiiotAdvisorSection() {
+      const wrap = qs('blueRiiotAdvisorContent');
+      if (!wrap) return;
+      if (isRaidersGroupMode()) {
+        wrap.innerHTML = '<div class="hint">Select a single pool to set up BlueRiiot and pump runtime advice.</div>';
+        return;
+      }
+      const pool = getSelectedPool();
+      const state = loadBlueRiiotAdvisorState();
+      const settings = getBlueRiiotSettingsForPool(state, pool.key);
+      const disabled = isTrainingMode() ? 'disabled' : '';
+      const advice = buildBlueRiiotAdvice(settings, pool);
+      const chipClass = tone => tone === 'bad' ? 'status-bad' : tone === 'warn' ? 'status-warn' : 'status-good';
+      wrap.innerHTML = `
+        ${isTrainingMode() ? '<div class="hint" style="margin-bottom: 12px;">Training mode is on, so BlueRiiot and pump settings are not saved.</div>' : ''}
+        <div class="field-grid" style="margin-bottom: 12px;">
+          <div class="field">
+            <label for="blueRiiotEnabled">BlueRiiot mode</label>
+            <select id="blueRiiotEnabled" class="blueriiot-input" data-field="enabled" ${disabled}>
+              <option value="manual" ${settings.enabled === 'manual' ? 'selected' : ''}>Manual reading entry</option>
+              <option value="cloud" ${settings.enabled === 'cloud' ? 'selected' : ''}>Cloud bridge planned</option>
+              <option value="off" ${settings.enabled === 'off' ? 'selected' : ''}>Not used at this pool</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="blueRiiotDeviceName">Device / pool label</label>
+            <input id="blueRiiotDeviceName" class="blueriiot-input" data-field="deviceName" type="text" value="${escapeHtml(settings.deviceName)}" placeholder="BlueRiiot Plus name" ${disabled} />
+          </div>
+          <div class="field span-12" style="grid-column: 1 / -1;">
+            <label for="blueRiiotBridgeUrl">Bridge endpoint</label>
+            <input id="blueRiiotBridgeUrl" class="blueriiot-input" data-field="bridgeUrl" type="url" inputmode="url" value="${escapeHtml(settings.bridgeUrl)}" placeholder="Optional Google Apps Script or Cloudflare Worker URL" ${disabled} />
+            <small>Use a secure bridge later so WaterOps does not store BlueRiiot login details in the app.</small>
+          </div>
+          <div class="span-12 mode-note" style="grid-column: 1 / -1;">Latest BlueRiiot Plus reading</div>
+          <div class="field"><label for="blueRiiotLatestPh">Latest pH</label><input id="blueRiiotLatestPh" class="blueriiot-input" data-field="latestPh" type="number" step="0.01" inputmode="decimal" value="${escapeHtml(String(settings.latestPh))}" ${disabled} /></div>
+          <div class="field"><label for="blueRiiotPreviousPh">Previous pH</label><input id="blueRiiotPreviousPh" class="blueriiot-input" data-field="previousPh" type="number" step="0.01" inputmode="decimal" value="${escapeHtml(String(settings.previousPh))}" ${disabled} /></div>
+          <div class="field"><label for="blueRiiotReadingAge">Latest age</label><input id="blueRiiotReadingAge" class="blueriiot-input" data-field="readingAgeHours" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.readingAgeHours))}" ${disabled} /><small>Hours old</small></div>
+          <div class="field"><label for="blueRiiotPreviousAge">Previous age</label><input id="blueRiiotPreviousAge" class="blueriiot-input" data-field="previousAgeHours" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.previousAgeHours))}" ${disabled} /><small>Hours old</small></div>
+          <div class="field"><label for="blueRiiotOrp">ORP / redox</label><input id="blueRiiotOrp" class="blueriiot-input" data-field="orp" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.orp))}" ${disabled} /><small>mV</small></div>
+          <div class="field"><label for="blueRiiotTemp">Temperature</label><input id="blueRiiotTemp" class="blueriiot-input" data-field="temperature" type="number" step="0.1" inputmode="decimal" value="${escapeHtml(String(settings.temperature))}" ${disabled} /><small>deg C</small></div>
+          <div class="field"><label for="blueRiiotSalinity">Salt / salinity</label><input id="blueRiiotSalinity" class="blueriiot-input" data-field="salinity" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.salinity))}" ${disabled} /><small>ppm or app equivalent</small></div>
+          <div class="span-12 mode-note" style="grid-column: 1 / -1;">Grid Connect / Enviroswim settings</div>
+          <div class="field"><label for="blueRiiotPumpRate">Acid pump rate</label><input id="blueRiiotPumpRate" class="blueriiot-input" data-field="acidPumpMlMin" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.acidPumpMlMin))}" ${disabled} /><small>mL per minute</small></div>
+          <div class="field"><label for="blueRiiotAcidCurrent">Current acid timer</label><input id="blueRiiotAcidCurrent" class="blueriiot-input" data-field="currentAcidMinDay" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.currentAcidMinDay))}" ${disabled} /><small>Minutes per day</small></div>
+          <div class="field"><label for="blueRiiotDoseDays">Split correction over</label><input id="blueRiiotDoseDays" class="blueriiot-input" data-field="acidDoseDays" type="number" min="1" max="7" step="1" inputmode="numeric" value="${escapeHtml(String(settings.acidDoseDays))}" ${disabled} /><small>Days</small></div>
+          <div class="field"><label for="blueRiiotEnviroRuntime">Enviroswim runtime</label><input id="blueRiiotEnviroRuntime" class="blueriiot-input" data-field="enviroswimHoursDay" type="number" step="0.25" inputmode="decimal" value="${escapeHtml(String(settings.enviroswimHoursDay))}" ${disabled} /><small>Hours per day</small></div>
+          <div class="field"><label for="blueRiiotFilterRuntime">Filter runtime</label><input id="blueRiiotFilterRuntime" class="blueriiot-input" data-field="filterHoursDay" type="number" step="0.25" inputmode="decimal" value="${escapeHtml(String(settings.filterHoursDay))}" ${disabled} /><small>Hours per day</small></div>
+          <div class="field span-12" style="grid-column: 1 / -1;"><label for="blueRiiotNotes">Runtime notes</label><textarea id="blueRiiotNotes" class="blueriiot-input" data-field="notes" placeholder="Grid Connect timer names, probe notes, calibration notes" ${disabled}>${escapeHtml(settings.notes)}</textarea></div>
+        </div>
+        <div class="actions" style="margin-bottom: 12px;">
+          <button class="button secondary" type="button" id="copyManualPhToBlueRiiotBtn" ${disabled}>Use current manual pH</button>
+        </div>
+        <div class="icebath-reference-grid" style="margin-bottom: 12px;">
+          ${advice.chips.map(item => `<div class="icebath-reference-card"><strong>${escapeHtml(item.label)}</strong><div class="icebath-reference-value"><span class="status-pill ${chipClass(item.tone)}">${escapeHtml(item.text)}</span></div></div>`).join('') || '<div class="icebath-reference-card"><strong>Status</strong><div class="icebath-reference-value">Add readings to build advice.</div></div>'}
+        </div>
+        <div class="insight-list">
+          ${advice.messages.map(message => `<div class="insight-item">${escapeHtml(message)}</div>`).join('')}
+        </div>
+      `;
+      wrap.querySelectorAll('.blueriiot-input').forEach(field => {
+        field.addEventListener('change', saveBlueRiiotAdvisorField);
+      });
+      qs('copyManualPhToBlueRiiotBtn')?.addEventListener('click', copyManualPhToBlueRiiot);
     }
     function renderStockSection() {
       const wrap = qs('stockContent');
@@ -10674,6 +10911,7 @@ async function buildAndSavePdfReport() {
       restoreQuickActions();
       renderCombinedTable();
       renderAutoDosingDrumsSection();
+      renderBlueRiiotAdvisorSection();
       renderStockSection();
       renderQrSection();
       renderClosedLoopTable();
@@ -10694,6 +10932,7 @@ async function buildAndSavePdfReport() {
       saveState();
       renderCombinedTable();
       renderAutoDosingDrumsSection();
+      renderBlueRiiotAdvisorSection();
       renderStockSection();
       renderQrSection();
       renderPriorityAlerts();
@@ -10756,6 +10995,7 @@ async function buildAndSavePdfReport() {
       restoreQuickActions();
       renderCombinedTable();
       renderAutoDosingDrumsSection();
+      renderBlueRiiotAdvisorSection();
       renderStockSection();
       renderQrSection();
       renderPriorityAlerts();

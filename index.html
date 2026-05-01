@@ -2558,12 +2558,12 @@
             <input id="poolVolumeAuto" type="number" readonly />
             <small>Auto-filled from the pool list.</small>
           </div>
-          <div class="field">
+          <div class="field" style="display:none;">
             <label for="customVolume">Custom volume override</label>
             <input id="customVolume" type="number" inputmode="decimal" min="0" step="1" placeholder="Optional" />
             <small>Use this if you want to override the saved volume.</small>
           </div>
-          <div class="field">
+          <div class="field" style="display:none;">
             <label for="activeVolume">Active volume used</label>
             <input id="activeVolume" type="number" readonly />
             <small>This volume is used in all dose calculations.</small>
@@ -2571,7 +2571,7 @@
         </div>
         <!-- Note displayed for pools using special systems like Enviroswim -->
         <small id="poolSystemNote" style="display:none; margin-top: 8px; color: var(--muted); font-size: 12px;"></small>
-        <div id="poolVolumeHelperNote" class="pool-helper-note"></div>
+        <div id="poolVolumeHelperNote" class="pool-helper-note" style="display:none;"></div>
       </section>
       <section class="card span-8 priority-alert-card" id="priorityAlertsCard">
         <h2>Today's priority alerts</h2>
@@ -2581,11 +2581,11 @@
       <section class="card span-12">
         <h2>Quick capture</h2>
         <div class="field-grid quick-capture-grid" style="margin-bottom: 12px;">
-          <div class="field">
+          <div class="field" style="display:none;">
             <label for="reportSite">Site</label>
             <input id="reportSite" type="text" placeholder="Enter site" />
           </div>
-          <div class="field">
+          <div class="field" style="display:none;">
             <label for="reportPoolName">Pool / body of water</label>
             <input id="reportPoolName" type="text" placeholder="Auto-filled from pool selection" />
           </div>
@@ -2873,8 +2873,8 @@
       </section>
 
       <section class="card span-12" id="singleCombinedCard">
-        <h2>Combined water balance and dosing</h2>
-        <div class="kpi-wrap">
+        <h2>Recommended dosing</h2>
+        <div class="kpi-wrap" style="display:none;">
           <div class="kpi">
             <div class="name">Active volume</div>
             <div class="value" id="kpiVolume">0</div>
@@ -2892,7 +2892,7 @@
           </div>
         </div>
 
-        <div class="subcard-grid" style="margin-bottom: 12px;">
+        <div class="subcard-grid" style="display:none; margin-bottom: 12px;">
           <div class="subcard">
             <h3>Watch item alerts</h3>
             <div id="watchAlertsWrap" class="insight-list"></div>
@@ -3555,16 +3555,6 @@
       checkRange('pH', values.ph, ACT_HEALTH_POOL_GUIDE.ph, 1);
       checkRange('Alkalinity', values.alk, ACT_HEALTH_POOL_GUIDE.alkalinity, 0);
 
-      if (values.tc == null) add('Total chlorine', 'Not entered', `maximum ${formatNumber(ACT_HEALTH_POOL_GUIDE.totalChlorineMax, 0)} ppm`, 'info');
-      else add('Total chlorine', formatNumber(values.tc, 2), `maximum ${formatNumber(ACT_HEALTH_POOL_GUIDE.totalChlorineMax, 0)} ppm`, values.tc <= ACT_HEALTH_POOL_GUIDE.totalChlorineMax ? 'good' : 'bad');
-
-      if (values.cc == null) {
-        add('Combined chlorine', 'Not entered', `maximum ${formatNumber(ACT_HEALTH_POOL_GUIDE.combinedChlorineMax, 1)} ppm and <= half total chlorine`, 'info');
-      } else {
-        const ccOk = values.cc <= ACT_HEALTH_POOL_GUIDE.combinedChlorineMax && (values.tc == null || values.cc <= values.tc / 2);
-        add('Combined chlorine', formatNumber(values.cc, 2), `maximum ${formatNumber(ACT_HEALTH_POOL_GUIDE.combinedChlorineMax, 1)} ppm and <= half total chlorine`, ccOk ? 'good' : 'bad');
-      }
-
       if (values.cya == null) {
         add('CYA/stabiliser', 'Not entered', `outdoor max ${ACT_HEALTH_POOL_GUIDE.cyaOutdoorMax} ppm`, 'info');
       } else if (!profile.cyaAllowed && values.cya > 0) {
@@ -3845,13 +3835,8 @@
       // Show or hide system note for selected pool
       const noteEl = document.getElementById('poolSystemNote');
       if (noteEl) {
-        if (pool.systemNote && !pool.isGroup) {
-          noteEl.textContent = pool.systemNote;
-          noteEl.style.display = 'block';
-        } else {
-          noteEl.textContent = '';
-          noteEl.style.display = 'none';
-        }
+        noteEl.textContent = '';
+        noteEl.style.display = 'none';
       }
 
       updateActiveVolume();
@@ -3870,14 +3855,8 @@
       const helperEl = document.getElementById('poolVolumeHelperNote');
       const pool = getSelectedPool();
       if (!helperEl || !pool) return;
-
-      if (pool.isGroup && pool.key === 'raiders_ice_baths_all') {
-        helperEl.textContent = `Each bath is dosed separately at ${Number(pool.volume || 0).toLocaleString()} L. Combined total for all 3 = ${Number(pool.totalVolume || 0).toLocaleString()} L.`;
-        helperEl.style.display = 'block';
-      } else {
-        helperEl.textContent = '';
-        helperEl.style.display = 'none';
-      }
+      helperEl.textContent = '';
+      helperEl.style.display = 'none';
     }
 
     function isRaidersGroupMode() {
@@ -7415,106 +7394,19 @@
         text: `${formatNumber(item.qty, item.unit === 'mL' || item.unit === 'g' ? 0 : 2)} ${item.unit}`.trim()
       }));
       const summary = [...defaultSummary, ...customSummary].map(item => `<div class="metric-chip">${escapeHtml(item.label)}: ${escapeHtml(item.text)}</div>`).join('');
-      const txRows = recent.length ? recent.map(tx => `
-        <tr>
-          <td>${escapeHtml(tx.date || '-')}</td>
-          <td>${escapeHtml(tx.chemicalLabel || '-')}</td>
-          <td>${escapeHtml(tx.sourceLabel || '-')}</td>
-          <td>${escapeHtml(formatLoggedQuantity(tx))}</td>
-          <td>${escapeHtml(tx.note || '')}</td>
-        </tr>
-      `).join('') : '<tr><td colspan="5">No stock used logged yet for this pool.</td></tr>';
       wrap.innerHTML = `
         <div class="stock-grid">
-          <div class="actions">
-            <button class="button ghost" id="clearStockUsedBtn" type="button">Clear this pool log</button>
-          </div>
+          <div class="mode-note">Stock used is still captured automatically for reports and Google Sheets. Detailed costing stays in Site costs.</div>
           <div class="metric-band">
             <div class="metric-chip">Entries saved: ${transactions.length}</div>
             ${summary || '<div class="metric-chip">No stock used recorded yet</div>'}
           </div>
-<div class="subcard" style="margin-bottom: 12px;">
-            <h3 style="margin-bottom: 10px;">Additional bulk chemicals used</h3>
-            <div class="mode-note" style="margin-bottom: 10px;">Preset 15 L drum top-up options are included for automatic dosing drums. Add unit cost when you need to price a chemical on the move.</div>
-            <div class="actions" style="margin-bottom: 12px;">
-              <button class="button ghost" id="prefillChlorineTopUpBtn" type="button">15 L liquid chlorine drum top-up</button>
-              <button class="button ghost" id="prefillAcidTopUpBtn" type="button">15 L hydrochloric acid drum top-up</button>
-            </div>
-            <div class="asset-form-grid">
-              <div class="field">
-                <label for="extraStockChemical">Chemical name</label>
-                <input id="extraStockChemical" type="text" placeholder="Magnesium, soda ash, inhibitor" />
-              </div>
-              <div class="field">
-                <label for="extraStockSource">Source</label>
-                <select id="extraStockSource">
-                  <option value="">Select source</option>
-                  <option value="ute">Ute stock used</option>
-                  <option value="onsite">Site stock used</option>
-                  <option value="bulk">Bulk stock used</option>
-                  <option value="other">Other source</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="extraStockQty">Qty used</label>
-                <input id="extraStockQty" type="number" step="any" inputmode="decimal" placeholder="0" />
-              </div>
-              <div class="field">
-                <label for="extraStockUnit">Unit</label>
-                <select id="extraStockUnit">
-                  <option value="kg">kg</option>
-                  <option value="L">L</option>
-                  <option value="mL">mL</option>
-                  <option value="g">g</option>
-                  <option value="tablets">tablets</option>
-                  <option value="bags">bags</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="extraStockUnitCost">Unit cost (optional)</label>
-                <input id="extraStockUnitCost" type="number" min="0" step="0.01" inputmode="decimal" placeholder="$/unit" />
-              </div>
-              <div class="field">
-                <label for="extraStockNote">Note</label>
-                <input id="extraStockNote" type="text" placeholder="Optional note" />
-              </div>
-            </div>
-            <div class="actions">
-              <button class="button secondary" id="addExtraStockBtn" type="button">Add additional bulk chemical</button>
-            </div>
-          </div>
-          <div class="log-table-wrap">
-            <table class="stock-table">
-              <thead>
-                <tr>
-                  <th>Date / time</th>
-                  <th>Chemical</th>
-                  <th>Source</th>
-                  <th>Qty used</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-              <tbody>${txRows}</tbody>
-            </table>
+          <div class="actions">
+            <button class="button ghost" id="clearStockUsedBtn" type="button">Clear this pool log</button>
           </div>
         </div>
       `;
       qs('clearStockUsedBtn').addEventListener('click', clearCurrentPoolStockUsedLog);
-      qs('addExtraStockBtn').addEventListener('click', addExtraStockUsedEntry);
-      qs('prefillChlorineTopUpBtn').addEventListener('click', () => prefillExtraStockUsedEntry({
-        chemicalLabel: 'Liquid Chlorine Drum Top-up',
-        qty: 15,
-        unit: 'L',
-        source: 'bulk',
-        note: 'Automatic dosing drum top-up'
-      }));
-      qs('prefillAcidTopUpBtn').addEventListener('click', () => prefillExtraStockUsedEntry({
-        chemicalLabel: 'Hydrochloric Acid Drum Top-up',
-        qty: 15,
-        unit: 'L',
-        source: 'bulk',
-        note: 'Automatic dosing drum top-up'
-      }));
     }
 
 

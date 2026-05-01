@@ -502,9 +502,12 @@ function buildBlueRiiotHistory_(params) {
         salinity: row[indexes.salinity],
         conductivity: row[indexes.conductivity]
       };
-      if (poolKey && item.waterOpsPoolKey !== poolKey) continue;
-      if (serial && item.blueSerial !== serial) continue;
-      if (swimmingPoolId && item.swimmingPoolId !== swimmingPoolId) continue;
+      var poolMatch = poolKey && item.waterOpsPoolKey === poolKey;
+      var serialMatch = serial && item.blueSerial === serial;
+      var swimmingPoolMatch = swimmingPoolId && item.swimmingPoolId === swimmingPoolId;
+      if (poolKey || serial || swimmingPoolId) {
+        if (!(poolMatch || serialMatch || swimmingPoolMatch)) continue;
+      }
       readings.push(item);
     }
     readings.sort(function(a, b) {
@@ -760,9 +763,12 @@ function filterBlueRiiotReadings_(readings, params) {
   var filtered = [];
   for (var i = 0; i < readings.length; i += 1) {
     var item = readings[i];
-    if (poolKey && item.waterOpsPoolKey !== poolKey) continue;
-    if (serial && item.blueSerial !== serial) continue;
-    if (swimmingPoolId && item.swimmingPoolId !== swimmingPoolId) continue;
+    var poolMatch = poolKey && item.waterOpsPoolKey === poolKey;
+    var serialMatch = serial && item.blueSerial === serial;
+    var swimmingPoolMatch = swimmingPoolId && item.swimmingPoolId === swimmingPoolId;
+    if (poolKey || serial || swimmingPoolId) {
+      if (!(poolMatch || serialMatch || swimmingPoolMatch)) continue;
+    }
     filtered.push(item);
   }
   return filtered;

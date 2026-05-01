@@ -803,7 +803,7 @@ function signAwsGet_(baseUrl, path, query, region, session) {
   var credentialScope = dateStamp + '/' + region + '/execute-api/aws4_request';
   var stringToSign = ['AWS4-HMAC-SHA256', amzDate, credentialScope, sha256Hex_(canonicalRequest)].join('\n');
   var signingKey = getAwsSignatureKey_(session.secretAccessKey, dateStamp, region, 'execute-api');
-  var signature = bytesToHex_(Utilities.computeHmacSha256Signature(stringToSign, signingKey));
+  var signature = bytesToHex_(hmacSha256Bytes_(stringToSign, signingKey));
   var authorization = 'AWS4-HMAC-SHA256 Credential=' + session.accessKeyId + '/' + credentialScope + ', SignedHeaders=' + signedHeaders + ', Signature=' + signature;
   return {
     url: baseUrl.replace(/\/$/, '') + canonicalUri + (canonicalQuery ? '?' + canonicalQuery : ''),
@@ -820,9 +820,13 @@ function signAwsGet_(baseUrl, path, query, region, session) {
 
 function getAwsSignatureKey_(key, dateStamp, regionName, serviceName) {
   var kDate = Utilities.computeHmacSha256Signature(dateStamp, 'AWS4' + key);
-  var kRegion = Utilities.computeHmacSha256Signature(regionName, kDate);
-  var kService = Utilities.computeHmacSha256Signature(serviceName, kRegion);
-  return Utilities.computeHmacSha256Signature('aws4_request', kService);
+  var kRegion = hmacSha256Bytes_(regionName, kDate);
+  var kService = hmacSha256Bytes_(serviceName, kRegion);
+  return hmacSha256Bytes_('aws4_request', kService);
+}
+
+function hmacSha256Bytes_(value, keyBytes) {
+  return Utilities.computeHmacSha256Signature(Utilities.newBlob(String(value)).getBytes(), keyBytes);
 }
 
 function canonicalUri_(path) {

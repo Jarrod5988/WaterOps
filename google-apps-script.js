@@ -36,6 +36,9 @@ function doGet(e) {
   if (action === 'blueRiiotDevices') {
     return jsonp_(callback, buildBlueRiiotDevicesResponse_());
   }
+  if (action === 'blueRiiotDiagnostics') {
+    return jsonp_(callback, buildBlueRiiotDiagnostics_());
+  }
   if (action === 'setupBlueRiiotSheets') {
     setupBlueRiiotSheets_();
     return jsonp_(callback, {
@@ -74,7 +77,7 @@ function doGet(e) {
   return jsonp_(callback, {
     ok: true,
     message: 'WaterOps Google Sheets bridge is running.',
-    availableActions: ['costSnapshot', 'technicianList', 'verifyTechnician', 'setupTechnicianSheet', 'setupBlueRiiotSheets', 'blueRiiotDevices', 'blueRiiotSnapshot', 'closedLoopVisit POST']
+    availableActions: ['costSnapshot', 'technicianList', 'verifyTechnician', 'setupTechnicianSheet', 'setupBlueRiiotSheets', 'blueRiiotDevices', 'blueRiiotSnapshot', 'blueRiiotDiagnostics', 'closedLoopVisit POST']
   });
 }
 
@@ -425,6 +428,64 @@ function buildBlueRiiotSnapshot_(params) {
   }
 }
 
+function buildBlueRiiotDiagnostics_() {
+  var out = {
+    ok: false,
+    checkedAt: new Date().toISOString(),
+    config: {},
+    steps: []
+  };
+  try {
+    var config = getBlueRiiotConfig_();
+    out.config = {
+      emailSet: !!config.email,
+      passwordSet: !!config.password,
+      apiBase: config.apiBase,
+      region: config.region,
+      language: config.language
+    };
+    if (!config.email || !config.password) {
+      out.steps.push({ step: 'scriptProperties', ok: false, message: 'Missing BLUERIIOT_EMAIL or BLUERIIOT_PASSWORD.' });
+      return out;
+    }
+    out.steps.push({ step: 'scriptProperties', ok: true, message: 'BlueRiiot email/password properties are present.' });
+
+    try {
+      UrlFetchApp.fetch('https://www.google.com', { muteHttpExceptions: true });
+      out.steps.push({ step: 'externalRequestPermission', ok: true, message: 'UrlFetchApp external request permission is available.' });
+    } catch (permissionError) {
+      out.steps.push({ step: 'externalRequestPermission', ok: false, message: String(permissionError && permissionError.message ? permissionError.message : permissionError) });
+      return out;
+    }
+
+    var session = blueRiiotLogin_(config);
+    out.steps.push({ step: 'login', ok: true, message: 'BlueRiiot login returned temporary API credentials.' });
+
+    var poolsResponse = blueRiiotSignedGet_(config, session, '/prod/swimming_pool/', {});
+    var pools = extractBlueRiiotArray_(poolsResponse, ['data', 'swimming_pools', 'swimmingPools', 'pools']);
+    out.poolCount = pools.length;
+    out.steps.push({ step: 'pools', ok: pools.length > 0, message: 'BlueRiiot swimming pools returned: ' + pools.length });
+
+    var devices = fetchBlueRiiotDevicesWithSession_(config, session);
+    out.deviceCount = devices.length;
+    out.deviceSamples = devices.slice(0, 5).map(function(d) {
+      return {
+        swimmingPoolId: d.swimmingPoolId || '',
+        swimmingPoolName: d.swimmingPoolName || '',
+        blueSerial: d.blueSerial || '',
+        deviceName: d.deviceName || ''
+      };
+    });
+    out.steps.push({ step: 'devices', ok: devices.length > 0, message: 'BlueRiiot devices returned: ' + devices.length });
+    out.ok = out.steps.every(function(step) { return step.ok; });
+    return out;
+  } catch (error) {
+    out.error = String(error && error.message ? error.message : error);
+    out.steps.push({ step: 'error', ok: false, message: out.error });
+    return out;
+  }
+}
+
 function fetchBlueRiiotDevices_() {
   var config = getBlueRiiotConfig_();
   if (!config.email || !config.password) throw new Error('Missing BLUERIIOT_EMAIL or BLUERIIOT_PASSWORD in Script properties.');
@@ -510,6 +571,7 @@ function blueRiiotLogin_(config) {
   var response = UrlFetchApp.fetch(config.apiBase + '/prod/user/login', {
     method: 'post',
     contentType: 'application/json',
+    headers: getBlueRiiotBaseHeaders_(config),
     muteHttpExceptions: true,
     payload: JSON.stringify({ email: config.email, password: config.password })
   });
@@ -522,6 +584,14 @@ function blueRiiotLogin_(config) {
     throw new Error('BlueRiiot login did not return temporary API credentials. Response shape may have changed.');
   }
   return credentials;
+}
+
+function getBlueRiiotBaseHeaders_(config) {
+  return {
+    'User-Agent': 'BlueConnect/3.2.1',
+    'Accept-Language': (config.language || 'en') + ';q=1.0',
+    'Accept': '**'
+  };
 }
 
 function blueRiiotSignedGet_(config, session, path, query) {
@@ -584,7 +654,7 @@ function filterBlueRiiotReadings_(readings, params) {
 }
 
 function extractBlueRiiotDeviceItems_(blueResponse) {
-  var items = extractBlueRiiotArray_(blueResponse, ['blue', 'devices', 'items']);
+  var items = extractBlueRiiotArray_(blueResponse, ['data', 'blue', 'devices', 'items']);
   if (items.length) return items;
   var data = blueResponse && blueResponse.data;
   var candidates = [
@@ -677,6 +747,7 @@ function extractBlueRiiotArray_(value, keys) {
     var key = keys[i];
     if (value && Array.isArray(value[key])) return value[key];
   }
+  if (value && Array.isArray(value.data)) return value.data;
   if (value && value.data && typeof value.data === 'object') {
     for (var prop in value.data) {
       if (value.data.hasOwnProperty(prop) && Array.isArray(value.data[prop])) return value.data[prop];

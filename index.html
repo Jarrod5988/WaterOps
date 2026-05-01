@@ -7240,6 +7240,40 @@
       }
     }
 
+    function formatBlueRiiotDiagnostic(response) {
+      if (!response) return 'No diagnostic response returned.';
+      const lines = ['BlueRiiot bridge diagnostic'];
+      if (response.config) {
+        lines.push(`Email property: ${response.config.emailSet ? 'set' : 'missing'}`);
+        lines.push(`Password property: ${response.config.passwordSet ? 'set' : 'missing'}`);
+        lines.push(`API: ${response.config.apiBase || ''}`);
+        lines.push(`Region: ${response.config.region || ''}`);
+      }
+      (response.steps || []).forEach(step => {
+        lines.push(`${step.ok ? 'OK' : 'FAIL'} - ${step.step}: ${step.message || ''}`);
+      });
+      if (response.poolCount != null) lines.push(`Pools found: ${response.poolCount}`);
+      if (response.deviceCount != null) lines.push(`Devices found: ${response.deviceCount}`);
+      if (Array.isArray(response.deviceSamples) && response.deviceSamples.length) {
+        lines.push('Sample devices:');
+        response.deviceSamples.forEach(device => {
+          lines.push(`- ${device.swimmingPoolName || device.deviceName || 'Device'} | pool ${device.swimmingPoolId || '-'} | serial ${device.blueSerial || '-'}`);
+        });
+      }
+      if (response.error) lines.push(`Error: ${response.error}`);
+      return lines.join('\n');
+    }
+
+    async function runBlueRiiotBridgeDiagnostic() {
+      try {
+        showAppToast('Running BlueRiiot diagnostic...');
+        const response = await requestGoogleJsonp('blueRiiotDiagnostics');
+        alert(formatBlueRiiotDiagnostic(response));
+      } catch (error) {
+        alert(`BlueRiiot diagnostic failed before the script could respond:\n${error.message || error}`);
+      }
+    }
+
     async function fetchBlueRiiotFromBridge() {
       const pool = getSelectedPool();
       const state = loadBlueRiiotAdvisorState();
@@ -7350,6 +7384,7 @@
           <button class="button secondary" type="button" id="copyManualPhToBlueRiiotBtn" ${disabled}>Use current manual pH</button>
           <button class="button ghost" type="button" id="loadBlueRiiotDevicesBtn" ${disabled}>Load BlueRiiot devices</button>
           <button class="button ghost" type="button" id="fetchBlueRiiotBridgeBtn" ${disabled}>Fetch from Google bridge</button>
+          <button class="button ghost" type="button" id="diagnoseBlueRiiotBridgeBtn" ${disabled}>Diagnose BlueRiiot bridge</button>
         </div>
         <div class="icebath-reference-grid" style="margin-bottom: 12px;">
           ${advice.chips.map(item => `<div class="icebath-reference-card"><strong>${escapeHtml(item.label)}</strong><div class="icebath-reference-value"><span class="status-pill ${chipClass(item.tone)}">${escapeHtml(item.text)}</span></div></div>`).join('') || '<div class="icebath-reference-card"><strong>Status</strong><div class="icebath-reference-value">Add readings to build advice.</div></div>'}
@@ -7364,6 +7399,7 @@
       qs('copyManualPhToBlueRiiotBtn')?.addEventListener('click', copyManualPhToBlueRiiot);
       qs('loadBlueRiiotDevicesBtn')?.addEventListener('click', loadBlueRiiotDevicesFromBridge);
       qs('fetchBlueRiiotBridgeBtn')?.addEventListener('click', fetchBlueRiiotFromBridge);
+      qs('diagnoseBlueRiiotBridgeBtn')?.addEventListener('click', runBlueRiiotBridgeDiagnostic);
     }
     function renderStockSection() {
       const wrap = qs('stockContent');

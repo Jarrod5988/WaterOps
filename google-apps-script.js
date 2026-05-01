@@ -500,7 +500,8 @@ function buildBlueRiiotHistory_(params) {
         orp: row[indexes.orp],
         temperature: row[indexes.temperature],
         salinity: row[indexes.salinity],
-        conductivity: row[indexes.conductivity]
+        conductivity: row[indexes.conductivity],
+        measurements: parseJsonArray_(row[indexes.allMeasurementsJson] || '[]')
       };
       var poolMatch = poolKey && item.waterOpsPoolKey === poolKey;
       var serialMatch = serial && item.blueSerial === serial;
@@ -739,19 +740,31 @@ function normaliseBlueRiiotReading_(device, response, measurements) {
     temperature: '',
     salinity: '',
     conductivity: '',
+    measurements: [],
+    allMeasurementsJson: '[]',
     rawJson: JSON.stringify(response)
   };
   for (var i = 0; i < measurements.length; i += 1) {
     var item = measurements[i] || {};
-    var name = String(item.name || item.type || item.key || '').toLowerCase();
+    var rawName = String(item.name || item.type || item.key || item.label || item.code || '').trim();
+    var name = rawName.toLowerCase();
     var value = item.value == null ? '' : item.value;
-    if (name === 'ph' || name === 'pH'.toLowerCase()) reading.ph = value;
-    if (name === 'orp' || name === 'redox') reading.orp = value;
-    if (name === 'temperature' || name === 'temp') reading.temperature = value;
-    if (name === 'salinity' || name === 'salt') reading.salinity = value;
-    if (name === 'conductivity') reading.conductivity = value;
+    var unit = item.unit || item.unit_symbol || item.measure_unit || item.units || '';
+    reading.measurements.push({
+      key: rawName || name || ('measurement_' + (i + 1)),
+      label: formatBlueRiiotMeasurementLabel_(rawName || name || ('Measurement ' + (i + 1))),
+      value: value,
+      unit: unit,
+      timestamp: item.timestamp || item.measured_at || item.date || ''
+    });
+    if (name === 'ph' || name.indexOf('ph') === 0) reading.ph = value;
+    if (name === 'orp' || name === 'redox' || name.indexOf('redox') >= 0) reading.orp = value;
+    if (name === 'temperature' || name === 'temp' || name.indexOf('temperature') >= 0) reading.temperature = value;
+    if (name === 'salinity' || name === 'salt' || name.indexOf('salinity') >= 0 || name.indexOf('salt') >= 0) reading.salinity = value;
+    if (name === 'conductivity' || name.indexOf('conductivity') >= 0) reading.conductivity = value;
     if (!reading.timestamp && item.timestamp) reading.timestamp = item.timestamp;
   }
+  reading.allMeasurementsJson = JSON.stringify(reading.measurements);
   return reading;
 }
 
@@ -828,7 +841,7 @@ function appendBlueRiiotReadingRows_(readings) {
     var r = readings[i];
     rows.push([
       new Date(), r.timestamp || '', r.waterOpsPoolKey || '', r.swimmingPoolId || '', r.swimmingPoolName || '',
-      r.blueSerial || '', r.deviceName || '', r.ph, r.orp, r.temperature, r.salinity, r.conductivity, r.rawJson || ''
+      r.blueSerial || '', r.deviceName || '', r.ph, r.orp, r.temperature, r.salinity, r.conductivity, r.allMeasurementsJson || JSON.stringify(r.measurements || []), r.rawJson || ''
     ]);
   }
   appendRows_(SHEETS.blueRiiotReadings, rows);
@@ -850,7 +863,7 @@ function upsertBlueRiiotDevices_(devices) {
 }
 
 function blueRiiotReadingHeader_() {
-  return ['receivedAt', 'measurementTimestamp', 'waterOpsPoolKey', 'swimmingPoolId', 'swimmingPoolName', 'blueSerial', 'deviceName', 'ph', 'orp', 'temperature', 'salinity', 'conductivity', 'rawJson'];
+  return ['receivedAt', 'measurementTimestamp', 'waterOpsPoolKey', 'swimmingPoolId', 'swimmingPoolName', 'blueSerial', 'deviceName', 'ph', 'orp', 'temperature', 'salinity', 'conductivity', 'allMeasurementsJson', 'rawJson'];
 }
 
 function blueRiiotDeviceHeader_() {
@@ -939,6 +952,23 @@ function parseJsonObject_(text) {
   } catch (error) {
     return {};
   }
+}
+
+function parseJsonArray_(text) {
+  try {
+    var parsed = JSON.parse(text || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function formatBlueRiiotMeasurementLabel_(text) {
+  var label = String(text || '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!label) return 'Measurement';
+  if (label.toLowerCase() === 'ph') return 'pH';
+  if (label.toLowerCase() === 'orp') return 'ORP';
+  return label.replace(/\b\w/g, function(match) { return match.toUpperCase(); });
 }
 
 function findCredentialsObject_(json) {

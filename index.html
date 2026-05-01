@@ -7077,6 +7077,7 @@
         orp: existing.orp ?? '',
         temperature: existing.temperature ?? '',
         salinity: existing.salinity ?? '',
+        latestMeasurements: Array.isArray(existing.latestMeasurements) ? existing.latestMeasurements : [],
         lastSyncedAt: existing.lastSyncedAt || '',
         history: Array.isArray(existing.history) ? existing.history.slice(0, BLUERIIOT_HISTORY_LIMIT) : [],
         acidPumpMlMin: existing.acidPumpMlMin ?? '',
@@ -7198,6 +7199,9 @@
 
     function normaliseBlueRiiotTrendReading(reading, pool, settings) {
       const selectedDevice = settings && settings.blueSerial ? findBlueRiiotDeviceBySerial(settings.blueSerial) : null;
+      const measurements = Array.isArray(reading.measurements)
+        ? reading.measurements
+        : safeParseArray(reading.allMeasurementsJson || '[]');
       return {
         capturedAt: reading.receivedAt || reading.capturedAt || new Date().toISOString(),
         timestamp: reading.timestamp || reading.measurementTimestamp || reading.receivedAt || new Date().toISOString(),
@@ -7207,7 +7211,8 @@
         ph: reading.ph ?? '',
         orp: reading.orp ?? '',
         temperature: reading.temperature ?? '',
-        salinity: reading.salinity ?? (reading.conductivity ?? '')
+        salinity: reading.salinity ?? (reading.conductivity ?? ''),
+        measurements
       };
     }
 
@@ -7260,6 +7265,41 @@
               ${trend.rows.map(row => `<tr><td>${escapeHtml(row.when)}</td><td>${escapeHtml(String(row.ph ?? ''))}</td><td>${escapeHtml(String(row.orp ?? ''))}</td><td>${escapeHtml(String(row.salinity ?? ''))}</td></tr>`).join('')}
             </tbody>
           </table>
+        </div>
+      `;
+    }
+
+    function safeParseArray(text) {
+      try {
+        const parsed = JSON.parse(text || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function formatBlueRiiotMeasurementValue(item) {
+      if (!item) return '';
+      const value = item.value == null ? '' : String(item.value);
+      const unit = item.unit ? ` ${item.unit}` : '';
+      return `${value}${unit}`.trim();
+    }
+
+    function renderBlueRiiotAllMeasurements(settings) {
+      const latest = (Array.isArray(settings.latestMeasurements) && settings.latestMeasurements.length)
+        ? settings.latestMeasurements
+        : (Array.isArray(settings.history) && settings.history[0] && Array.isArray(settings.history[0].measurements) ? settings.history[0].measurements : []);
+      if (!latest.length) {
+        return '<div class="hint">Fetch from the Google bridge to show every field returned by BlueRiiot.</div>';
+      }
+      return `
+        <div class="icebath-reference-grid">
+          ${latest.map(item => `
+            <div class="icebath-reference-card">
+              <strong>${escapeHtml(item.label || item.key || 'Measurement')}</strong>
+              <div class="icebath-reference-value">${escapeHtml(formatBlueRiiotMeasurementValue(item)) || '-'}</div>
+            </div>
+          `).join('')}
         </div>
       `;
     }
@@ -7414,6 +7454,7 @@
           orp: reading.orp == null ? current.orp : String(reading.orp),
           temperature: reading.temperature == null ? current.temperature : String(reading.temperature),
           salinity: reading.salinity == null ? (reading.conductivity == null ? current.salinity : String(reading.conductivity)) : String(reading.salinity),
+          latestMeasurements: Array.isArray(reading.measurements) ? reading.measurements : [],
           lastSyncedAt: new Date().toISOString()
         };
         const trendReading = normaliseBlueRiiotTrendReading(reading, pool, nextSettings);
@@ -7451,7 +7492,12 @@
         if (!response || response.ok === false) throw new Error(response && response.error ? response.error : 'No BlueRiiot history returned.');
         const incoming = (Array.isArray(response.readings) ? response.readings : [])
           .map(reading => normaliseBlueRiiotTrendReading(reading, pool, current));
-        state.pools[pool.key] = { ...current, history: mergeBlueRiiotHistory(current.history, incoming) };
+        const mergedHistory = mergeBlueRiiotHistory(current.history, incoming);
+        state.pools[pool.key] = {
+          ...current,
+          history: mergedHistory,
+          latestMeasurements: mergedHistory[0]?.measurements || current.latestMeasurements || []
+        };
         saveBlueRiiotAdvisorState(state);
         renderBlueRiiotAdvisorSection();
         showAppToast(incoming.length ? `Loaded ${incoming.length} BlueRiiot trend reading${incoming.length === 1 ? '' : 's'}.` : 'No BlueRiiot history found for this pool yet.');
@@ -7519,6 +7565,8 @@
           <div class="field"><label for="blueRiiotTemp">Temperature</label><input id="blueRiiotTemp" class="blueriiot-input" data-field="temperature" type="number" step="0.1" inputmode="decimal" value="${escapeHtml(String(settings.temperature))}" ${disabled} /><small>deg C</small></div>
           <div class="field"><label for="blueRiiotSalinity">Salt / salinity</label><input id="blueRiiotSalinity" class="blueriiot-input" data-field="salinity" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.salinity))}" ${disabled} /><small>ppm or app equivalent</small></div>
           <div class="field"><label for="blueRiiotLastSync">Last bridge sync</label><input id="blueRiiotLastSync" type="text" value="${escapeHtml(settings.lastSyncedAt ? new Date(settings.lastSyncedAt).toLocaleString() : '')}" readonly /><small>Saved when fetched</small></div>
+          <div class="span-12 mode-note" style="grid-column: 1 / -1;">All BlueRiiot fields</div>
+          <div class="span-12" style="grid-column: 1 / -1;">${renderBlueRiiotAllMeasurements(settings)}</div>
           <div class="span-12 mode-note" style="grid-column: 1 / -1;">Saved BlueRiiot trend</div>
           <div class="span-12" style="grid-column: 1 / -1;">${renderBlueRiiotTrend(settings)}</div>
           <div class="span-12 mode-note" style="grid-column: 1 / -1;">Grid Connect / Enviroswim settings</div>

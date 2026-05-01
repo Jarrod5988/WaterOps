@@ -22,7 +22,8 @@ var SHEETS = {
   technicians: 'Technicians',
   closedLoops: 'Closed Loop Log',
   blueRiiotReadings: 'BlueRiiot Readings',
-  blueRiiotDevices: 'BlueRiiot Devices'
+  blueRiiotDevices: 'BlueRiiot Devices',
+  blueRiiotLinks: 'BlueRiiot Links'
 };
 
 function doGet(e) {
@@ -38,6 +39,15 @@ function doGet(e) {
   }
   if (action === 'blueRiiotDiagnostics') {
     return jsonp_(callback, buildBlueRiiotDiagnostics_());
+  }
+  if (action === 'blueRiiotLinkPool') {
+    return jsonp_(callback, saveBlueRiiotPoolLink_(params));
+  }
+  if (action === 'blueRiiotHistory') {
+    return jsonp_(callback, buildBlueRiiotHistory_(params));
+  }
+  if (action === 'blueRiiotRefreshHistory') {
+    return jsonp_(callback, refreshBlueRiiotHistory_());
   }
   if (action === 'setupBlueRiiotSheets') {
     setupBlueRiiotSheets_();
@@ -77,7 +87,7 @@ function doGet(e) {
   return jsonp_(callback, {
     ok: true,
     message: 'WaterOps Google Sheets bridge is running.',
-    availableActions: ['costSnapshot', 'technicianList', 'verifyTechnician', 'setupTechnicianSheet', 'setupBlueRiiotSheets', 'blueRiiotDevices', 'blueRiiotSnapshot', 'blueRiiotDiagnostics', 'closedLoopVisit POST']
+    availableActions: ['costSnapshot', 'technicianList', 'verifyTechnician', 'setupTechnicianSheet', 'setupBlueRiiotSheets', 'blueRiiotDevices', 'blueRiiotSnapshot', 'blueRiiotDiagnostics', 'blueRiiotLinkPool', 'blueRiiotHistory', 'blueRiiotRefreshHistory', 'closedLoopVisit POST']
   });
 }
 
@@ -400,6 +410,7 @@ function getBlueRiiotConfig_() {
 function setupBlueRiiotSheets_() {
   appendRows_(SHEETS.blueRiiotDevices, [blueRiiotDeviceHeader_()]);
   appendRows_(SHEETS.blueRiiotReadings, [blueRiiotReadingHeader_()]);
+  appendRows_(SHEETS.blueRiiotLinks, [blueRiiotLinkHeader_()]);
 }
 
 function buildBlueRiiotDevicesResponse_() {
@@ -426,6 +437,110 @@ function buildBlueRiiotSnapshot_(params) {
   } catch (error) {
     return { ok: false, error: String(error && error.message ? error.message : error) };
   }
+}
+
+function saveBlueRiiotPoolLink_(params) {
+  try {
+    params = params || {};
+    var poolKey = String(params.poolKey || '').trim();
+    var blueSerial = String(params.blueSerial || '').trim();
+    var swimmingPoolId = String(params.swimmingPoolId || '').trim();
+    var swimmingPoolName = String(params.swimmingPoolName || '').trim();
+    if (!poolKey) throw new Error('Missing WaterOps pool key.');
+    if (!blueSerial && !swimmingPoolId && !swimmingPoolName) throw new Error('Missing BlueRiiot device or pool identifier.');
+
+    var props = PropertiesService.getScriptProperties();
+    var poolMap = parseJsonObject_(props.getProperty('BLUERIIOT_POOL_MAP') || '{}');
+    if (blueSerial) poolMap[blueSerial] = poolKey;
+    if (swimmingPoolId) poolMap[swimmingPoolId] = poolKey;
+    if (swimmingPoolName) poolMap[swimmingPoolName] = poolKey;
+    props.setProperty('BLUERIIOT_POOL_MAP', JSON.stringify(poolMap));
+
+    upsertBlueRiiotLink_({
+      waterOpsPoolKey: poolKey,
+      waterOpsPoolName: String(params.poolName || '').trim(),
+      site: String(params.site || '').trim(),
+      swimmingPoolId: swimmingPoolId,
+      swimmingPoolName: swimmingPoolName,
+      blueSerial: blueSerial,
+      deviceName: String(params.deviceName || '').trim(),
+      source: 'WaterOps app'
+    });
+
+    return { ok: true, poolKey: poolKey, blueSerial: blueSerial, swimmingPoolId: swimmingPoolId };
+  } catch (error) {
+    return { ok: false, error: String(error && error.message ? error.message : error) };
+  }
+}
+
+function buildBlueRiiotHistory_(params) {
+  try {
+    params = params || {};
+    var sheet = getOrCreateSheet_(SHEETS.blueRiiotReadings);
+    var values = sheet.getDataRange().getValues();
+    if (values.length <= 1) return { ok: true, readings: [], count: 0 };
+    var header = values[0].map(function(value) { return String(value || ''); });
+    var indexes = indexHeaders_(header);
+    var poolKey = String(params.poolKey || '').trim();
+    var serial = String(params.blueSerial || '').trim();
+    var swimmingPoolId = String(params.swimmingPoolId || '').trim();
+    var limit = Math.max(1, Math.min(100, Number(params.limit || 30) || 30));
+    var readings = [];
+    for (var i = 1; i < values.length; i += 1) {
+      var row = values[i];
+      var item = {
+        receivedAt: cellIso_(row[indexes.receivedAt]),
+        timestamp: cellIso_(row[indexes.measurementTimestamp]),
+        waterOpsPoolKey: String(row[indexes.waterOpsPoolKey] || ''),
+        swimmingPoolId: String(row[indexes.swimmingPoolId] || ''),
+        swimmingPoolName: String(row[indexes.swimmingPoolName] || ''),
+        blueSerial: String(row[indexes.blueSerial] || ''),
+        deviceName: String(row[indexes.deviceName] || ''),
+        ph: row[indexes.ph],
+        orp: row[indexes.orp],
+        temperature: row[indexes.temperature],
+        salinity: row[indexes.salinity],
+        conductivity: row[indexes.conductivity]
+      };
+      if (poolKey && item.waterOpsPoolKey !== poolKey) continue;
+      if (serial && item.blueSerial !== serial) continue;
+      if (swimmingPoolId && item.swimmingPoolId !== swimmingPoolId) continue;
+      readings.push(item);
+    }
+    readings.sort(function(a, b) {
+      return new Date(b.timestamp || b.receivedAt || 0).getTime() - new Date(a.timestamp || a.receivedAt || 0).getTime();
+    });
+    return { ok: true, readings: readings.slice(0, limit), count: readings.length };
+  } catch (error) {
+    return { ok: false, error: String(error && error.message ? error.message : error) };
+  }
+}
+
+function refreshBlueRiiotHistory_() {
+  try {
+    var readings = fetchBlueRiiotReadings_();
+    if (readings.length) appendBlueRiiotReadingRows_(readings);
+    return { ok: true, count: readings.length, capturedAt: new Date().toISOString() };
+  } catch (error) {
+    return { ok: false, error: String(error && error.message ? error.message : error) };
+  }
+}
+
+function refreshBlueRiiotHistoryNow() {
+  var result = refreshBlueRiiotHistory_();
+  if (!result.ok) throw new Error(result.error);
+  return 'BlueRiiot history refreshed. Readings saved: ' + result.count;
+}
+
+function installBlueRiiotTrendTrigger() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i += 1) {
+    if (triggers[i].getHandlerFunction && triggers[i].getHandlerFunction() === 'refreshBlueRiiotHistoryNow') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  ScriptApp.newTrigger('refreshBlueRiiotHistoryNow').timeBased().everyHours(1).create();
+  return 'Installed hourly BlueRiiot history refresh trigger.';
 }
 
 function buildBlueRiiotDiagnostics_() {
@@ -734,6 +849,61 @@ function blueRiiotReadingHeader_() {
 
 function blueRiiotDeviceHeader_() {
   return ['updatedAt', 'waterOpsPoolKey', 'swimmingPoolId', 'swimmingPoolName', 'blueSerial', 'deviceName', 'rawPoolJson', 'rawDeviceJson'];
+}
+
+function blueRiiotLinkHeader_() {
+  return ['updatedAt', 'waterOpsPoolKey', 'waterOpsPoolName', 'site', 'swimmingPoolId', 'swimmingPoolName', 'blueSerial', 'deviceName', 'source'];
+}
+
+function upsertBlueRiiotLink_(record) {
+  var header = blueRiiotLinkHeader_();
+  var sheet = getOrCreateSheet_(SHEETS.blueRiiotLinks);
+  if (sheet.getLastRow() === 0) sheet.appendRow(header);
+  var values = sheet.getDataRange().getValues();
+  var indexes = indexHeaders_(values[0] || header);
+  var targetRow = 0;
+  for (var i = 1; i < values.length; i += 1) {
+    var row = values[i];
+    var sameSerial = record.blueSerial && String(row[indexes.blueSerial] || '') === record.blueSerial;
+    var samePoolId = record.swimmingPoolId && String(row[indexes.swimmingPoolId] || '') === record.swimmingPoolId;
+    var sameWaterOpsPool = record.waterOpsPoolKey && String(row[indexes.waterOpsPoolKey] || '') === record.waterOpsPoolKey;
+    if (sameSerial || samePoolId || sameWaterOpsPool) {
+      targetRow = i + 1;
+      break;
+    }
+  }
+  var next = [
+    new Date(),
+    record.waterOpsPoolKey || '',
+    record.waterOpsPoolName || '',
+    record.site || '',
+    record.swimmingPoolId || '',
+    record.swimmingPoolName || '',
+    record.blueSerial || '',
+    record.deviceName || '',
+    record.source || ''
+  ];
+  if (targetRow) {
+    sheet.getRange(targetRow, 1, 1, next.length).setValues([next]);
+  } else {
+    sheet.appendRow(next);
+  }
+}
+
+function indexHeaders_(headers) {
+  var out = {};
+  for (var i = 0; i < headers.length; i += 1) {
+    out[String(headers[i] || '')] = i;
+  }
+  return out;
+}
+
+function cellIso_(value) {
+  if (!value) return '';
+  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value.getTime())) {
+    return value.toISOString();
+  }
+  return String(value);
 }
 
 function resolveBlueRiiotPoolKey_(poolMap, poolId, poolName, serial) {

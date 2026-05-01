@@ -3321,6 +3321,7 @@
     const AUTO_DOSING_DRUM_STORAGE_KEY = 'mbs-auto-dosing-drums-v1';
     const BLUERIIOT_ADVISOR_STORAGE_KEY = 'mbs-blueriiot-advisor-v1';
     const BLUERIIOT_DEVICE_CACHE_KEY = 'mbs-blueriiot-devices-v1';
+    const BLUERIIOT_HISTORY_LIMIT = 40;
     const DEFAULT_LEAH_PO_EMAIL = 'leahm@mbsfm.com.au';
     const COST_CENTRE_STORAGE_KEY = 'mbs-cost-centre-settings-v1';
     const DOSE_KEYS = ['acid', 'chlorine', 'bicarb', 'calcium', 'stabiliser', 'salt'];
@@ -7076,11 +7077,17 @@
         orp: existing.orp ?? '',
         temperature: existing.temperature ?? '',
         salinity: existing.salinity ?? '',
+        lastSyncedAt: existing.lastSyncedAt || '',
+        history: Array.isArray(existing.history) ? existing.history.slice(0, BLUERIIOT_HISTORY_LIMIT) : [],
         acidPumpMlMin: existing.acidPumpMlMin ?? '',
         currentAcidMinDay: existing.currentAcidMinDay ?? '',
         acidDoseDays: existing.acidDoseDays ?? '3',
         enviroswimHoursDay: existing.enviroswimHoursDay ?? '',
         filterHoursDay: existing.filterHoursDay ?? '',
+        gridConnectMode: existing.gridConnectMode || 'advice',
+        gridConnectAcidTimerName: existing.gridConnectAcidTimerName || '',
+        gridConnectEnviroTimerName: existing.gridConnectEnviroTimerName || '',
+        gridConnectBridgeUrl: existing.gridConnectBridgeUrl || '',
         notes: existing.notes || ''
       };
     }
@@ -7189,6 +7196,90 @@
       return { messages, chips };
     }
 
+    function normaliseBlueRiiotTrendReading(reading, pool, settings) {
+      const selectedDevice = settings && settings.blueSerial ? findBlueRiiotDeviceBySerial(settings.blueSerial) : null;
+      return {
+        capturedAt: reading.receivedAt || reading.capturedAt || new Date().toISOString(),
+        timestamp: reading.timestamp || reading.measurementTimestamp || reading.receivedAt || new Date().toISOString(),
+        poolKey: pool?.key || reading.waterOpsPoolKey || '',
+        blueSerial: reading.blueSerial || settings?.blueSerial || selectedDevice?.blueSerial || '',
+        deviceName: reading.deviceName || reading.swimmingPoolName || settings?.deviceName || selectedDevice?.deviceName || '',
+        ph: reading.ph ?? '',
+        orp: reading.orp ?? '',
+        temperature: reading.temperature ?? '',
+        salinity: reading.salinity ?? (reading.conductivity ?? '')
+      };
+    }
+
+    function mergeBlueRiiotHistory(existing, incoming) {
+      const byKey = new Map();
+      [...(Array.isArray(existing) ? existing : []), ...(Array.isArray(incoming) ? incoming : [])].forEach(item => {
+        if (!item) return;
+        const key = `${item.blueSerial || ''}|${item.timestamp || item.capturedAt || ''}`;
+        byKey.set(key, item);
+      });
+      return [...byKey.values()]
+        .sort((a, b) => new Date(b.timestamp || b.capturedAt || 0).getTime() - new Date(a.timestamp || a.capturedAt || 0).getTime())
+        .slice(0, BLUERIIOT_HISTORY_LIMIT);
+    }
+
+    function buildBlueRiiotTrendSummary(settings) {
+      const history = Array.isArray(settings.history) ? settings.history : [];
+      const valid = history.filter(item => n(item.ph) != null);
+      if (!valid.length) return { rows: [], summary: 'No trend history saved yet.' };
+      const latest = valid[0];
+      const previous = valid.find(item => item.timestamp !== latest.timestamp) || null;
+      const rows = valid.slice(0, 6).map(item => {
+        const when = item.timestamp ? new Date(item.timestamp) : null;
+        return {
+          when: when && Number.isFinite(when.getTime()) ? when.toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Saved reading',
+          ph: item.ph,
+          orp: item.orp,
+          salinity: item.salinity
+        };
+      });
+      let summary = `Latest saved pH ${formatNumber(n(latest.ph), 2)}.`;
+      if (previous && n(previous.ph) != null) {
+        const delta = round(n(latest.ph) - n(previous.ph), 2);
+        summary += ` Change from previous ${delta >= 0 ? '+' : ''}${formatNumber(delta, 2)}.`;
+      }
+      return { rows, summary };
+    }
+
+    function renderBlueRiiotTrend(settings) {
+      const trend = buildBlueRiiotTrendSummary(settings);
+      if (!trend.rows.length) {
+        return '<div class="hint">No BlueRiiot trend history saved for this pool yet. Fetch from the Google bridge to start building the trend.</div>';
+      }
+      return `
+        <div class="mode-note">${escapeHtml(trend.summary)}</div>
+        <div class="stock-scroll" style="margin-top: 8px;">
+          <table class="stock-table">
+            <thead><tr><th>Time</th><th>pH</th><th>ORP</th><th>Salt</th></tr></thead>
+            <tbody>
+              ${trend.rows.map(row => `<tr><td>${escapeHtml(row.when)}</td><td>${escapeHtml(String(row.ph ?? ''))}</td><td>${escapeHtml(String(row.orp ?? ''))}</td><td>${escapeHtml(String(row.salinity ?? ''))}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function syncBlueRiiotPoolLink(pool, settings, device) {
+      if (!pool || !settings?.blueSerial || isTrainingMode()) return;
+      const selectedDevice = device || findBlueRiiotDeviceBySerial(settings.blueSerial);
+      const params = {
+        poolKey: pool.key,
+        poolName: pool.name,
+        site: pool.site,
+        blueSerial: selectedDevice?.blueSerial || settings.blueSerial,
+        swimmingPoolId: selectedDevice?.swimmingPoolId || '',
+        swimmingPoolName: selectedDevice?.swimmingPoolName || '',
+        deviceName: selectedDevice?.deviceName || settings.deviceName || ''
+      };
+      const response = await requestGoogleJsonp('blueRiiotLinkPool', params);
+      if (!response || response.ok === false) throw new Error(response && response.error ? response.error : 'BlueRiiot pool link was not saved.');
+    }
+
     function saveBlueRiiotAdvisorField(event) {
       if (isTrainingMode()) {
         showAppToast('Training mode: BlueRiiot advisor changes not saved.');
@@ -7207,6 +7298,9 @@
         if (device) {
           next.deviceName = device.deviceName || device.swimmingPoolName || next.deviceName;
           next.enabled = 'cloud';
+          syncBlueRiiotPoolLink(pool, next, device)
+            .then(() => showAppToast('BlueRiiot device saved to this pool.'))
+            .catch(error => showAppToast(`BlueRiiot link not saved to Google yet: ${error.message || error}`));
         }
       }
       state.pools[pool.key] = next;
@@ -7228,8 +7322,23 @@
         if (!response || response.ok === false) throw new Error(response && response.error ? response.error : 'No BlueRiiot device response returned.');
         const devices = Array.isArray(response.devices) ? response.devices : [];
         saveBlueRiiotDeviceCache(devices);
+        const pool = getSelectedPool();
+        const matched = pool && devices.find(device => device.waterOpsPoolKey === pool.key);
+        if (matched) {
+          const state = loadBlueRiiotAdvisorState();
+          const current = getBlueRiiotSettingsForPool(state, pool.key);
+          state.pools[pool.key] = {
+            ...current,
+            enabled: 'cloud',
+            blueSerial: getBlueRiiotDeviceKey(matched),
+            deviceName: matched.deviceName || matched.swimmingPoolName || current.deviceName
+          };
+          saveBlueRiiotAdvisorState(state);
+        }
         renderBlueRiiotAdvisorSection();
-        showAppToast(devices.length ? `Loaded ${devices.length} BlueRiiot device${devices.length === 1 ? '' : 's'}.` : 'No BlueRiiot devices were returned.');
+        showAppToast(matched
+          ? `Loaded ${devices.length} BlueRiiot device${devices.length === 1 ? '' : 's'} and matched this pool.`
+          : (devices.length ? `Loaded ${devices.length} BlueRiiot device${devices.length === 1 ? '' : 's'}.` : 'No BlueRiiot devices were returned.'));
       } catch (error) {
         console.error('BlueRiiot device load failed', error);
         const message = String(error && error.message ? error.message : error);
@@ -7284,7 +7393,7 @@
         }
         showAppToast('Fetching BlueRiiot reading...');
         const selectedDevice = findBlueRiiotDeviceBySerial(current.blueSerial);
-        const requestParams = {};
+        const requestParams = { poolKey: pool.key };
         if (selectedDevice && selectedDevice.blueSerial) requestParams.blueSerial = selectedDevice.blueSerial;
         if (selectedDevice && selectedDevice.swimmingPoolId) requestParams.swimmingPoolId = selectedDevice.swimmingPoolId;
         if (!requestParams.blueSerial && !requestParams.swimmingPoolId) requestParams.blueSerial = current.blueSerial;
@@ -7293,7 +7402,7 @@
         const readings = Array.isArray(response.readings) ? response.readings : [];
         if (!readings.length) throw new Error('No reading was found for the selected BlueRiiot device.');
         const reading = readings[0];
-        state.pools[pool.key] = {
+        const nextSettings = {
           ...current,
           enabled: 'cloud',
           blueSerial: getBlueRiiotDeviceKey(selectedDevice) || current.blueSerial,
@@ -7304,14 +7413,51 @@
           readingAgeHours: blueRiiotReadingAgeHours(reading.timestamp),
           orp: reading.orp == null ? current.orp : String(reading.orp),
           temperature: reading.temperature == null ? current.temperature : String(reading.temperature),
-          salinity: reading.salinity == null ? (reading.conductivity == null ? current.salinity : String(reading.conductivity)) : String(reading.salinity)
+          salinity: reading.salinity == null ? (reading.conductivity == null ? current.salinity : String(reading.conductivity)) : String(reading.salinity),
+          lastSyncedAt: new Date().toISOString()
         };
+        const trendReading = normaliseBlueRiiotTrendReading(reading, pool, nextSettings);
+        nextSettings.history = mergeBlueRiiotHistory(current.history, [trendReading]);
+        state.pools[pool.key] = {
+          ...nextSettings
+        };
+        await syncBlueRiiotPoolLink(pool, nextSettings, selectedDevice).catch(error => {
+          console.warn('BlueRiiot pool link sync failed', error);
+        });
         saveBlueRiiotAdvisorState(state);
         renderBlueRiiotAdvisorSection();
         showAppToast('BlueRiiot reading updated.');
       } catch (error) {
         console.error('BlueRiiot bridge fetch failed', error);
         showAppToast(`BlueRiiot fetch failed: ${error.message || error}`);
+      }
+    }
+
+    async function refreshBlueRiiotHistoryFromBridge() {
+      const pool = getSelectedPool();
+      const state = loadBlueRiiotAdvisorState();
+      const current = getBlueRiiotSettingsForPool(state, pool.key);
+      try {
+        if (!current.blueSerial) throw new Error('Choose the BlueRiiot device for this pool first.');
+        showAppToast('Refreshing BlueRiiot trend...');
+        const selectedDevice = findBlueRiiotDeviceBySerial(current.blueSerial);
+        const params = {
+          poolKey: pool.key,
+          blueSerial: selectedDevice?.blueSerial || current.blueSerial,
+          swimmingPoolId: selectedDevice?.swimmingPoolId || '',
+          limit: BLUERIIOT_HISTORY_LIMIT
+        };
+        const response = await requestGoogleJsonp('blueRiiotHistory', params);
+        if (!response || response.ok === false) throw new Error(response && response.error ? response.error : 'No BlueRiiot history returned.');
+        const incoming = (Array.isArray(response.readings) ? response.readings : [])
+          .map(reading => normaliseBlueRiiotTrendReading(reading, pool, current));
+        state.pools[pool.key] = { ...current, history: mergeBlueRiiotHistory(current.history, incoming) };
+        saveBlueRiiotAdvisorState(state);
+        renderBlueRiiotAdvisorSection();
+        showAppToast(incoming.length ? `Loaded ${incoming.length} BlueRiiot trend reading${incoming.length === 1 ? '' : 's'}.` : 'No BlueRiiot history found for this pool yet.');
+      } catch (error) {
+        console.error('BlueRiiot history refresh failed', error);
+        showAppToast(`BlueRiiot trend refresh failed: ${error.message || error}`);
       }
     }
     function copyManualPhToBlueRiiot() {
@@ -7372,18 +7518,34 @@
           <div class="field"><label for="blueRiiotOrp">ORP / redox</label><input id="blueRiiotOrp" class="blueriiot-input" data-field="orp" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.orp))}" ${disabled} /><small>mV</small></div>
           <div class="field"><label for="blueRiiotTemp">Temperature</label><input id="blueRiiotTemp" class="blueriiot-input" data-field="temperature" type="number" step="0.1" inputmode="decimal" value="${escapeHtml(String(settings.temperature))}" ${disabled} /><small>deg C</small></div>
           <div class="field"><label for="blueRiiotSalinity">Salt / salinity</label><input id="blueRiiotSalinity" class="blueriiot-input" data-field="salinity" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.salinity))}" ${disabled} /><small>ppm or app equivalent</small></div>
+          <div class="field"><label for="blueRiiotLastSync">Last bridge sync</label><input id="blueRiiotLastSync" type="text" value="${escapeHtml(settings.lastSyncedAt ? new Date(settings.lastSyncedAt).toLocaleString() : '')}" readonly /><small>Saved when fetched</small></div>
+          <div class="span-12 mode-note" style="grid-column: 1 / -1;">Saved BlueRiiot trend</div>
+          <div class="span-12" style="grid-column: 1 / -1;">${renderBlueRiiotTrend(settings)}</div>
           <div class="span-12 mode-note" style="grid-column: 1 / -1;">Grid Connect / Enviroswim settings</div>
+          <div class="field">
+            <label for="blueRiiotGridConnectMode">Timer control mode</label>
+            <select id="blueRiiotGridConnectMode" class="blueriiot-input" data-field="gridConnectMode" ${disabled}>
+              <option value="advice" ${settings.gridConnectMode === 'advice' ? 'selected' : ''}>Advice only</option>
+              <option value="tuya" ${settings.gridConnectMode === 'tuya' ? 'selected' : ''}>Tuya/Grid Connect bridge planned</option>
+              <option value="homeAssistant" ${settings.gridConnectMode === 'homeAssistant' ? 'selected' : ''}>Home Assistant bridge planned</option>
+            </select>
+            <small>WaterOps calculates timers; direct control needs a bridge.</small>
+          </div>
+          <div class="field"><label for="blueRiiotGridBridgeUrl">Timer bridge URL</label><input id="blueRiiotGridBridgeUrl" class="blueriiot-input" data-field="gridConnectBridgeUrl" type="url" value="${escapeHtml(String(settings.gridConnectBridgeUrl))}" placeholder="Optional webhook URL" ${disabled} /></div>
           <div class="field"><label for="blueRiiotPumpRate">Acid pump rate</label><input id="blueRiiotPumpRate" class="blueriiot-input" data-field="acidPumpMlMin" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.acidPumpMlMin))}" ${disabled} /><small>mL per minute</small></div>
           <div class="field"><label for="blueRiiotAcidCurrent">Current acid timer</label><input id="blueRiiotAcidCurrent" class="blueriiot-input" data-field="currentAcidMinDay" type="number" step="1" inputmode="decimal" value="${escapeHtml(String(settings.currentAcidMinDay))}" ${disabled} /><small>Minutes per day</small></div>
           <div class="field"><label for="blueRiiotDoseDays">Split correction over</label><input id="blueRiiotDoseDays" class="blueriiot-input" data-field="acidDoseDays" type="number" min="1" max="7" step="1" inputmode="numeric" value="${escapeHtml(String(settings.acidDoseDays))}" ${disabled} /><small>Days</small></div>
           <div class="field"><label for="blueRiiotEnviroRuntime">Enviroswim runtime</label><input id="blueRiiotEnviroRuntime" class="blueriiot-input" data-field="enviroswimHoursDay" type="number" step="0.25" inputmode="decimal" value="${escapeHtml(String(settings.enviroswimHoursDay))}" ${disabled} /><small>Hours per day</small></div>
           <div class="field"><label for="blueRiiotFilterRuntime">Filter runtime</label><input id="blueRiiotFilterRuntime" class="blueriiot-input" data-field="filterHoursDay" type="number" step="0.25" inputmode="decimal" value="${escapeHtml(String(settings.filterHoursDay))}" ${disabled} /><small>Hours per day</small></div>
+          <div class="field"><label for="blueRiiotAcidTimerName">Acid timer name</label><input id="blueRiiotAcidTimerName" class="blueriiot-input" data-field="gridConnectAcidTimerName" type="text" value="${escapeHtml(String(settings.gridConnectAcidTimerName))}" placeholder="Grid Connect timer label" ${disabled} /></div>
+          <div class="field"><label for="blueRiiotEnviroTimerName">Enviroswim timer name</label><input id="blueRiiotEnviroTimerName" class="blueriiot-input" data-field="gridConnectEnviroTimerName" type="text" value="${escapeHtml(String(settings.gridConnectEnviroTimerName))}" placeholder="Grid Connect timer label" ${disabled} /></div>
           <div class="field span-12" style="grid-column: 1 / -1;"><label for="blueRiiotNotes">Runtime notes</label><textarea id="blueRiiotNotes" class="blueriiot-input" data-field="notes" placeholder="Grid Connect timer names, probe notes, calibration notes" ${disabled}>${escapeHtml(settings.notes)}</textarea></div>
         </div>
         <div class="actions" style="margin-bottom: 12px;">
           <button class="button secondary" type="button" id="copyManualPhToBlueRiiotBtn" ${disabled}>Use current manual pH</button>
           <button class="button ghost" type="button" id="loadBlueRiiotDevicesBtn" ${disabled}>Load BlueRiiot devices</button>
           <button class="button ghost" type="button" id="fetchBlueRiiotBridgeBtn" ${disabled}>Fetch from Google bridge</button>
+          <button class="button ghost" type="button" id="refreshBlueRiiotTrendBtn" ${disabled}>Refresh trend</button>
           <button class="button ghost" type="button" id="diagnoseBlueRiiotBridgeBtn" ${disabled}>Diagnose BlueRiiot bridge</button>
         </div>
         <div class="icebath-reference-grid" style="margin-bottom: 12px;">
@@ -7399,6 +7561,7 @@
       qs('copyManualPhToBlueRiiotBtn')?.addEventListener('click', copyManualPhToBlueRiiot);
       qs('loadBlueRiiotDevicesBtn')?.addEventListener('click', loadBlueRiiotDevicesFromBridge);
       qs('fetchBlueRiiotBridgeBtn')?.addEventListener('click', fetchBlueRiiotFromBridge);
+      qs('refreshBlueRiiotTrendBtn')?.addEventListener('click', refreshBlueRiiotHistoryFromBridge);
       qs('diagnoseBlueRiiotBridgeBtn')?.addEventListener('click', runBlueRiiotBridgeDiagnostic);
     }
     function renderStockSection() {

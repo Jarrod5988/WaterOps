@@ -2573,11 +2573,6 @@
         <small id="poolSystemNote" style="display:none; margin-top: 8px; color: var(--muted); font-size: 12px;"></small>
         <div id="poolVolumeHelperNote" class="pool-helper-note" style="display:none;"></div>
       </section>
-      <section class="card span-8 priority-alert-card" id="priorityAlertsCard">
-        <h2>Today's priority alerts</h2>
-        <div id="priorityAlertsSummary" class="insight-list"></div>
-        <div class="inline-note">Only urgent chemistry and water-quality risks appear here. Full reasoning stays in Insights.</div>
-      </section>
       <section class="card span-12">
         <h2>Quick capture</h2>
         <div class="field-grid quick-capture-grid" style="margin-bottom: 12px;">
@@ -2641,12 +2636,6 @@
             </div>
             <div class="photo-note" id="photoOcrStatus" style="margin-top: 8px; font-size: 12px;">For best results, fill the photo with the blue Spin Touch screen, hold square-on, tap to focus, then read. The app reads in Spin Touch order: FCL, TCL, CCL, pH, ALK, HARD, CYA, COPPER, PHOS, SALT.</div>
           </div>
-          <div class="span-6" style="grid-column: span 12;">
-            <div class="field">
-              <label for="serviceNotes">Service notes</label>
-              <textarea id="serviceNotes" placeholder="Optional notes"></textarea>
-            </div>
-          </div>
           <div class="span-12" style="grid-column: span 12;">
             <h2 style="margin-top: 4px;">Job photos for report attachment</h2>
             <div class="job-photo-actions">
@@ -2670,6 +2659,14 @@
           </div>
         </div>
 
+      </section>
+
+      <section class="card span-12 collapsed" id="serviceNotesCard">
+        <h2>Service notes</h2>
+        <div class="field">
+          <label for="serviceNotes">Service notes</label>
+          <textarea id="serviceNotes" placeholder="Optional notes"></textarea>
+        </div>
       </section>
 
       <!-- Pool selection removed from its original location; moved above Quick capture -->
@@ -2862,7 +2859,7 @@
       </section>
 </section>
 
-      <section class="card span-12" id="quickActionsCard">
+      <section class="card span-12 collapsed" id="quickActionsCard">
         <h2>Quick actions</h2>
         <div class="actions" style="margin-bottom: 10px;">
           <button class="button secondary" id="noIssuesTodayBtn" type="button">No issues today</button>
@@ -2912,12 +2909,12 @@
       </section>
 
 
-      <section class="card span-12" id="autoDosingDrumsCard">
+      <section class="card span-12 collapsed" id="autoDosingDrumsCard">
         <h2>Onsite dosing drums</h2>
         <div class="mode-note">Record acid/chlorine drum levels for pools with onsite dosing systems. At 15% or lower, WaterOps can open a draft purchase order request for Leah.</div>
         <div id="autoDosingDrumsContent"></div>
       </section>
-      <section class="card span-12" id="blueRiiotAdvisorCard">
+      <section class="card span-12 collapsed" id="blueRiiotAdvisorCard">
         <h2>BlueRiiot & pump runtime advisor</h2>
         <div class="mode-note">Use BlueRiiot Plus trend readings with manual test results to suggest safer Grid Connect acid pump and Enviroswim runtime settings. This is advisory only; confirm before changing timers.</div>
         <div id="blueRiiotAdvisorContent"></div>
@@ -8557,6 +8554,16 @@
       const doseCards = qs('singleDoseCards');
       const referenceGrid = qs('singleReferenceGrid');
       const resultByParameter = Object.fromEntries(rows.map(row => [row.parameter, row]));
+      const actCheck = buildActHealthPoolCrossCheck();
+      const actDoseRows = actCheck.rows.filter(item => item.tone === 'bad' || item.tone === 'warn');
+      const actDoseNote = `
+        <div class="mode-note act-health-inline">
+          <strong>ACT Health guide:</strong>
+          ${actDoseRows.length
+            ? actDoseRows.map(item => `${escapeHtml(item.label)} ${escapeHtml(item.value)} - ${escapeHtml(item.note)}`).join(' ')
+            : `${escapeHtml(actCheck.profile.label)} checks have no extra alerts from the current readings.`}
+        </div>
+      `;
       const combinedRows = [
         { result: resultByParameter['pH'], chemical: { key: 'acid', label: chemicalNames.acid, value: doses.acid || 0, unit: 'mL', decimals: 0 } },
         { result: resultByParameter['Free chlorine'], chemical: { key: 'chlorine', label: chemicalNames.chlorine, value: doses.chlorine || 0, unit: 'mL', decimals: 0 } },
@@ -8568,7 +8575,7 @@
       const visibleDoseRows = combinedRows.filter(item => Number.isFinite(item.chemical.value) && item.chemical.value > 0);
 
       if (doseCards) {
-        doseCards.innerHTML = visibleDoseRows.length
+        const doseHtml = visibleDoseRows.length
           ? visibleDoseRows.map(item => `
             <div class="icebath-compact-card">
               <div class="icebath-compact-top">
@@ -8598,10 +8605,10 @@
             </div>
           `).join('')
           : `<div class="icebath-reference-card"><strong>No chemical dosing required</strong><div class="icebath-reference-value">All automatic dose items are currently within range.</div></div>`;
+        doseCards.innerHTML = doseHtml + actDoseNote;
       }
 
       if (referenceGrid) {
-        const actCheck = buildActHealthPoolCrossCheck();
         const resultCards = rows.map(row => `
           <div class="icebath-reference-card">
             <strong>${escapeHtml(row.parameter)}</strong>
@@ -8609,22 +8616,7 @@
             <div class="subtle">${escapeHtml(row.status.label)} - ${escapeHtml(row.rangeLabel || '-')}</div>
           </div>
         `).join('');
-        const actCards = `
-          <div class="icebath-reference-card act-health-card">
-            <strong>ACT Health cross-check</strong>
-            <div class="subtle">${escapeHtml(actCheck.profile.label)}. Based on ACT public swimming/spa pool guide; keep site-specific targets where stricter.</div>
-            <div class="act-health-list">
-              ${actCheck.rows.map(item => `
-                <div class="act-health-row ${escapeHtml(item.tone || 'info')}">
-                  <span>${escapeHtml(item.label)}</span>
-                  <strong>${escapeHtml(item.value)}</strong>
-                  <small>${escapeHtml(item.note)}</small>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-        referenceGrid.innerHTML = resultCards + actCards;
+        referenceGrid.innerHTML = resultCards;
       }
 
       const statuses = rows.map(row => row.status.label);

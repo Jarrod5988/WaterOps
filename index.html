@@ -1787,10 +1787,15 @@
     }
 
     .job-photo-actions {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
       margin-bottom: 10px;
+    }
+
+    .job-photo-actions .button {
+      width: 100%;
+      min-height: 48px;
     }
 
     .job-photo-grid {
@@ -2636,29 +2641,23 @@
             </div>
             <div class="photo-note" id="photoOcrStatus" style="margin-top: 8px; font-size: 12px;">For best results, fill the photo with the blue Spin Touch screen, hold square-on, tap to focus, then read. The app reads in Spin Touch order: FCL, TCL, CCL, pH, ALK, HARD, CYA, COPPER, PHOS, SALT.</div>
           </div>
-          <div class="span-12" style="grid-column: span 12;">
-            <h2 style="margin-top: 4px;">Job photos for report attachment</h2>
-            <div class="job-photo-actions">
-              <label class="button secondary" for="jobPhotoCameraInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
-                Take job photo
-              </label>
-              <label class="button secondary" for="jobPhotoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
-                Choose job photos
-              </label>
-              <button class="button ghost" type="button" id="clearJobPhotosBtn">Clear all job photos</button>
-              <input id="jobPhotoCameraInput" type="file" accept="image/*" capture="environment" multiple class="hidden" />
-              <input id="jobPhotoInput" type="file" accept="image/*" multiple class="hidden" />
-            </div>
-            <label class="inline-check" style="margin: 2px 0 8px; display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#244766;">
-              <input id="includeJobPhotosInPdf" type="checkbox" style="margin-top:3px;" />
-              <span>Include job photos in the PDF <small style="display:block; color:#607d99; margin-top:2px;">Leave off for a fast report. Turn on only when photo pages are needed.</small></span>
-            </label>
-            <div id="jobPhotoPreviewBox" class="job-photo-grid">
-              <div class="placeholder" style="grid-column: 1 / -1;">No job photos attached yet.</div>
-            </div>
-          </div>
         </div>
 
+      </section>
+
+      <section class="card span-12 collapsed" id="jobPhotosCard">
+        <h2>Job photos for report attachment</h2>
+        <div class="job-photo-actions">
+          <label class="button secondary" for="jobPhotoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+            Choose job photo
+          </label>
+          <button class="button ghost" type="button" id="clearJobPhotosBtn">Clear photos</button>
+          <input id="jobPhotoInput" type="file" accept="image/*" multiple class="hidden" />
+        </div>
+        <div class="mode-note">Attached job photos are included in the service report PDF automatically.</div>
+        <div id="jobPhotoPreviewBox" class="job-photo-grid">
+          <div class="placeholder" style="grid-column: 1 / -1;">No job photos attached yet.</div>
+        </div>
       </section>
 
       <section class="card span-12 collapsed" id="serviceNotesCard">
@@ -8854,13 +8853,11 @@
     function clearJobPhotoAttachments() {
       jobPhotoAttachments = [];
       if (qs('jobPhotoInput')) qs('jobPhotoInput').value = '';
-      if (qs('jobPhotoCameraInput')) qs('jobPhotoCameraInput').value = '';
       renderJobPhotoPreview();
     }
 
     function shouldIncludeJobPhotosInPdf() {
-      const field = qs('includeJobPhotosInPdf');
-      return Boolean(field && field.checked && jobPhotoAttachments.length);
+      return jobPhotoAttachments.length > 0;
     }
 
     async function handleJobPhotoUpload(event) {
@@ -8890,7 +8887,6 @@
         alert('One or more job photos could not be loaded. Please try again.');
       } finally {
         if (qs('jobPhotoInput')) qs('jobPhotoInput').value = '';
-        if (qs('jobPhotoCameraInput')) qs('jobPhotoCameraInput').value = '';
       }
     }
 
@@ -11287,7 +11283,6 @@ async function buildAndSavePdfReport() {
       qs('closedEquipmentLookupBtn')?.addEventListener('click', findClosedEquipmentGuidance);
       qs('clearClosedPlateBtn')?.addEventListener('click', clearClosedPlatePhoto);
       qs('jobPhotoInput').addEventListener('change', handleJobPhotoUpload);
-      qs('jobPhotoCameraInput').addEventListener('change', handleJobPhotoUpload);
       qs('clearJobPhotosBtn').addEventListener('click', clearJobPhotoAttachments);
       qs('scanPhotoBtn').addEventListener('click', scanSpinTouchPhoto);
       qs('clearPhotoBtn').addEventListener('click', () => {

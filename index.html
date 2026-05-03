@@ -2962,8 +2962,9 @@
         <div id="qrCodesWrap" class="qr-grid"></div>
       </section>
 
-      <section class="card span-12 collapsed" id="jobPhotosCard">
-        <h2>Job photos for report attachment</h2>
+      <section class="card collapsed span-12" id="serviceReportCard">
+        <h2>Service report</h2>
+        <div class="mode-note">Attach job photos, generate the service report, then save the PDF and snapshot.</div>
         <div class="job-photo-actions">
           <label class="button secondary" for="jobPhotoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
             Choose job photo
@@ -2975,11 +2976,7 @@
         <div id="jobPhotoPreviewBox" class="job-photo-grid">
           <div class="placeholder" style="grid-column: 1 / -1;">No job photos attached yet.</div>
         </div>
-      </section>
-
-      <section class="card collapsed span-12">
-        <h2>Service report</h2>
-        <div class="actions" style="margin-bottom: 12px;">
+        <div class="actions" style="margin-top: 12px; margin-bottom: 12px;">
           <button class="button" id="generateReportBtn" type="button">Generate report</button>
           <!-- Updated: the save and generate button now also records a visit snapshot automatically -->
           <button class="button secondary" id="saveReportBtn" type="button">Save report (PDF + snapshot)</button>

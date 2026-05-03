@@ -273,6 +273,10 @@
       gap: 10px;
     }
 
+    .header .app-tabs {
+      margin: 14px 0 0;
+    }
+
     .access-status {
       margin-top: 10px;
       padding: 10px 12px;
@@ -502,6 +506,20 @@
     .target-settings-panel summary::after {
       content: '\25BC';
       font-size: 12px;
+    }
+
+    .training-toggle::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #93a4b7;
+      box-shadow: 0 0 0 3px rgba(99, 123, 149, 0.12);
+    }
+
+    .training-toggle.active::before {
+      background: #b8750d;
+      box-shadow: 0 0 0 3px rgba(184, 117, 13, 0.16);
     }
 
     .target-settings-panel[open] summary::after {
@@ -2334,16 +2352,21 @@
     .toolbar .button.training-toggle {
       width: auto !important;
       max-width: max-content;
-      min-height: 0 !important;
-      height: 30px;
-      padding: 4px 9px !important;
+      min-height: 36px !important;
+      height: 36px;
+      padding: 7px 12px !important;
       line-height: 1;
       align-self: flex-start;
-      background: transparent;
-      border-color: transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.84);
+      border-color: rgba(7, 89, 133, 0.18);
       color: var(--muted);
       box-shadow: none;
       font-size: 12px;
+      font-weight: 800;
+      border-radius: 999px;
     }
 
     .toolbar .button.training-toggle:hover,
@@ -2355,7 +2378,7 @@
     }
 
     .toolbar .button.training-toggle.active {
-      background: #fff0bf;
+      background: #fff7dc;
       border-color: rgba(176, 116, 0, 0.36);
       color: #684500;
     }
@@ -2529,10 +2552,16 @@
           <p>Water testing, dosing, closed loops and service logging.</p>
         </div>
       </div>
+      <div class="app-tabs" id="appTabs" role="tablist" aria-label="Primary sections">
+        <button class="tab-btn" type="button" data-screen="pools">Pool testing</button>
+        <button class="tab-btn" type="button" data-screen="closedLoops">Closed loops</button>
+        <button class="tab-btn" type="button" data-screen="insights">Insights & assets</button>
+        <button class="tab-btn" type="button" data-screen="costCentre">Site costs</button>
+      </div>
       <div class="toolbar">
         <button class="button ghost" id="resetBtn" type="button">Reset last test</button>
         <button class="button secondary" id="loadDefaultsBtn" type="button">Reload pool defaults</button>
-        <button class="button ghost training-toggle" id="trainingModeBtn" type="button" aria-pressed="false" title="Toggle training mode">Training</button>
+        <button class="button ghost training-toggle" id="trainingModeBtn" type="button" aria-pressed="false" title="Toggle training mode">Training mode</button>
         <!-- Dark mode toggle removed -->
       </div>
       <div class="access-status" id="accessStatusBox">Access: setup unlocked until technician roles are loaded.</div>
@@ -2573,20 +2602,10 @@
       </button>
     </nav>
 
-    <!-- Hide the original horizontal tab bar on wider screens.  When the viewport is narrow (e.g. on mobile), the
-         horizontal tabs remain visible to provide a compact navigation method. -->
-    <div class="app-tabs" id="appTabs" role="tablist" aria-label="Primary sections">
-      <button class="tab-btn" type="button" data-screen="pools">Pool testing</button>
-      <button class="tab-btn" type="button" data-screen="closedLoops">Closed loops</button>
-      <button class="tab-btn" type="button" data-screen="insights">Insights & assets</button>
-      <button class="tab-btn" type="button" data-screen="costCentre">Site costs</button>
-    </div>
-
     <div id="screenPools" class="screen-panel active">
       <div class="grid">
-      <!-- Pool selection moved above Quick capture -->
-      <section class="card collapsed span-4">
-        <h2>Pool selection</h2>
+      <section class="card collapsed span-12" id="jobSetupCard">
+        <h2>Job setup</h2>
         <div class="field-grid">
           <div class="field">
             <label for="poolSelect">Selected pool</label>
@@ -2612,10 +2631,7 @@
         <!-- Note displayed for pools using special systems like Enviroswim -->
         <small id="poolSystemNote" style="display:none; margin-top: 8px; color: var(--muted); font-size: 12px;"></small>
         <div id="poolVolumeHelperNote" class="pool-helper-note" style="display:none;"></div>
-      </section>
-      <section class="card collapsed span-12">
-        <h2>Quick capture</h2>
-        <div class="field-grid quick-capture-grid" style="margin-bottom: 12px;">
+        <div class="field-grid quick-capture-grid" style="margin-top: 12px; margin-bottom: 12px;">
           <div class="field" style="display:none;">
             <label for="reportSite">Site</label>
             <input id="reportSite" type="text" placeholder="Enter site" />
@@ -2679,31 +2695,6 @@
         </div>
 
       </section>
-
-      <section class="card span-12 collapsed" id="jobPhotosCard">
-        <h2>Job photos for report attachment</h2>
-        <div class="job-photo-actions">
-          <label class="button secondary" for="jobPhotoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
-            Choose job photo
-          </label>
-          <button class="button ghost" type="button" id="clearJobPhotosBtn">Clear photos</button>
-          <input id="jobPhotoInput" type="file" accept="image/*" multiple class="hidden" />
-        </div>
-        <div class="mode-note">Attached job photos are included in the service report PDF automatically.</div>
-        <div id="jobPhotoPreviewBox" class="job-photo-grid">
-          <div class="placeholder" style="grid-column: 1 / -1;">No job photos attached yet.</div>
-        </div>
-      </section>
-
-      <section class="card span-12 collapsed" id="serviceNotesCard">
-        <h2>Service notes</h2>
-        <div class="field">
-          <label for="serviceNotes">Service notes</label>
-          <textarea id="serviceNotes" placeholder="Optional notes"></textarea>
-        </div>
-      </section>
-
-      <!-- Pool selection removed from its original location; moved above Quick capture -->
 
       <section class="card collapsed span-8" id="singleResultsCard">
         <h2>Current test results and targets</h2>
@@ -2787,8 +2778,6 @@
         </div>
 
       </section>
-
-
 
       <section class="card collapsed span-12 hidden" id="groupIceBathsCard">
         <h2>Raiders ice baths - all 3</h2>
@@ -2895,17 +2884,6 @@
           </div>
         </div>
       </section>
-</section>
-
-      <section class="card span-12 collapsed" id="quickActionsCard">
-        <h2>Quick actions</h2>
-        <div class="actions" style="margin-bottom: 10px;">
-          <button class="button secondary" id="noIssuesTodayBtn" type="button">No issues today</button>
-          <button class="button ghost" id="clearQuickActionsBtn" type="button">Clear actions</button>
-        </div>
-        <div id="quickActionsWrap" class="check-grid"></div>
-        <div id="draftStatusBanner" class="hint" style="margin-top: 12px;">Incomplete visits auto-save on this device.</div>
-      </section>
 
       <section class="card collapsed span-12" id="singleCombinedCard">
         <h2>Recommended dosing</h2>
@@ -2946,28 +2924,61 @@
         <div class="icebath-reference-grid" id="singleReferenceGrid"></div>
       </section>
 
-
-      <section class="card span-12 collapsed" id="autoDosingDrumsCard">
-        <h2>Onsite dosing drums</h2>
-        <div class="mode-note">Record acid/chlorine drum levels for pools with onsite dosing systems. At 15% or lower, WaterOps can open a draft purchase order request for Leah.</div>
-        <div id="autoDosingDrumsContent"></div>
-      </section>
-      <section class="card span-12 collapsed" id="blueRiiotAdvisorCard">
-        <h2>BlueRiiot & pump runtime advisor</h2>
-        <div class="mode-note">Use BlueRiiot Plus trend readings with manual test results to suggest safer Grid Connect acid pump and Enviroswim runtime settings. This is advisory only; confirm before changing timers.</div>
-        <div id="blueRiiotAdvisorContent"></div>
-      </section>
-
       <section class="card collapsed span-12" id="stockLogCard">
         <h2>Chemical stock used</h2>
         <div class="mode-note">Marked Dosed = Yes chemicals are automatically logged to stock used when you generate or save the service report.</div>
         <div id="stockContent"></div>
       </section>
 
+      <section class="card span-12 collapsed" id="autoDosingDrumsCard">
+        <h2>Onsite dosing drums</h2>
+        <div class="mode-note">Record acid/chlorine drum levels for pools with onsite dosing systems. At 15% or lower, WaterOps can open a draft purchase order request for Leah.</div>
+        <div id="autoDosingDrumsContent"></div>
+      </section>
+
+      <section class="card span-12 collapsed" id="blueRiiotAdvisorCard">
+        <h2>BlueRiiot & pump runtime advisor</h2>
+        <div class="mode-note">Use BlueRiiot Plus trend readings with manual test results to suggest safer Grid Connect acid pump and Enviroswim runtime settings. This is advisory only; confirm before changing timers.</div>
+        <div id="blueRiiotAdvisorContent"></div>
+      </section>
+
+      <section class="card span-12 collapsed" id="quickActionsCard">
+        <h2>Quick actions</h2>
+        <div class="actions" style="margin-bottom: 10px;">
+          <button class="button secondary" id="noIssuesTodayBtn" type="button">No issues today</button>
+          <button class="button ghost" id="clearQuickActionsBtn" type="button">Clear actions</button>
+        </div>
+        <div id="quickActionsWrap" class="check-grid"></div>
+        <div id="draftStatusBanner" class="hint" style="margin-top: 12px;">Incomplete visits auto-save on this device.</div>
+      </section>
+
+      <section class="card span-12 collapsed" id="serviceNotesCard">
+        <h2>Service notes</h2>
+        <div class="field">
+          <label for="serviceNotes">Service notes</label>
+          <textarea id="serviceNotes" placeholder="Optional notes"></textarea>
+        </div>
+      </section>
+
       <section class="card collapsed span-12 hidden" id="qrCodesCard">
         <h2>QR codes</h2>
         <div class="mode-note">Each QR opens this app straight to a pool, plus one QR for Raiders Ice Baths - All 3.</div>
         <div id="qrCodesWrap" class="qr-grid"></div>
+      </section>
+
+      <section class="card span-12 collapsed" id="jobPhotosCard">
+        <h2>Job photos for report attachment</h2>
+        <div class="job-photo-actions">
+          <label class="button secondary" for="jobPhotoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+            Choose job photo
+          </label>
+          <button class="button ghost" type="button" id="clearJobPhotosBtn">Clear photos</button>
+          <input id="jobPhotoInput" type="file" accept="image/*" multiple class="hidden" />
+        </div>
+        <div class="mode-note">Attached job photos are included in the service report PDF automatically.</div>
+        <div id="jobPhotoPreviewBox" class="job-photo-grid">
+          <div class="placeholder" style="grid-column: 1 / -1;">No job photos attached yet.</div>
+        </div>
       </section>
 
       <section class="card collapsed span-12">
@@ -2984,6 +2995,10 @@
         <div class="report-output" id="reportOutput">Tap Generate report to build the service report.</div>
         <div class="footer-note">PDF export is set to landscape. If the built-in master sheet URL is active, this button also updates the live log sheet.</div>
       </section>
+
+      
+      
+      
     </div>
   </div>
 
@@ -3657,7 +3672,7 @@
       if (button) {
         button.classList.toggle('active', enabled);
         button.setAttribute('aria-pressed', enabled ? 'true' : 'false');
-        button.textContent = enabled ? 'Training on' : 'Training';
+        button.textContent = enabled ? 'Training active' : 'Training mode';
       }
       const banner = qs('trainingModeBanner');
       if (banner) banner.classList.toggle('hidden', !enabled);

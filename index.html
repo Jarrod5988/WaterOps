@@ -268,13 +268,26 @@
 
     .toolbar {
       margin-top: 14px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      width: 100%;
+      padding: 8px;
+      border: 1px solid transparent;
     }
 
     .header .app-tabs {
       margin: 14px 0 0;
+    }
+
+    .header .toolbar .button:not(.training-toggle),
+    .header .app-tabs .tab-btn {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .access-status {
@@ -2357,6 +2370,7 @@
       padding: 7px 12px !important;
       line-height: 1;
       align-self: flex-start;
+      grid-column: 1 / -1;
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -2482,9 +2496,11 @@
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         width: 100%;
+        padding: 8px;
+        gap: 8px;
       }
 
-      .header .toolbar .button {
+      .header .toolbar .button:not(.training-toggle) {
         min-height: 44px;
         padding: 10px 8px;
         font-size: 14px;

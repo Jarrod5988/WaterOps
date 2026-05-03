@@ -1,0 +1,26 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self), geolocation=(), microphone=()
+
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/service-worker.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Service-Worker-Allowed: /
+
+/manifest.json
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=86400
+
+/apple-touch-icon-dark.png
+  Cache-Control: public, max-age=86400
+
+/icon-512.png
+  Cache-Control: public, max-age=86400
+
+/icon-512-dark.png
+  Cache-Control: public, max-age=86400

@@ -1,22 +1,28 @@
 {
   "name": "WaterOps",
   "short_name": "WaterOps",
-  "start_url": "./",
-  "scope": "./",
+  "description": "Pool testing, closed loop logging, site costs, onsite dosing records and service reports for WaterOps technicians.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#f4f9fc",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#f5fbfe",
   "theme_color": "#009fe3",
+  "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
-      "src": "apple-touch-icon-dark.png",
+      "src": "/apple-touch-icon-dark.png",
       "sizes": "180x180",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512-dark.png",
-      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icon-512-dark.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

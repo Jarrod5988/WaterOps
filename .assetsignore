@@ -7,8 +7,8 @@ node_modules/**
 README.md
 CLOUDFLARE_PAGES.md
 google-apps-script.js
+appsscript.json
 index .html
 wrangler.jsonc
 .assetsignore
-_headers
 _redirects

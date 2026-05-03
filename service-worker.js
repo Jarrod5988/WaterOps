@@ -1,12 +1,12 @@
-const WATEROPS_CACHE = 'waterops-app-v2026-05-03-01';
+const WATEROPS_CACHE = 'waterops-app-v2026-05-03-02';
 const WATEROPS_CORE_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './apple-touch-icon.png',
-  './apple-touch-icon-dark.png',
-  './icon-512.png',
-  './icon-512-dark.png'
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/apple-touch-icon.png',
+  '/apple-touch-icon-dark.png',
+  '/icon-512.png',
+  '/icon-512-dark.png'
 ];
 const WATEROPS_CDN_ASSETS = [
   'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
@@ -18,7 +18,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(WATEROPS_CACHE)
       .then(cache => Promise.all(WATEROPS_CORE_ASSETS.map(asset =>
-        cache.add(asset).catch(error => console.info('WaterOps cache skipped', asset, error))
+        cache.add(new Request(asset, { cache: 'reload' })).catch(error => console.info('WaterOps cache skipped', asset, error))
       )))
       .then(() => self.skipWaiting())
   );
@@ -40,7 +40,11 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
 
   if (url.origin === self.location.origin) {
-    event.respondWith(networkFirst(request));
+    if (request.mode === 'navigate' || request.destination === 'document') {
+      event.respondWith(networkFirst(request, '/index.html'));
+      return;
+    }
+    event.respondWith(staleWhileRevalidate(request));
     return;
   }
 
@@ -49,18 +53,32 @@ self.addEventListener('fetch', event => {
   }
 });
 
-async function networkFirst(request) {
+async function networkFirst(request, fallbackUrl = '/index.html') {
   const cache = await caches.open(WATEROPS_CACHE);
   try {
-    const response = await fetch(request);
+    const response = await fetch(request, { cache: 'no-store' });
     if (response && response.ok) cache.put(request, response.clone());
     return response;
   } catch (error) {
     const cached = await cache.match(request);
     if (cached) return cached;
-    if (request.mode === 'navigate') return cache.match('./index.html');
+    if (request.mode === 'navigate') return cache.match(fallbackUrl);
     throw error;
   }
+}
+
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(WATEROPS_CACHE);
+  const cached = await cache.match(request);
+  const network = fetch(request)
+    .then(response => {
+      if (response && response.ok) cache.put(request, response.clone());
+      return response;
+    })
+    .catch(() => null);
+  if (cached) return cached;
+  const response = await network;
+  return response || cache.match('/index.html');
 }
 
 async function cacheFirst(request) {

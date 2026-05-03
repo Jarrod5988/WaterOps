@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <!-- Update the theme colour to reflect the new purple palette -->
-  <!-- Updated theme colour to align with the new bright azure palette -->
   <meta name="theme-color" content="#009fe3" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -14,10 +12,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-dark.png" />
-  <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon-dark.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="icon-512-dark.png" />
-  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-dark.png" />
+  <link rel="icon" type="image/png" sizes="180x180" href="/apple-touch-icon-dark.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512-dark.png" />
+  <link rel="manifest" href="/manifest.json" />
   <title>MBS FM WaterOps</title>
   <style>
     :root {
@@ -475,6 +473,43 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 12px;
+    }
+
+    .target-settings-panel {
+      grid-column: 1 / -1;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.74);
+      overflow: hidden;
+    }
+
+    .target-settings-panel summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 12px 14px;
+      font-weight: 800;
+      color: var(--blue-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .target-settings-panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .target-settings-panel summary::after {
+      content: '\25BC';
+      font-size: 12px;
+    }
+
+    .target-settings-panel[open] summary::after {
+      content: '\25B2';
+    }
+
+    .target-settings-grid {
+      padding: 0 14px 14px;
     }
 
     .quick-capture-grid {
@@ -2715,31 +2750,35 @@
             <input id="salt" type="number" inputmode="decimal" step="1" placeholder="ppm" />
           </div>
           <div class="span-12 mode-note" style="grid-column: 1 / -1; margin-top: -4px;">Chlorine dosing is calculated from free chlorine only. Total and combined chlorine are recorded as reference readings.</div>
-          <div class="span-12 mode-note" style="grid-column: 1 / -1;">Targets</div>
-          <div class="field">
-            <label for="targetFreeChlorine">Target free chlorine</label>
-            <input id="targetFreeChlorine" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="targetPh">Target pH</label>
-            <input id="targetPh" type="number" inputmode="decimal" step="0.01" placeholder="7.2" />
-          </div>
-          <div class="field">
-            <label for="targetAlkalinity">Target alkalinity</label>
-            <input id="targetAlkalinity" type="number" inputmode="decimal" step="1" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="targetCalcium">Target calcium hardness</label>
-            <input id="targetCalcium" type="number" inputmode="decimal" step="1" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="targetCya">Target CYA</label>
-            <input id="targetCya" type="number" inputmode="decimal" step="1" placeholder="ppm" />
-          </div>
-          <div class="field">
-            <label for="targetSalt">Target salt</label>
-            <input id="targetSalt" type="number" inputmode="decimal" step="1" placeholder="ppm" />
-          </div>
+          <details class="target-settings-panel span-12" id="targetSettingsPanel">
+            <summary>Targets</summary>
+            <div class="field-grid target-settings-grid">
+              <div class="field">
+                <label for="targetFreeChlorine">Target free chlorine</label>
+                <input id="targetFreeChlorine" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
+              </div>
+              <div class="field">
+                <label for="targetPh">Target pH</label>
+                <input id="targetPh" type="number" inputmode="decimal" step="0.01" placeholder="7.2" />
+              </div>
+              <div class="field">
+                <label for="targetAlkalinity">Target alkalinity</label>
+                <input id="targetAlkalinity" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+              </div>
+              <div class="field">
+                <label for="targetCalcium">Target calcium hardness</label>
+                <input id="targetCalcium" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+              </div>
+              <div class="field">
+                <label for="targetCya">Target CYA</label>
+                <input id="targetCya" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+              </div>
+              <div class="field">
+                <label for="targetSalt">Target salt</label>
+                <input id="targetSalt" type="number" inputmode="decimal" step="1" placeholder="ppm" />
+              </div>
+            </div>
+          </details>
           <div class="span-12 mode-note" style="grid-column: 1 / -1;">Other reading</div>
           <div class="field">
             <label for="temperature">Water temperature</label>
@@ -11441,23 +11480,41 @@ async function buildAndSavePdfReport() {
     (function registerWaterOpsServiceWorker() {
       if (!('serviceWorker' in navigator)) return;
       if (!/^https?:$/.test(window.location.protocol)) return;
+      var updateCheckTimer = null;
+      function notifyUpdateReady() {
+        if (typeof showAppToast === 'function') showAppToast('WaterOps update ready. Reopen the app when convenient.');
+      }
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('./service-worker.js')
           .then(function (registration) {
-            if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            function activateWaitingWorker() {
+              if (!registration.waiting || !navigator.serviceWorker.controller) return;
+              registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+              notifyUpdateReady();
+            }
+            activateWaitingWorker();
             registration.addEventListener('updatefound', function () {
               var worker = registration.installing;
               if (!worker) return;
               worker.addEventListener('statechange', function () {
                 if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-                  showAppToast('WaterOps update cached. Reopen the app to use the latest version.');
+                  activateWaitingWorker();
                 }
               });
+            });
+            updateCheckTimer = setInterval(function () {
+              registration.update().catch(function () {});
+            }, 30 * 60 * 1000);
+            document.addEventListener('visibilitychange', function () {
+              if (document.visibilityState === 'visible') registration.update().catch(function () {});
             });
           })
           .catch(function (error) {
             console.info('WaterOps offline cache unavailable', error);
           });
+      });
+      window.addEventListener('beforeunload', function () {
+        if (updateCheckTimer) clearInterval(updateCheckTimer);
       });
     })();
   </script>

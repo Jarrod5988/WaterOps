@@ -11462,38 +11462,9 @@ async function buildAndSavePdfReport() {
        exist. -->
   <script>
     (function() {
-      let autoCollapseTicking = false;
-
       function setCollapsedState(card, heading, collapsed) {
         card.classList.toggle('collapsed', collapsed);
         heading.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-      }
-
-      function shouldKeepCardOpen(card) {
-        const active = document.activeElement;
-        if (active && card.contains(active) && /^(INPUT|SELECT|TEXTAREA|BUTTON|SUMMARY)$/.test(active.tagName)) {
-          return true;
-        }
-        return card.matches(':focus-within');
-      }
-
-      function autoCollapsePassedCards() {
-        autoCollapseTicking = false;
-        const topSafeZone = 88;
-        document.querySelectorAll('.card:not(.collapsed):not(.hidden)').forEach(function(card) {
-          const heading = card.querySelector(':scope > h2');
-          if (!heading || shouldKeepCardOpen(card)) return;
-          const rect = card.getBoundingClientRect();
-          if (rect.bottom < topSafeZone) {
-            setCollapsedState(card, heading, true);
-          }
-        });
-      }
-
-      function requestAutoCollapse() {
-        if (autoCollapseTicking) return;
-        autoCollapseTicking = true;
-        window.requestAnimationFrame(autoCollapsePassedCards);
       }
 
       function initCollapsibleCards() {
@@ -11514,8 +11485,6 @@ async function buildAndSavePdfReport() {
             setCollapsedState(card, h, !card.classList.contains('collapsed'));
           });
         });
-        window.addEventListener('scroll', requestAutoCollapse, { passive: true });
-        window.addEventListener('resize', requestAutoCollapse);
       }
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initCollapsibleCards);

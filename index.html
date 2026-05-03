@@ -2585,7 +2585,7 @@
     <div id="screenPools" class="screen-panel active">
       <div class="grid">
       <!-- Pool selection moved above Quick capture -->
-      <section class="card span-4">
+      <section class="card collapsed span-4">
         <h2>Pool selection</h2>
         <div class="field-grid">
           <div class="field">
@@ -2613,7 +2613,7 @@
         <small id="poolSystemNote" style="display:none; margin-top: 8px; color: var(--muted); font-size: 12px;"></small>
         <div id="poolVolumeHelperNote" class="pool-helper-note" style="display:none;"></div>
       </section>
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Quick capture</h2>
         <div class="field-grid quick-capture-grid" style="margin-bottom: 12px;">
           <div class="field" style="display:none;">
@@ -2705,7 +2705,7 @@
 
       <!-- Pool selection removed from its original location; moved above Quick capture -->
 
-      <section class="card span-8" id="singleResultsCard">
+      <section class="card collapsed span-8" id="singleResultsCard">
         <h2>Current test results and targets</h2>
         <div class="field-grid">
           <div class="span-12 mode-note" style="grid-column: 1 / -1;">Spin Touch readings - left column: FCL, TCL, CCL, pH, ALK. Right column: HARD, CYA, COPPER, PHOS, SALT.</div>
@@ -2790,7 +2790,7 @@
 
 
 
-      <section class="card span-12 hidden" id="groupIceBathsCard">
+      <section class="card collapsed span-12 hidden" id="groupIceBathsCard">
         <h2>Raiders ice baths - all 3</h2>
         <div class="mode-note">Each ice bath is calculated separately at 6,000 L. Group view shown as 3 x 6,000 L = 18,000 L total.</div>
         <div class="subcard-grid">
@@ -2907,7 +2907,7 @@
         <div id="draftStatusBanner" class="hint" style="margin-top: 12px;">Incomplete visits auto-save on this device.</div>
       </section>
 
-      <section class="card span-12" id="singleCombinedCard">
+      <section class="card collapsed span-12" id="singleCombinedCard">
         <h2>Recommended dosing</h2>
         <div class="kpi-wrap" style="display:none;">
           <div class="kpi">
@@ -2958,19 +2958,19 @@
         <div id="blueRiiotAdvisorContent"></div>
       </section>
 
-      <section class="card span-12" id="stockLogCard">
+      <section class="card collapsed span-12" id="stockLogCard">
         <h2>Chemical stock used</h2>
         <div class="mode-note">Marked Dosed = Yes chemicals are automatically logged to stock used when you generate or save the service report.</div>
         <div id="stockContent"></div>
       </section>
 
-      <section class="card span-12 hidden" id="qrCodesCard">
+      <section class="card collapsed span-12 hidden" id="qrCodesCard">
         <h2>QR codes</h2>
         <div class="mode-note">Each QR opens this app straight to a pool, plus one QR for Raiders Ice Baths - All 3.</div>
         <div id="qrCodesWrap" class="qr-grid"></div>
       </section>
 
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Service report</h2>
         <div class="actions" style="margin-bottom: 12px;">
           <button class="button" id="generateReportBtn" type="button">Generate report</button>
@@ -2990,7 +2990,7 @@
 
   <div id="screenCostCentre" class="screen-panel">
     <div class="grid">
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Site costs</h2>
         <div class="mode-note">Supervisor chemical costing, ongoing site costs and future quote estimates from the stock used log.</div>
         <div id="costCentreContent"></div>
@@ -2999,7 +2999,7 @@
   </div>
   <div id="screenClosedLoops" class="screen-panel">
     <div class="grid">
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Closed loop quick capture</h2>
         <div class="field-grid quick-capture-grid" style="margin-bottom: 12px;">
           <div class="field">
@@ -3043,7 +3043,7 @@
       </section>
 
 
-      <section class="card span-12 hidden" id="closedEquipmentPlateCard">
+      <section class="card collapsed span-12 hidden" id="closedEquipmentPlateCard">
         <h2>Equipment plate reader</h2>
         <div class="actions" style="margin-bottom: 12px;">
           <label class="button" for="closedPlateCameraInput">Take plate photo</label>
@@ -3074,7 +3074,7 @@
         <div class="hint" style="margin-top: 12px;">The photo reader can identify plate text and material clues. Confirm manufacturer limits from the actual manual before changing site ranges.</div>
       </section>
 
-      <section class="card span-12 hidden" id="closedLoopFieldChecksCard">
+      <section class="card collapsed span-12 hidden" id="closedLoopFieldChecksCard">
         <h2>Closed loop field checks</h2>
         <div class="field-grid">
           <div class="field"><label for="closedMakeupStatus">Make-up / pressure</label><select id="closedMakeupStatus"><option value="Not checked">Not checked</option><option value="Stable">Stable</option><option value="Low pressure">Low pressure</option><option value="High make-up or pressure issue">High make-up or pressure issue</option></select></div>
@@ -3084,7 +3084,7 @@
         </div>
       </section>
 
-      <section class="card span-6 closed-loop-system-card hidden" id="closedLoopHhwCard" data-closed-loop-card="HHW">
+      <section class="card collapsed span-6 closed-loop-system-card hidden" id="closedLoopHhwCard" data-closed-loop-card="HHW">
         <h2>HHW</h2>
         <div class="field-grid">
           <div class="field"><label for="hhwTds">TDS</label><input id="hhwTds" type="number" step="1" inputmode="decimal" placeholder="ppm" /></div>
@@ -3099,7 +3099,7 @@
         </div>
       </section>
 
-      <section class="card span-6 closed-loop-system-card hidden" id="closedLoopChwCard" data-closed-loop-card="CHW">
+      <section class="card collapsed span-6 closed-loop-system-card hidden" id="closedLoopChwCard" data-closed-loop-card="CHW">
         <h2>CHW</h2>
         <div class="field-grid">
           <div class="field"><label for="chwTds">TDS</label><input id="chwTds" type="number" step="1" inputmode="decimal" placeholder="ppm" /></div>
@@ -3114,7 +3114,7 @@
         </div>
       </section>
 
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Closed loop status</h2>
         <div class="kpi-wrap">
           <div class="kpi"><div class="name">Systems</div><div class="value" id="closedLoopKpiSystems">2</div><div class="unit">HHW and CHW</div></div>
@@ -3133,7 +3133,7 @@
         <div class="hint" style="margin-top: 12px;">Use this for heating and cooling closed loops. Ranges are editable per site so the report matches the plant you are testing.</div>
       </section>
 
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Closed loop report</h2>
         <div class="actions" style="margin-bottom: 12px;">
           <button class="button" id="generateClosedReportBtn" type="button">Generate report</button>
@@ -3151,7 +3151,7 @@
 
   <div id="screenInsights" class="screen-panel">
     <div class="grid">
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Smart insights</h2>
         <div class="field-grid" style="margin-bottom: 12px;">
           <div class="field">
@@ -3226,7 +3226,7 @@
         </div>
       </section>
 
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Visit history</h2>
         <div class="metric-band" id="historyMetricBand"></div>
         <div class="subcard history-trend-card" style="margin-bottom: 12px;">
@@ -3262,7 +3262,7 @@
         </div>
       </section>
 
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Equipment register</h2>
         <div class="asset-form-grid">
           <div class="field"><label for="assetType">Asset type</label><input id="assetType" type="text" placeholder="Pump, filter, heater, chlorinator" /></div>
@@ -3289,7 +3289,7 @@
 
   <div id="screenAdmin" class="screen-panel">
     <div class="grid">
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>QR codes and setup</h2>
         <div class="field-grid" style="margin-bottom: 12px;">
           <div class="field">
@@ -3301,7 +3301,7 @@
         <div id="adminQrCodesWrap" class="qr-grid"></div>
       </section>
 
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Google Sheets live log</h2>
         <div class="field-grid" style="margin-bottom: 12px;">
           <div class="field">
@@ -3317,7 +3317,7 @@
         <div class="hint" id="sheetStatusBox">Master sheet URL is built in.</div>
       </section>
 
-      <section class="card span-12">
+      <section class="card collapsed span-12">
         <h2>Local data tools</h2>
         <div class="actions" style="margin-bottom: 12px;">
           <button class="button secondary" id="exportDataBtn" type="button">Export local data</button>

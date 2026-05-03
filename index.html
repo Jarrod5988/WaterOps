@@ -2713,7 +2713,7 @@
       </section>
 
       <section class="card collapsed span-8" id="singleResultsCard">
-        <h2>Current test results and targets</h2>
+        <h2>Test readings</h2>
         <div class="field-grid">
           <div class="span-12 mode-note" style="grid-column: 1 / -1;">Spin Touch readings - left column: FCL, TCL, CCL, pH, ALK. Right column: HARD, CYA, COPPER, PHOS, SALT.</div>
           <div class="field">
@@ -2902,7 +2902,7 @@
       </section>
 
       <section class="card collapsed span-12" id="singleCombinedCard">
-        <h2>Recommended dosing</h2>
+        <h2>Dosing</h2>
         <div class="kpi-wrap" style="display:none;">
           <div class="kpi">
             <div class="name">Active volume</div>
@@ -2941,25 +2941,14 @@
       </section>
 
       <section class="card collapsed span-12" id="stockLogCard">
-        <h2>Chemical stock used</h2>
+        <h2>Stock used</h2>
         <div class="mode-note">Marked Dosed = Yes chemicals are automatically logged to stock used when you generate or save the service report.</div>
         <div id="stockContent"></div>
       </section>
 
-      <section class="card span-12 collapsed" id="autoDosingDrumsCard">
-        <h2>Onsite dosing drums</h2>
-        <div class="mode-note">Record acid/chlorine drum levels for pools with onsite dosing systems. At 15% or lower, WaterOps can open a draft purchase order request for Leah.</div>
-        <div id="autoDosingDrumsContent"></div>
-      </section>
-
-      <section class="card span-12 collapsed" id="blueRiiotAdvisorCard">
-        <h2>BlueRiiot & pump runtime advisor</h2>
-        <div class="mode-note">Use BlueRiiot Plus trend readings with manual test results to suggest safer Grid Connect acid pump and Enviroswim runtime settings. This is advisory only; confirm before changing timers.</div>
-        <div id="blueRiiotAdvisorContent"></div>
-      </section>
-
-      <section class="card span-12 collapsed" id="quickActionsCard">
-        <h2>Service notes & quick actions</h2>
+      <section class="card collapsed span-12" id="serviceReportCard">
+        <h2>Finish job</h2>
+        <div class="mode-note">Add final notes, mark quick actions, attach job photos, then generate and save the report.</div>
         <div class="field" style="margin-bottom: 12px;">
           <label for="serviceNotes">Service notes</label>
           <textarea id="serviceNotes" placeholder="Optional notes"></textarea>
@@ -2970,17 +2959,6 @@
         </div>
         <div id="quickActionsWrap" class="check-grid"></div>
         <div id="draftStatusBanner" class="hint" style="margin-top: 12px;">Incomplete visits auto-save on this device.</div>
-      </section>
-
-      <section class="card collapsed span-12 hidden" id="qrCodesCard">
-        <h2>QR codes</h2>
-        <div class="mode-note">Each QR opens this app straight to a pool, plus one QR for Raiders Ice Baths - All 3.</div>
-        <div id="qrCodesWrap" class="qr-grid"></div>
-      </section>
-
-      <section class="card collapsed span-12" id="serviceReportCard">
-        <h2>Service report</h2>
-        <div class="mode-note">Attach job photos, generate the service report, then save the PDF and snapshot.</div>
         <div class="job-photo-actions">
           <label class="button secondary" for="jobPhotoInput" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
             Choose job photo
@@ -3003,6 +2981,24 @@
         </div>
         <div class="report-output" id="reportOutput">Tap Generate report to build the service report.</div>
         <div class="footer-note">PDF export is set to landscape. If the built-in master sheet URL is active, this button also updates the live log sheet.</div>
+      </section>
+
+      <section class="card span-12 collapsed" id="autoDosingDrumsCard">
+        <h2>Onsite dosing drums</h2>
+        <div class="mode-note">Record acid/chlorine drum levels for pools with onsite dosing systems. At 15% or lower, WaterOps can open a draft purchase order request for Leah.</div>
+        <div id="autoDosingDrumsContent"></div>
+      </section>
+
+      <section class="card span-12 collapsed" id="blueRiiotAdvisorCard">
+        <h2>BlueRiiot & pump runtime advisor</h2>
+        <div class="mode-note">Use BlueRiiot Plus trend readings with manual test results to suggest safer Grid Connect acid pump and Enviroswim runtime settings. This is advisory only; confirm before changing timers.</div>
+        <div id="blueRiiotAdvisorContent"></div>
+      </section>
+
+      <section class="card collapsed span-12 hidden" id="qrCodesCard">
+        <h2>QR codes</h2>
+        <div class="mode-note">Each QR opens this app straight to a pool, plus one QR for Raiders Ice Baths - All 3.</div>
+        <div id="qrCodesWrap" class="qr-grid"></div>
       </section>
 
       

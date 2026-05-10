@@ -3586,7 +3586,87 @@
         grid-template-columns: minmax(0, 1fr);
       }
     }
-  </style>
+  
+    /* iPhone home screen overflow fix
+       Keep the home dashboard inside the visible viewport and prevent wide
+       module cards/buttons from pushing the page off the right edge. */
+    @media (max-width: 640px) {
+      html,
+      body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
+      body {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
+      .app,
+      main.app {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        overflow-x: hidden;
+        box-sizing: border-box;
+      }
+
+      .header,
+      .screen-panel,
+      .screen-panel.active,
+      #screenHome.screen-panel.active,
+      #screenJobs.screen-panel.active,
+      #screenAssetsHub.screen-panel.active,
+      #screenReportsHub.screen-panel.active,
+      #screenStockHub.screen-panel.active,
+      #screenMoreHub.screen-panel.active {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
+      }
+
+      #screenHome .workflow-shell,
+      #screenHome .home-hero,
+      #screenHome .card,
+      #screenHome .hub-grid,
+      #screenHome .home-module-grid,
+      #screenHome .module-choice-grid,
+      #screenHome .hero-actions,
+      #screenHome .status-grid {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
+      }
+
+      #screenHome .home-module-grid,
+      #screenHome .hub-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+
+      #screenHome .module-launch-btn,
+      #screenHome .hub-card,
+      #screenHome .tab-btn,
+      #screenHome .button {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: normal;
+      }
+
+      #screenHome .hub-card {
+        overflow: hidden;
+      }
+    }
+
+</style>
 </head>
 <body>
   <a class="skip-link" href="#mainContent">Skip to app content</a>

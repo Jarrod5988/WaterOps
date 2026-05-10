@@ -4726,6 +4726,63 @@ body {
 }
 /* === END FINAL MEDIUM GREY STATUS / ISLAND AREA === */
 
+
+
+/* === FINAL FREE WATEROPS HEADER ===
+   Removes the boxed card around the WaterOps logo so it sits freely on the
+   same grey page background. CSS-only; no app logic changed. */
+.header {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+.header::before,
+.header::after {
+  display: none !important;
+  content: none !important;
+}
+
+.header .brand,
+.header .brand-header-image,
+.header .waterops-header-lockup,
+.header .waterops-brand-mark {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.header .waterops-brand-icon {
+  filter: drop-shadow(0 8px 14px rgba(15, 23, 42, 0.28)) !important;
+}
+
+.header .waterops-brand-name {
+  text-shadow: 0 1px 2px rgba(255,255,255,0.18) !important;
+}
+
+@media (max-width: 700px) {
+  body:has(#screenHome.active) .header,
+  .header {
+    min-height: 80px !important;
+    padding: 10px 10px 8px !important;
+    margin-bottom: 6px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  body:has(#screenHome.active) .header,
+  .header {
+    min-height: 74px !important;
+    padding: 8px 8px 6px !important;
+    margin-bottom: 6px !important;
+  }
+}
+/* === END FINAL FREE WATEROPS HEADER === */
+
 </style>
 </head>
 <body>

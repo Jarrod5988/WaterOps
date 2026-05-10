@@ -4355,6 +4355,32 @@ body {
 }
 /* === END FINAL FIXED BOTTOM NAV BAR === */
 
+
+
+/* === FINAL SAFE TOP OFFSET: keep header clear of iPhone island/status bar ===
+   Moves the app content down slightly on phones so the WaterOps header does not
+   sit under the Dynamic Island/status area. CSS-only; no app logic changed. */
+@media (max-width: 700px) {
+  body {
+    padding-top: calc(22px + env(safe-area-inset-top)) !important;
+  }
+
+  .app {
+    padding-top: 0 !important;
+  }
+
+  .header {
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  body {
+    padding-top: calc(26px + env(safe-area-inset-top)) !important;
+  }
+}
+/* === END FINAL SAFE TOP OFFSET === */
+
 </style>
 </head>
 <body>

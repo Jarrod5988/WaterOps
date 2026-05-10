@@ -4043,6 +4043,226 @@ body {
 }
 /* === END FINAL HOME HEADER CLEANUP === */
 
+
+
+/* === WATEROPS SERVICE MODULE COLOUR CARD REFRESH ===
+   CSS-only home module styling. Does not change module IDs, click handlers,
+   report output, dosing logic, QR logic, jobs, assets, or pool data. */
+#screenHome .module-launcher-card {
+  padding: 10px !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at top left, rgba(0, 161, 224, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(239,249,255,0.94) 100%) !important;
+  border: 1px solid rgba(0, 120, 180, 0.16) !important;
+  box-shadow: 0 12px 26px rgba(0, 54, 112, 0.08) !important;
+}
+
+#screenHome .home-module-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+#screenHome .home-module-grid .module-launch-btn,
+#screenHome .module-launch-btn {
+  position: relative !important;
+  isolation: isolate !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 108px !important;
+  aspect-ratio: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 11px 10px 10px !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255,255,255,0.32) !important;
+  background:
+    radial-gradient(circle at 94% 8%, rgba(255,255,255,0.48), transparent 24%),
+    radial-gradient(circle at 10% 105%, rgba(255,255,255,0.22), transparent 30%),
+    linear-gradient(135deg, var(--module-start, #32c5ff) 0%, var(--module-mid, #00a1e0) 48%, var(--module-end, #006fae) 100%) !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    0 10px 18px rgba(7, 45, 80, 0.14) !important;
+  text-align: left !important;
+  font-weight: 800 !important;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease !important;
+}
+
+#screenHome .module-launch-btn::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: auto -28px -34px auto !important;
+  width: 92px !important;
+  height: 92px !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.16) !important;
+  z-index: -1 !important;
+}
+
+#screenHome .module-launch-btn::after {
+  content: var(--module-badge, "Service") !important;
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  max-width: 68px !important;
+  padding: 3px 7px !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.22) !important;
+  border: 1px solid rgba(255,255,255,0.24) !important;
+  color: rgba(255,255,255,0.95) !important;
+  font-size: 9px !important;
+  line-height: 1.05 !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+#screenHome .module-launch-btn .module-icon {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.22) !important;
+  border: 1px solid rgba(255,255,255,0.24) !important;
+  color: #ffffff !important;
+  font-size: 16px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22) !important;
+}
+
+#screenHome .module-launch-btn .module-label {
+  width: 100% !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 34, 68, 0.28) !important;
+  font-size: clamp(12px, 3.2vw, 14px) !important;
+  line-height: 1.12 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.01em !important;
+  padding-right: 4px !important;
+}
+
+#screenHome .module-launch-btn:active {
+  transform: scale(0.985) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    0 5px 10px rgba(7, 45, 80, 0.13) !important;
+  filter: saturate(1.05) !important;
+}
+
+@media (hover: hover) {
+  #screenHome .module-launch-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.30),
+      0 14px 24px rgba(7, 45, 80, 0.17) !important;
+  }
+}
+
+/* Per-module colour themes */
+#screenHome .module-launch-btn:nth-child(1) {
+  --module-start: #42d9ff;
+  --module-mid: #009fe3;
+  --module-end: #005fae;
+  --module-edge: #00a1e0;
+  --module-badge: "Pool";
+}
+
+#screenHome .module-launch-btn:nth-child(2) {
+  --module-start: #2dd4bf;
+  --module-mid: #0f9f8f;
+  --module-end: #0f5f76;
+  --module-edge: #14b8a6;
+  --module-badge: "Loop";
+}
+
+#screenHome .module-launch-btn:nth-child(3) {
+  --module-start: #56e0b7;
+  --module-mid: #12a37a;
+  --module-end: #08605c;
+  --module-edge: #10b981;
+  --module-badge: "Tower";
+}
+
+#screenHome .module-launch-btn:nth-child(4) {
+  --module-start: #60a5fa;
+  --module-mid: #2563eb;
+  --module-end: #1e3a8a;
+  --module-edge: #3b82f6;
+  --module-badge: "Tap";
+}
+
+#screenHome .module-launch-btn:nth-child(5) {
+  --module-start: #c084fc;
+  --module-mid: #7c3aed;
+  --module-end: #4c1d95;
+  --module-edge: #8b5cf6;
+  --module-badge: "Billi";
+}
+
+#screenHome .module-launch-btn:nth-child(6) {
+  --module-start: #bae6fd;
+  --module-mid: #38bdf8;
+  --module-end: #0369a1;
+  --module-edge: #38bdf8;
+  --module-badge: "Ice";
+}
+
+#screenHome .module-launch-btn:nth-child(7) {
+  --module-start: #fb923c;
+  --module-mid: #ef4444;
+  --module-end: #991b1b;
+  --module-edge: #f97316;
+  --module-badge: "TMV";
+}
+
+#screenHome .module-launch-btn:nth-child(8) {
+  --module-start: #94a3b8;
+  --module-mid: #475569;
+  --module-end: #1e293b;
+  --module-edge: #64748b;
+  --module-badge: "Filter";
+}
+
+@media (max-width: 380px) {
+  #screenHome .home-module-grid {
+    gap: 7px !important;
+  }
+
+  #screenHome .module-launch-btn {
+    min-height: 100px !important;
+    padding: 10px 9px 9px !important;
+    border-radius: 16px !important;
+  }
+
+  #screenHome .module-launch-btn::after {
+    max-width: 58px !important;
+    font-size: 8px !important;
+    padding: 3px 6px !important;
+  }
+
+  #screenHome .module-launch-btn .module-icon {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+  }
+
+  #screenHome .module-launch-btn .module-label {
+    font-size: clamp(11px, 3.1vw, 13px) !important;
+  }
+}
+/* === END WATEROPS SERVICE MODULE COLOUR CARD REFRESH === */
+
   </style>
 </head>
 <body>

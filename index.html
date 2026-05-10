@@ -4639,6 +4639,37 @@ body {
 }
 /* === END FINAL HOME BOTTOM BAR POSITION === */
 
+
+
+/* === FINAL FULL PAGE DARK GREY BACKGROUND ===
+   Changes the full app/page background to dark grey while leaving the header,
+   service module cards, and bottom nav styling intact. CSS-only. */
+html,
+body {
+  background:
+    radial-gradient(circle at top left, rgba(148, 163, 184, 0.10), transparent 34%),
+    radial-gradient(circle at top right, rgba(100, 116, 139, 0.12), transparent 30%),
+    linear-gradient(180deg, #1f2933 0%, #111827 52%, #0f172a 100%) !important;
+}
+
+body::before {
+  background:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px) !important;
+  opacity: 0.30 !important;
+}
+
+.app {
+  background: transparent !important;
+}
+
+#screenHome,
+.screen-panel,
+.workflow-shell {
+  background: transparent !important;
+}
+/* === END FINAL FULL PAGE DARK GREY BACKGROUND === */
+
 </style>
 </head>
 <body>

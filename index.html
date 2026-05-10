@@ -6491,6 +6491,276 @@
       }).join('');
     }
 
+
+    /* === WaterOps enhanced saved reports support === */
+    const REPORT_PDF_DB_NAME = 'waterops-report-pdf-store-v1';
+    const REPORT_PDF_STORE_NAME = 'pdfs';
+
+    function openReportPdfDb() {
+      return new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) {
+          reject(new Error('IndexedDB is not available in this browser.'));
+          return;
+        }
+        const request = indexedDB.open(REPORT_PDF_DB_NAME, 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(REPORT_PDF_STORE_NAME)) {
+            db.createObjectStore(REPORT_PDF_STORE_NAME, { keyPath: 'id' });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error('Could not open report PDF storage.'));
+      });
+    }
+
+    async function storeReportPdf(reportId, pdfBlob, filename, mimeType) {
+      if (!reportId || !pdfBlob || !('indexedDB' in window)) return false;
+      const db = await openReportPdfDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(REPORT_PDF_STORE_NAME, 'readwrite');
+        tx.objectStore(REPORT_PDF_STORE_NAME).put({
+          id: reportId,
+          filename: filename || 'waterops-report.pdf',
+          mimeType: mimeType || 'application/pdf',
+          blob: pdfBlob,
+          savedAt: new Date().toISOString()
+        });
+        tx.oncomplete = () => {
+          db.close();
+          resolve(true);
+        };
+        tx.onerror = () => {
+          db.close();
+          reject(tx.error || new Error('Could not save report PDF.'));
+        };
+      });
+    }
+
+    async function getStoredReportPdf(reportId) {
+      if (!reportId || !('indexedDB' in window)) return null;
+      const db = await openReportPdfDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(REPORT_PDF_STORE_NAME, 'readonly');
+        const request = tx.objectStore(REPORT_PDF_STORE_NAME).get(reportId);
+        request.onsuccess = () => {
+          db.close();
+          resolve(request.result || null);
+        };
+        request.onerror = () => {
+          db.close();
+          reject(request.error || new Error('Could not read saved report PDF.'));
+        };
+      });
+    }
+
+    async function deleteStoredReportPdf(reportId) {
+      if (!reportId || !('indexedDB' in window)) return false;
+      const db = await openReportPdfDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(REPORT_PDF_STORE_NAME, 'readwrite');
+        tx.objectStore(REPORT_PDF_STORE_NAME).delete(reportId);
+        tx.oncomplete = () => {
+          db.close();
+          resolve(true);
+        };
+        tx.onerror = () => {
+          db.close();
+          reject(tx.error || new Error('Could not delete saved report PDF.'));
+        };
+      });
+    }
+
+    function normaliseReportEntry(meta) {
+      const createdAt = meta.createdAt || new Date().toISOString();
+      const moduleType = meta.moduleType || 'pool';
+      return {
+        id: meta.id || `report-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        moduleType,
+        siteName: meta.siteName || '',
+        assetName: meta.assetName || '',
+        technician: meta.technician || '',
+        createdAt,
+        reportTitle: meta.reportTitle || getReportCategoryLabel(moduleType),
+        filename: meta.filename || '',
+        pdfUrl: meta.pdfUrl || '',
+        summary: meta.summary || '',
+        status: meta.status || 'Saved PDF',
+        hasStoredPdf: Boolean(meta.hasStoredPdf),
+        storedAt: meta.storedAt || createdAt
+      };
+    }
+
+    function recordGeneratedReport(meta = {}) {
+      if (isTrainingMode()) return;
+      const latestPdf = window.__wateropsLastGeneratedPdf;
+      const entry = normaliseReportEntry({
+        ...meta,
+        hasStoredPdf: Boolean(latestPdf && latestPdf.blob),
+        storedAt: new Date().toISOString()
+      });
+
+      const reports = loadReportIndex().filter(report => report.id !== entry.id);
+      reports.unshift(entry);
+      saveReportIndex(reports);
+
+      if (latestPdf && latestPdf.blob) {
+        storeReportPdf(entry.id, latestPdf.blob, entry.filename || latestPdf.filename, latestPdf.mimeType || 'application/pdf')
+          .catch(error => {
+            console.warn('Could not store report PDF for later opening:', error);
+            const currentReports = loadReportIndex();
+            const report = currentReports.find(item => item.id === entry.id);
+            if (report) {
+              report.hasStoredPdf = false;
+              report.status = 'PDF saved to device';
+              saveReportIndex(currentReports);
+              if (activeScreen === 'reportsHub') renderReportsHub();
+            }
+          });
+        window.__wateropsLastGeneratedPdf = null;
+      }
+
+      if (activeScreen === 'reportsHub') renderReportsHub();
+    }
+
+    async function openSavedReport(reportId) {
+      const reports = loadReportIndex();
+      const report = reports.find(item => item.id === reportId);
+      if (!report) {
+        showAppToast('Saved report record could not be found.');
+        return;
+      }
+
+      try {
+        const stored = await getStoredReportPdf(reportId);
+        if (stored && stored.blob) {
+          const blob = stored.blob instanceof Blob ? stored.blob : new Blob([stored.blob], { type: stored.mimeType || 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.download = stored.filename || report.filename || 'waterops-report.pdf';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 30000);
+          return;
+        }
+      } catch (error) {
+        console.warn('Could not open stored PDF:', error);
+      }
+
+      if (report.pdfUrl) {
+        window.open(report.pdfUrl, '_blank', 'noopener');
+        return;
+      }
+
+      showAppToast('This report was saved before PDF storage was added. Generate it again to reopen it from Reports.');
+    }
+
+    async function deleteSavedReport(reportId) {
+      const reports = loadReportIndex();
+      const nextReports = reports.filter(report => report.id !== reportId);
+      saveReportIndex(nextReports);
+      try {
+        await deleteStoredReportPdf(reportId);
+      } catch (error) {
+        console.warn('Could not delete stored report PDF:', error);
+      }
+      renderReportsHub();
+      showAppToast('Saved report removed.');
+    }
+
+    function renderReportsHub() {
+      const categoryGrid = qs('reportCategoryGrid');
+      const list = qs('reportHistoryList');
+      const summary = qs('reportHistorySummary');
+      if (!categoryGrid || !list) return;
+
+      const reports = loadReportIndex()
+        .map(normaliseReportEntry)
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+      const categoryCounts = reports.reduce((acc, report) => {
+        const key = report.moduleType || 'pool';
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      const categories = [{ key: 'all', label: 'All reports' }, ...REPORT_CATEGORIES];
+      categoryGrid.innerHTML = categories.map(category => {
+        const count = category.key === 'all' ? reports.length : (categoryCounts[category.key] || 0);
+        const active = activeReportCategory === category.key ? ' active' : '';
+        const displayLabel = category.key === 'all' ? category.label : category.label.replace(/\s+reports$/i, '');
+        return `<button class="button ghost report-category-btn${active}" type="button" data-report-category="${escapeHtml(category.key)}">${escapeHtml(displayLabel)}<small>${count} report${count === 1 ? '' : 's'}</small></button>`;
+      }).join('');
+
+      if (summary) {
+        summary.innerHTML = reports.length
+          ? `<strong>${reports.length}</strong> saved report${reports.length === 1 ? '' : 's'} on this device. Tap a report to reopen it where available.`
+          : 'No reports have been generated yet.';
+      }
+
+      const visibleReports = activeReportCategory === 'all'
+        ? reports
+        : reports.filter(report => (report.moduleType || 'pool') === activeReportCategory);
+
+      if (!reports.length) {
+        list.innerHTML = '<p class="report-empty-state"><strong>No reports saved yet.</strong><br />Generate a report from any service module and it will appear here.</p>';
+        return;
+      }
+
+      if (!visibleReports.length) {
+        list.innerHTML = `<p class="report-empty-state"><strong>No ${escapeHtml(getReportCategoryLabel(activeReportCategory).toLowerCase())} saved yet.</strong><br />Complete this type of job and save a PDF report to see it here.</p>`;
+        return;
+      }
+
+      list.innerHTML = visibleReports.map(report => {
+        const details = [
+          report.siteName ? `Site: ${report.siteName}` : '',
+          report.assetName ? `Asset: ${report.assetName}` : '',
+          report.technician ? `Technician: ${report.technician}` : '',
+          `Generated: ${formatReportTimestamp(report.createdAt)}`,
+          report.filename ? `File: ${report.filename}` : '',
+          report.summary ? report.summary : ''
+        ].filter(Boolean).map(line => `<span>${escapeHtml(line)}</span>`).join('');
+
+        const canOpen = report.hasStoredPdf || report.pdfUrl;
+        const openLabel = canOpen ? 'Open saved report' : 'Saved to device only';
+        const openDisabled = canOpen ? '' : ' disabled';
+        const status = report.hasStoredPdf ? 'Stored in app' : (report.status || 'Saved PDF');
+
+        return `
+          <article class="report-history-card" data-report-card="${escapeHtml(report.id)}">
+            <span class="report-pill">${escapeHtml(getReportCategoryLabel(report.moduleType))}</span>
+            <h3>${escapeHtml(report.reportTitle || 'WaterOps report')}</h3>
+            <div class="report-history-meta">${details}</div>
+            <div class="report-history-actions">
+              <button class="button ghost" type="button" data-open-report="${escapeHtml(report.id)}"${openDisabled}>${escapeHtml(openLabel)}</button>
+              <button class="button secondary" type="button" data-delete-report="${escapeHtml(report.id)}">Remove</button>
+            </div>
+            <div class="footer-note">${escapeHtml(status)}${canOpen ? '' : ' — regenerate this report once to make it reopenable from here.'}</div>
+          </article>
+        `;
+      }).join('');
+
+      list.onclick = async event => {
+        const openButton = event.target.closest('[data-open-report]');
+        if (openButton && !openButton.disabled) {
+          await openSavedReport(openButton.dataset.openReport);
+          return;
+        }
+
+        const deleteButton = event.target.closest('[data-delete-report]');
+        if (deleteButton) {
+          await deleteSavedReport(deleteButton.dataset.deleteReport);
+        }
+      };
+    }
+    /* === End WaterOps enhanced saved reports support === */
+
+
     function isTrainingMode() {
       return localStorage.getItem(TRAINING_MODE_STORAGE_KEY) === 'true';
     }
@@ -18273,6 +18543,12 @@ function buildReportHtml() {
     }
 
     async function saveBlob(blob, filename, mimeType) {
+      window.__wateropsLastGeneratedPdf = {
+        blob,
+        filename,
+        mimeType,
+        savedAt: Date.now()
+      };
       if (isIosSaveEnvironment()) {
         showPdfSavePanel(blob, filename, mimeType);
         return true;

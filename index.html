@@ -4473,6 +4473,126 @@ body {
 }
 /* === END FINAL BOTTOM NAV GREY HEADER MATCH === */
 
+
+
+/* === FINAL HOME NON-SCROLLABLE LAYOUT ===
+   Locks only the Home screen to the visible phone viewport so it does not scroll.
+   Other screens remain scrollable. CSS-only; no app logic changed. */
+@media (max-width: 700px) {
+  html,
+  body {
+    min-height: 100dvh !important;
+  }
+
+  body:has(#screenHome.active) {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+    padding-top: calc(18px + env(safe-area-inset-top)) !important;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important;
+  }
+
+  body:has(#screenHome.active) .app {
+    height: calc(100dvh - 18px - env(safe-area-inset-top) - 92px - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100dvh - 18px - env(safe-area-inset-top) - 92px - env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  body:has(#screenHome.active) .header {
+    flex: 0 0 auto !important;
+    min-height: 84px !important;
+    padding: 12px 14px !important;
+    margin-bottom: 8px !important;
+  }
+
+  body:has(#screenHome.active) #screenHome {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body:has(#screenHome.active) #screenHome .workflow-shell {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body:has(#screenHome.active) #screenHome .module-launcher-card {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding: 8px !important;
+  }
+
+  body:has(#screenHome.active) #screenHome .home-module-grid {
+    height: 100% !important;
+    min-height: 0 !important;
+    grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  body:has(#screenHome.active) #screenHome .home-module-grid .module-launch-btn,
+  body:has(#screenHome.active) #screenHome .module-launch-btn {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 9px 9px 8px !important;
+    border-radius: 17px !important;
+  }
+
+  body:has(#screenHome.active) #screenHome .module-launch-btn .module-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 11px !important;
+    font-size: 15px !important;
+  }
+
+  body:has(#screenHome.active) #screenHome .module-launch-btn .module-label {
+    font-size: clamp(11px, 3vw, 14px) !important;
+    line-height: 1.08 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  body:has(#screenHome.active) {
+    padding-top: calc(20px + env(safe-area-inset-top)) !important;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+  }
+
+  body:has(#screenHome.active) .app {
+    height: calc(100dvh - 20px - env(safe-area-inset-top) - 88px - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100dvh - 20px - env(safe-area-inset-top) - 88px - env(safe-area-inset-bottom)) !important;
+  }
+
+  body:has(#screenHome.active) .header {
+    min-height: 78px !important;
+    padding: 10px 12px !important;
+    margin-bottom: 7px !important;
+  }
+
+  body:has(#screenHome.active) .header .waterops-brand-icon {
+    width: clamp(40px, 10vw, 54px) !important;
+    height: clamp(40px, 10vw, 54px) !important;
+    flex-basis: clamp(40px, 10vw, 54px) !important;
+  }
+
+  body:has(#screenHome.active) .header .waterops-brand-name {
+    font-size: clamp(34px, 10.8vw, 50px) !important;
+  }
+
+  body:has(#screenHome.active) #screenHome .home-module-grid {
+    gap: 6px !important;
+  }
+
+  body:has(#screenHome.active) #screenHome .home-module-grid .module-launch-btn,
+  body:has(#screenHome.active) #screenHome .module-launch-btn {
+    padding: 8px !important;
+    border-radius: 16px !important;
+  }
+}
+/* === END FINAL HOME NON-SCROLLABLE LAYOUT === */
+
 </style>
 </head>
 <body>

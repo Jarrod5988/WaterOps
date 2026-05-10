@@ -6631,11 +6631,36 @@
         return;
       }
 
+      // Important for iPhone/Safari: open a viewer immediately during the tap
+      // event. If we wait for IndexedDB first, Safari may treat the later PDF
+      // open as a blocked popup.
+      let viewer = null;
+      try {
+        viewer = window.open('', '_blank');
+        if (viewer && viewer.document) {
+          viewer.document.write(`<!doctype html><html><head><title>Opening WaterOps report...</title><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:22px;color:#17324d;background:#f5fbfe;"><h2>Opening saved report...</h2><p>If the PDF does not appear, return to WaterOps and use Download saved report.</p></body></html>`);
+          viewer.document.close();
+        }
+      } catch (error) {
+        viewer = null;
+      }
+
       try {
         const stored = await getStoredReportPdf(reportId);
         if (stored && stored.blob) {
           const blob = stored.blob instanceof Blob ? stored.blob : new Blob([stored.blob], { type: stored.mimeType || 'application/pdf' });
           const url = URL.createObjectURL(blob);
+
+          if (viewer) {
+            try {
+              viewer.location.href = url;
+              setTimeout(() => URL.revokeObjectURL(url), 60000);
+              return;
+            } catch (error) {
+              console.warn('Could not load PDF into viewer window:', error);
+            }
+          }
+
           const link = document.createElement('a');
           link.href = url;
           link.target = '_blank';
@@ -6644,7 +6669,7 @@
           document.body.appendChild(link);
           link.click();
           link.remove();
-          setTimeout(() => URL.revokeObjectURL(url), 30000);
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
           return;
         }
       } catch (error) {
@@ -6652,11 +6677,18 @@
       }
 
       if (report.pdfUrl) {
-        window.open(report.pdfUrl, '_blank', 'noopener');
+        if (viewer) {
+          viewer.location.href = report.pdfUrl;
+        } else {
+          window.open(report.pdfUrl, '_blank', 'noopener');
+        }
         return;
       }
 
-      showAppToast('This report was saved before PDF storage was added. Generate it again to reopen it from Reports.');
+      if (viewer && !viewer.closed) {
+        viewer.document.body.innerHTML = '<h2>PDF not available</h2><p>This report record was saved before PDF storage was added. Generate the report again once, then it can be reopened from Reports.</p>';
+      }
+      showAppToast('This older report record has no stored PDF yet. Generate it again once to make it reopenable.');
     }
 
     async function deleteSavedReport(reportId) {
@@ -6727,7 +6759,7 @@
         ].filter(Boolean).map(line => `<span>${escapeHtml(line)}</span>`).join('');
 
         const canOpen = report.hasStoredPdf || report.pdfUrl;
-        const openLabel = canOpen ? 'Open saved report' : 'Saved to device only';
+        const openLabel = canOpen ? 'Open PDF' : 'Regenerate to reopen';
         const openDisabled = canOpen ? '' : ' disabled';
         const status = report.hasStoredPdf ? 'Stored in app' : (report.status || 'Saved PDF');
 

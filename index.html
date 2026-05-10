@@ -4083,15 +4083,20 @@ body {
   padding: 11px 10px 10px !important;
   overflow: hidden !important;
   border-radius: 18px !important;
-  border: 1px solid rgba(255,255,255,0.32) !important;
+  /* Sharper outer border so the coloured service modules stand out clearly */
+  border: 2px solid rgba(255,255,255,0.78) !important;
+  outline: 1px solid rgba(7, 45, 80, 0.22) !important;
+  outline-offset: -3px !important;
   background:
     radial-gradient(circle at 94% 8%, rgba(255,255,255,0.48), transparent 24%),
     radial-gradient(circle at 10% 105%, rgba(255,255,255,0.22), transparent 30%),
     linear-gradient(135deg, var(--module-start, #32c5ff) 0%, var(--module-mid, #00a1e0) 48%, var(--module-end, #006fae) 100%) !important;
   color: #ffffff !important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.28),
-    0 10px 18px rgba(7, 45, 80, 0.14) !important;
+    inset 0 1px 0 rgba(255,255,255,0.34),
+    inset 0 0 0 1px rgba(255,255,255,0.28),
+    0 0 0 1px var(--module-edge, #00a1e0),
+    0 10px 18px rgba(7, 45, 80, 0.16) !important;
   text-align: left !important;
   font-weight: 800 !important;
   transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease !important;
@@ -4163,8 +4168,10 @@ body {
   #screenHome .module-launch-btn:hover {
     transform: translateY(-1px) !important;
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.30),
-      0 14px 24px rgba(7, 45, 80, 0.17) !important;
+      inset 0 1px 0 rgba(255,255,255,0.36),
+      inset 0 0 0 1px rgba(255,255,255,0.30),
+      0 0 0 1px var(--module-edge, #00a1e0),
+      0 14px 24px rgba(7, 45, 80, 0.20) !important;
   }
 }
 
@@ -4265,54 +4272,88 @@ body {
 
   
 
-/* === FINAL HEADER RESTYLE: match lighter grey Filter module bubble look === */
-.header {
-  position: relative !important;
-  overflow: hidden !important;
-  background:
-    radial-gradient(circle at 86% 18%, rgba(255,255,255,0.72), transparent 18%),
-    linear-gradient(135deg, #f8fbfe 0%, #dfe6ee 50%, #c6d0dc 100%) !important;
-  border: 1px solid rgba(100, 116, 139, 0.28) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.88),
-    0 10px 22px rgba(71, 85, 105, 0.10) !important;
+/* === FINAL HOME MODULE HEIGHT FILL: stretch service cards downwards ===
+   Uses the empty space above the bottom tabs by making the home module panel and
+   service cards taller on phone screens. CSS-only; no service logic changed. */
+@media (max-width: 700px) {
+  #screenHome .workflow-shell {
+    min-height: calc(100dvh - 190px) !important;
+  }
+
+  #screenHome .module-launcher-card {
+    min-height: calc(100dvh - 275px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: stretch !important;
+  }
+
+  #screenHome .home-module-grid {
+    flex: 1 1 auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(4, minmax(124px, 1fr)) !important;
+    align-content: stretch !important;
+    gap: 9px !important;
+  }
+
+  #screenHome .home-module-grid .module-launch-btn,
+  #screenHome .module-launch-btn {
+    height: 100% !important;
+    min-height: 124px !important;
+    max-height: none !important;
+    justify-content: space-between !important;
+  }
 }
 
-.header::before {
-  content: "" !important;
-  position: absolute !important;
-  left: auto !important;
-  right: 92px !important;
-  bottom: -54px !important;
-  width: 170px !important;
-  height: 170px !important;
-  border-radius: 999px !important;
-  background: rgba(255,255,255,0.12) !important;
-  pointer-events: none !important;
-  z-index: 0 !important;
-}
+@media (max-width: 390px) {
+  #screenHome .module-launcher-card {
+    min-height: calc(100dvh - 268px) !important;
+  }
 
-.header::after {
-  right: -34px !important;
-  bottom: -48px !important;
-  width: 150px !important;
-  height: 150px !important;
-  border-radius: 50% !important;
-  background: radial-gradient(circle, rgba(255,255,255,0.16), rgba(255,255,255,0.06) 58%, transparent 72%) !important;
-  filter: none !important;
-  opacity: 1 !important;
-  pointer-events: none !important;
-  z-index: 0 !important;
-}
+  #screenHome .home-module-grid {
+    grid-template-rows: repeat(4, minmax(116px, 1fr)) !important;
+    gap: 8px !important;
+  }
 
-.header .brand,
-.header .brand-header-image,
-.header .waterops-header-lockup,
-.header .waterops-brand-mark {
-  position: relative !important;
-  z-index: 1 !important;
+  #screenHome .home-module-grid .module-launch-btn,
+  #screenHome .module-launch-btn {
+    min-height: 116px !important;
+  }
 }
-/* === END FINAL HEADER RESTYLE === */
+/* === END FINAL HOME MODULE HEIGHT FILL === */
+
+
+
+/* === FINAL FIXED BOTTOM NAV BAR ===
+   Keeps the Home / Jobs / Assets / Reports / More bar stationary on iPhone.
+   Adds safe bottom padding so stretched service cards do not hide behind it. */
+@media (max-width: 700px) {
+  body {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .bottom-tab-bar {
+    position: fixed !important;
+    left: max(10px, env(safe-area-inset-left)) !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    z-index: 2000 !important;
+    width: auto !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  #screenHome {
+    padding-bottom: 8px !important;
+  }
+
+  #screenHome .module-launcher-card {
+    margin-bottom: 0 !important;
+  }
+}
+/* === END FINAL FIXED BOTTOM NAV BAR === */
 
 </style>
 </head>

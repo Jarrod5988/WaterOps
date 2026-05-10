@@ -3823,34 +3823,38 @@
   
 
   
-/* === WaterOps centred service-module heading fix === */
+
+  
+
+  
+/* === WaterOps final centred Service modules heading === */
 @media (max-width: 700px) {
   #screenHome .home-hero {
+    position: relative !important;
+    display: block !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    display: block !important;
-    padding: 12px 0 8px !important;
-    margin: 0 !important;
-    text-align: center !important;
+    margin: 0 auto 8px !important;
+    padding: 8px 0 10px !important;
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
     overflow: visible !important;
+    box-sizing: border-box !important;
   }
 
-  #screenHome .home-hero h2 {
+  /* The h2 is now a true full-width row. The text is centred by itself. */
+  #screenHome .home-hero h2.waterops-section-heading {
+    position: relative !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     margin: 0 auto !important;
-    padding: 0 6px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 12px !important;
-    box-sizing: border-box !important;
+    padding: 0 !important;
+    display: block !important;
     text-align: center !important;
+    box-sizing: border-box !important;
     color: #102b46 !important;
     font-size: clamp(24px, 7vw, 34px) !important;
     font-weight: 850 !important;
@@ -3859,27 +3863,39 @@
     white-space: nowrap !important;
   }
 
-  #screenHome .home-hero h2::before,
-  #screenHome .home-hero h2::after {
+  #screenHome .home-hero h2.waterops-section-heading span {
+    position: relative !important;
+    z-index: 2 !important;
+    display: inline-block !important;
+    margin: 0 auto !important;
+    padding: 0 12px !important;
+    background: transparent !important;
+  }
+
+  /* Side graphics are positioned relative to the full row, not the text width. */
+  #screenHome .home-hero h2.waterops-section-heading::before,
+  #screenHome .home-hero h2.waterops-section-heading::after {
     content: "" !important;
-    flex: 1 1 0 !important;
-    min-width: 38px !important;
-    max-width: 96px !important;
-    height: 14px !important;
+    position: absolute !important;
+    top: 50% !important;
+    width: 58px !important;
+    height: 12px !important;
+    margin-top: -6px !important;
     border-radius: 999px !important;
     background:
-      radial-gradient(circle at center, rgba(0, 161, 224, 0.85) 0 4px, transparent 5px),
-      linear-gradient(90deg, transparent 0%, rgba(0, 161, 224, 0.10) 15%, rgba(0, 161, 224, 0.34) 50%, rgba(0, 161, 224, 0.10) 85%, transparent 100%) !important;
+      radial-gradient(circle at center, rgba(0, 161, 224, 0.88) 0 4px, transparent 5px),
+      linear-gradient(90deg, transparent 0%, rgba(0, 161, 224, 0.10) 16%, rgba(0, 161, 224, 0.36) 50%, rgba(0, 161, 224, 0.10) 84%, transparent 100%) !important;
     box-shadow: 0 8px 18px rgba(0, 149, 209, 0.10) !important;
     display: block !important;
+    transform: none !important;
   }
 
-  #screenHome .home-hero h2::before {
-    margin-left: 0 !important;
+  #screenHome .home-hero h2.waterops-section-heading::before {
+    right: calc(50% + 168px) !important;
   }
 
-  #screenHome .home-hero h2::after {
-    margin-right: 0 !important;
+  #screenHome .home-hero h2.waterops-section-heading::after {
+    left: calc(50% + 168px) !important;
   }
 
   #screenHome .home-hero p {
@@ -3888,19 +3904,246 @@
 }
 
 @media (max-width: 380px) {
-  #screenHome .home-hero h2 {
-    gap: 8px !important;
-    font-size: clamp(22px, 6.6vw, 28px) !important;
+  #screenHome .home-hero h2.waterops-section-heading {
+    font-size: clamp(21px, 6.6vw, 27px) !important;
   }
 
-  #screenHome .home-hero h2::before,
-  #screenHome .home-hero h2::after {
-    min-width: 24px !important;
-    max-width: 58px !important;
-    height: 10px !important;
+  #screenHome .home-hero h2.waterops-section-heading span {
+    padding: 0 8px !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading::before,
+  #screenHome .home-hero h2.waterops-section-heading::after {
+    width: 34px !important;
+    height: 9px !important;
+    margin-top: -4.5px !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading::before {
+    right: calc(50% + 138px) !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading::after {
+    left: calc(50% + 138px) !important;
   }
 }
-/* === End WaterOps centred service-module heading fix === */
+/* === End WaterOps final centred Service modules heading === */
+
+  
+
+
+  
+
+
+  
+/* === WaterOps Service modules fine-centre shift === */
+@media (max-width: 700px) {
+  #screenHome .home-hero h2.waterops-section-heading {
+    transform: translateX(24mm) !important;
+    width: calc(100% - 24mm) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  #screenHome .home-hero h2.waterops-section-heading {
+    transform: translateX(19mm) !important;
+    width: calc(100% - 19mm) !important;
+  }
+}
+/* === End WaterOps Service modules fine-centre shift === */
+
+  
+/* === WaterOps Service modules fine tune v2 === */
+@media (max-width: 700px) {
+  /* Nudge the whole heading group 5mm back to the left */
+  #screenHome .home-hero h2.waterops-section-heading {
+    transform: translateX(19mm) !important;
+    width: calc(100% - 19mm) !important;
+  }
+
+  /* Bring the side graphics in much closer to the text */
+  #screenHome .home-hero h2.waterops-section-heading::before,
+  #screenHome .home-hero h2.waterops-section-heading::after {
+    width: 34px !important;
+    height: 12px !important;
+    margin-top: -6px !important;
+  }
+
+  /* About 1mm-ish visual gap from the text block */
+  #screenHome .home-hero h2.waterops-section-heading::before {
+    right: calc(50% + 148px) !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading::after {
+    left: calc(50% + 148px) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  #screenHome .home-hero h2.waterops-section-heading {
+    transform: translateX(15mm) !important;
+    width: calc(100% - 15mm) !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading::before,
+  #screenHome .home-hero h2.waterops-section-heading::after {
+    width: 24px !important;
+    height: 9px !important;
+    margin-top: -4.5px !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading::before {
+    right: calc(50% + 122px) !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading::after {
+    left: calc(50% + 122px) !important;
+  }
+}
+/* === End WaterOps Service modules fine tune v2 === */
+
+  
+/* === WaterOps remove Service modules dots === */
+@media (max-width: 700px) {
+  #screenHome .home-hero h2.waterops-section-heading::before,
+  #screenHome .home-hero h2.waterops-section-heading::after {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 161, 224, 0.10) 16%,
+      rgba(0, 161, 224, 0.34) 50%,
+      rgba(0, 161, 224, 0.10) 84%,
+      transparent 100%
+    ) !important;
+  }
+}
+/* === End WaterOps remove Service modules dots === */
+
+  
+/* === WaterOps remove Service modules side accents completely === */
+@media (max-width: 700px) {
+  #screenHome .home-hero h2.waterops-section-heading::before,
+  #screenHome .home-hero h2.waterops-section-heading::after {
+    content: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading {
+    text-align: center !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading span {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+/* === End WaterOps remove Service modules side accents completely === */
+
+  
+/* === WaterOps home heading vertical tighten === */
+@media (max-width: 700px) {
+  /* Pull the Service modules heading closer to the WaterOps logo */
+  #screenHome .workflow-shell {
+    gap: 2px !important;
+    margin-top: -6px !important;
+  }
+
+  #screenHome .home-hero {
+    margin: -4px auto 0 !important;
+    padding: 0 0 2px !important;
+    min-height: auto !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading {
+    margin: 0 auto !important;
+    line-height: 1 !important;
+  }
+
+  #screenHome .module-launcher-card {
+    margin-top: -2px !important;
+    padding-top: 8px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  #screenHome .workflow-shell {
+    gap: 1px !important;
+    margin-top: -4px !important;
+  }
+
+  #screenHome .home-hero {
+    margin: -3px auto 0 !important;
+    padding: 0 0 1px !important;
+  }
+
+  #screenHome .module-launcher-card {
+    margin-top: -1px !important;
+    padding-top: 7px !important;
+  }
+}
+/* === End WaterOps home heading vertical tighten === */
+
+  
+/* === WaterOps service heading unclipped spacing fix === */
+@media (max-width: 700px) {
+  /* Keep the heading close to the logo, but stop clipping the top */
+  #screenHome .workflow-shell {
+    gap: 0 !important;
+    margin-top: -2px !important;
+  }
+
+  #screenHome .home-hero {
+    margin: 0 auto 0 !important;
+    padding: 3px 0 1px !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading {
+    margin: 0 auto 2px !important;
+    padding-top: 2px !important;
+    line-height: 1.08 !important;
+    overflow: visible !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading span {
+    padding-top: 1px !important;
+  }
+
+  /* Pull the module list up neatly under the heading */
+  #screenHome .module-launcher-card {
+    margin-top: -4px !important;
+    padding-top: 6px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  #screenHome .workflow-shell {
+    gap: 0 !important;
+    margin-top: -1px !important;
+  }
+
+  #screenHome .home-hero {
+    margin: 0 auto 0 !important;
+    padding: 2px 0 1px !important;
+  }
+
+  #screenHome .home-hero h2.waterops-section-heading {
+    margin: 0 auto 2px !important;
+    padding-top: 1px !important;
+    line-height: 1.08 !important;
+  }
+
+  #screenHome .module-launcher-card {
+    margin-top: -3px !important;
+    padding-top: 5px !important;
+  }
+}
+/* === End WaterOps service heading unclipped spacing fix === */
 
   </style>
 </head>
@@ -4041,7 +4284,7 @@
     <div id="screenHome" class="screen-panel active">
       <div class="workflow-shell">
         <section class="home-hero">
-          <h2>Service modules</h2>
+          <h2 class="waterops-section-heading"><span>Service modules</span></h2>
           <p>Select a system, then choose manual setup or QR.</p>
         </section>
 
@@ -4159,7 +4402,7 @@
     <div id="screenMoreHub" class="screen-panel">
       <div class="grid">
         <section class="card span-12">
-          <h2>Service modules</h2>
+          <h2 class="waterops-section-heading"><span>Service modules</span></h2>
           <div class="hub-grid">
             <div class="hub-card"><h3>Pool / spa / ice bath testing</h3><p>Testing, dosing, stock used and reports.</p><button class="tab-btn" type="button" data-screen="pools">Open module</button></div>
             <div class="hub-card"><h3>Closed loops</h3><p>Closed-loop checks and reports.</p><button class="tab-btn" type="button" data-screen="closedLoops">Open module</button></div>

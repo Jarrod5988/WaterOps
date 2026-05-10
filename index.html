@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#009fe3" />
+  <meta name="theme-color" content="#b7c0ca" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="WaterOps" />
   <meta name="format-detection" content="telephone=no" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -4641,22 +4641,26 @@ body {
 
 
 
-/* === FINAL FULL PAGE DARK GREY BACKGROUND ===
-   Changes the full app/page background to dark grey while leaving the header,
-   service module cards, and bottom nav styling intact. CSS-only. */
+
+
+
+
+/* === FINAL FULL PAGE MEDIUM GREY BACKGROUND ===
+   Lightens the previous dark grey page background to roughly half strength.
+   Keeps header, service modules, bottom bar, and app logic unchanged. */
 html,
 body {
   background:
-    radial-gradient(circle at top left, rgba(148, 163, 184, 0.10), transparent 34%),
+    radial-gradient(circle at top left, rgba(148, 163, 184, 0.13), transparent 34%),
     radial-gradient(circle at top right, rgba(100, 116, 139, 0.12), transparent 30%),
-    linear-gradient(180deg, #1f2933 0%, #111827 52%, #0f172a 100%) !important;
+    linear-gradient(180deg, #d2d8df 0%, #b7c0ca 52%, #9faab7 100%) !important;
 }
 
 body::before {
   background:
-    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px) !important;
-  opacity: 0.30 !important;
+    linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px) !important;
+  opacity: 0.22 !important;
 }
 
 .app {
@@ -4668,7 +4672,59 @@ body::before {
 .workflow-shell {
   background: transparent !important;
 }
-/* === END FINAL FULL PAGE DARK GREY BACKGROUND === */
+/* === END FINAL FULL PAGE MEDIUM GREY BACKGROUND === */
+
+
+
+/* === FINAL MEDIUM GREY STATUS / ISLAND AREA ===
+   Extends the same medium grey background into the iPhone safe-area/status
+   region around the Dynamic Island/front camera where iOS allows it. */
+:root {
+  --waterops-page-grey-top: #d2d8df;
+  --waterops-page-grey-mid: #b7c0ca;
+  --waterops-page-grey-bottom: #9faab7;
+}
+
+html {
+  background: linear-gradient(
+    180deg,
+    var(--waterops-page-grey-top) 0%,
+    var(--waterops-page-grey-mid) 52%,
+    var(--waterops-page-grey-bottom) 100%
+  ) !important;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(148, 163, 184, 0.13), transparent 34%),
+    radial-gradient(circle at top right, rgba(100, 116, 139, 0.12), transparent 30%),
+    linear-gradient(
+      180deg,
+      var(--waterops-page-grey-top) 0%,
+      var(--waterops-page-grey-mid) 52%,
+      var(--waterops-page-grey-bottom) 100%
+    ) !important;
+  background-attachment: fixed !important;
+}
+
+@media (max-width: 700px) {
+  body {
+    padding-top: calc(24px + env(safe-area-inset-top)) !important;
+  }
+
+  body::after {
+    content: "" !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: calc(24px + env(safe-area-inset-top)) !important;
+    background: var(--waterops-page-grey-top) !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+  }
+}
+/* === END FINAL MEDIUM GREY STATUS / ISLAND AREA === */
 
 </style>
 </head>

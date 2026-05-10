@@ -4427,6 +4427,52 @@ body {
 }
 /* === END FINAL HEADER GREY BUBBLE RESTORE + SAFE TOP === */
 
+
+
+/* === FINAL BOTTOM NAV GREY HEADER MATCH ===
+   Makes the Home / Jobs / Assets / Reports / More buttons match the grey/slate
+   WaterOps header style while keeping the active tab obvious. CSS-only. */
+.bottom-tab-bar {
+  background:
+    radial-gradient(circle at 92% 12%, rgba(255,255,255,0.76), transparent 18%),
+    linear-gradient(135deg, rgba(248,251,254,0.96) 0%, rgba(227,233,240,0.94) 48%, rgba(203,213,223,0.94) 100%) !important;
+  border: 1px solid rgba(100, 116, 139, 0.34) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.92),
+    0 12px 26px rgba(71, 85, 105, 0.16) !important;
+}
+
+.bottom-tab-bar .tab-btn {
+  background:
+    radial-gradient(circle at 86% 16%, rgba(255,255,255,0.70), transparent 22%),
+    linear-gradient(135deg, #f8fbfe 0%, #e3e9f0 50%, #cbd5df 100%) !important;
+  border: 1px solid rgba(100, 116, 139, 0.34) !important;
+  color: #17324d !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.90),
+    inset 0 -1px 0 rgba(100,116,139,0.10),
+    0 6px 12px rgba(71, 85, 105, 0.08) !important;
+}
+
+.bottom-tab-bar .tab-btn.active {
+  background:
+    radial-gradient(circle at 86% 16%, rgba(255,255,255,0.78), transparent 20%),
+    linear-gradient(135deg, #e8eef5 0%, #cbd5df 48%, #94a3b8 100%) !important;
+  border: 1px solid rgba(71, 85, 105, 0.44) !important;
+  color: #073b67 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.94),
+    0 8px 16px rgba(71, 85, 105, 0.18) !important;
+}
+
+.bottom-tab-bar .tab-btn:active {
+  transform: translateY(1px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.72),
+    0 3px 8px rgba(71, 85, 105, 0.12) !important;
+}
+/* === END FINAL BOTTOM NAV GREY HEADER MATCH === */
+
 </style>
 </head>
 <body>

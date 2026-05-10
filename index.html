@@ -4645,34 +4645,7 @@ body {
 
 
 
-/* === FINAL FULL PAGE MEDIUM GREY BACKGROUND ===
-   Lightens the previous dark grey page background to roughly half strength.
-   Keeps header, service modules, bottom bar, and app logic unchanged. */
-html,
-body {
-  background:
-    radial-gradient(circle at top left, rgba(148, 163, 184, 0.13), transparent 34%),
-    radial-gradient(circle at top right, rgba(100, 116, 139, 0.12), transparent 30%),
-    linear-gradient(180deg, #d2d8df 0%, #b7c0ca 52%, #9faab7 100%) !important;
-}
 
-body::before {
-  background:
-    linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px) !important;
-  opacity: 0.22 !important;
-}
-
-.app {
-  background: transparent !important;
-}
-
-#screenHome,
-.screen-panel,
-.workflow-shell {
-  background: transparent !important;
-}
-/* === END FINAL FULL PAGE MEDIUM GREY BACKGROUND === */
 
 
 
@@ -4737,39 +4710,28 @@ body::before {
 
 
 
-/* === FINAL GREY TOP STATUS STRIP ===
-   Forces the top iPhone status/island strip to visually match the medium grey
-   page background where iOS/webview permits it. CSS-only. */
+
+
+
+
+/* === FINAL UNIFORM GREY BACKGROUND ===
+   Makes the page background and top safe-area/status strip one consistent grey
+   tone so there is no visible shift at the top. CSS-only. */
 :root {
-  --waterops-page-grey-top: #d2d8df;
-  --waterops-page-grey-mid: #b7c0ca;
-  --waterops-page-grey-bottom: #9faab7;
+  --waterops-uniform-grey: #b7c0ca;
 }
 
-html {
-  min-height: 100% !important;
-  background: var(--waterops-page-grey-mid) !important;
-}
-
+html,
 body {
-  min-height: 100dvh !important;
-  background:
-    radial-gradient(circle at top left, rgba(148, 163, 184, 0.13), transparent 34%),
-    radial-gradient(circle at top right, rgba(100, 116, 139, 0.12), transparent 30%),
-    linear-gradient(
-      180deg,
-      var(--waterops-page-grey-top) 0%,
-      var(--waterops-page-grey-mid) 48%,
-      var(--waterops-page-grey-bottom) 100%
-    ) !important;
-  background-attachment: fixed !important;
+  background: var(--waterops-uniform-grey) !important;
+}
+
+body::before {
+  opacity: 0 !important;
+  background: none !important;
 }
 
 @media (max-width: 700px) {
-  body {
-    padding-top: calc(24px + env(safe-area-inset-top)) !important;
-  }
-
   body::after {
     content: "" !important;
     position: fixed !important;
@@ -4777,19 +4739,19 @@ body {
     left: 0 !important;
     right: 0 !important;
     height: calc(30px + env(safe-area-inset-top)) !important;
-    background: var(--waterops-page-grey-mid) !important;
+    background: var(--waterops-uniform-grey) !important;
     pointer-events: none !important;
     z-index: 0 !important;
   }
-
-  .app,
-  .bottom-tab-bar,
-  #backToTop {
-    position: relative !important;
-    z-index: 1 !important;
-  }
 }
-/* === END FINAL GREY TOP STATUS STRIP === */
+
+.app,
+#screenHome,
+.screen-panel,
+.workflow-shell {
+  background: transparent !important;
+}
+/* === END FINAL UNIFORM GREY BACKGROUND === */
 
 </style>
 </head>

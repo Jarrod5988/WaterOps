@@ -1,4 +1,4 @@
-const WATEROPS_CACHE = 'waterops-app-v2026-05-03-02';
+const WATEROPS_CACHE = 'waterops-app-v2026-05-14-01';
 const WATEROPS_CORE_ASSETS = [
   '/',
   '/index.html',
@@ -11,7 +11,9 @@ const WATEROPS_CORE_ASSETS = [
 const WATEROPS_CDN_ASSETS = [
   'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
   'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',
-  'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js'
+  'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+  'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css'
 ];
 
 self.addEventListener('install', event => {

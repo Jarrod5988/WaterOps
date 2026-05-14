@@ -1,12 +1,14 @@
-const WATEROPS_CACHE = 'waterops-app-v2026-05-14-01';
+const WATEROPS_CACHE = 'waterops-app-v2026-05-15-01';
+const WATEROPS_APP_ROOT = new URL('./', self.registration.scope).href;
+const WATEROPS_INDEX = new URL('./index.html', self.registration.scope).href;
 const WATEROPS_CORE_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/apple-touch-icon.png',
-  '/apple-touch-icon-dark.png',
-  '/icon-512.png',
-  '/icon-512-dark.png'
+  WATEROPS_APP_ROOT,
+  WATEROPS_INDEX,
+  new URL('./manifest.json', self.registration.scope).href,
+  new URL('./apple-touch-icon.png', self.registration.scope).href,
+  new URL('./apple-touch-icon-dark.png', self.registration.scope).href,
+  new URL('./icon-512.png', self.registration.scope).href,
+  new URL('./icon-512-dark.png', self.registration.scope).href
 ];
 const WATEROPS_CDN_ASSETS = [
   'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
@@ -43,7 +45,7 @@ self.addEventListener('fetch', event => {
 
   if (url.origin === self.location.origin) {
     if (request.mode === 'navigate' || request.destination === 'document') {
-      event.respondWith(networkFirst(request, '/index.html'));
+      event.respondWith(networkFirst(request, WATEROPS_INDEX));
       return;
     }
     event.respondWith(staleWhileRevalidate(request));
@@ -55,7 +57,7 @@ self.addEventListener('fetch', event => {
   }
 });
 
-async function networkFirst(request, fallbackUrl = '/index.html') {
+async function networkFirst(request, fallbackUrl = WATEROPS_INDEX) {
   const cache = await caches.open(WATEROPS_CACHE);
   try {
     const response = await fetch(request, { cache: 'no-store' });
@@ -80,7 +82,7 @@ async function staleWhileRevalidate(request) {
     .catch(() => null);
   if (cached) return cached;
   const response = await network;
-  return response || cache.match('/index.html');
+  return response || cache.match(WATEROPS_INDEX);
 }
 
 async function cacheFirst(request) {

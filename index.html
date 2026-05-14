@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#b7c0ca" />
+  <meta name="theme-color" content="#009fe3" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="WaterOps" />
   <meta name="format-detection" content="telephone=no" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -16,7 +16,6 @@
   <link rel="icon" type="image/png" sizes="180x180" href="/apple-touch-icon-dark.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="/icon-512-dark.png" />
   <link rel="manifest" href="/manifest.json" />
-  <!-- Load Font Awesome for modern icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <title>MBS FM WaterOps</title>
   <style>
@@ -57,7 +56,7 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-       /* Use azureâ€‘tinted radial accents and a soft sky gradient for the page background */
+       /* Use azureÃ¢â‚¬â€˜tinted radial accents and a soft sky gradient for the page background */
        background:
          radial-gradient(circle at top left, rgba(0, 161, 224, 0.12), transparent 34%),
          radial-gradient(circle at top right, rgba(0, 190, 240, 0.09), transparent 30%),
@@ -111,14 +110,14 @@
     /* Removed dark mode surface overrides as dark mode is no longer supported. */
 
     .header {
-      /* Arrange the header vertically on small screens so the logo and tagline
-         are centered. */
+      /* Compact the header into a horizontal bar.  Display the logo and tagline
+         alongside the action buttons rather than stacking them vertically. */
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 12px 16px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 16px;
       margin-bottom: 16px;
     }
 
@@ -134,13 +133,6 @@
        background: radial-gradient(circle, rgba(0, 161, 224, 0.13), transparent 68%);
       filter: blur(8px);
       pointer-events: none;
-    }
-
-    /* Center the brand and tagline within the header */
-    .brand-header-image,
-    .brand-copy-center {
-      width: 100%;
-      text-align: center;
     }
 
     .brand {
@@ -207,7 +199,7 @@
      * width ensures the header remains compact and balanced. */
     .waterops-header-lockup img {
       display: block;
-      /* Reduce the maximum width of the droplet logo so it doesnâ€™t dominate
+      /* Reduce the maximum width of the droplet logo so it doesnÃ¢â‚¬â„¢t dominate
        * the header.  Using !important ensures this rule overrides any
        * inline dimensions on the embedded image. */
       max-width: 90px !important;
@@ -266,7 +258,7 @@
     }
 
     .brand-copy-center p {
-      /* Remove the centering and maxâ€‘width so the copy flows naturally
+      /* Remove the centering and maxÃ¢â‚¬â€˜width so the copy flows naturally
        * next to the logo.  A slightly smaller font size improves
        * hierarchy and prevents the tagline from dominating the header. */
       margin: 0;
@@ -1258,7 +1250,7 @@
      * Give users control over long forms by allowing each card to be collapsed.
      * When collapsed, only the heading remains visible. Clicking the heading
      * toggles the collapsed state. A small arrow on the heading conveys
-     * whether the section is open (â–²) or closed (â–¼). These rules hide all
+     * whether the section is open (Ã¢â€“Â²) or closed (Ã¢â€“Â¼). These rules hide all
      * immediate children of a card except its <h2> when the card has the
      * `.collapsed` class. The arrow icons are added via the ::after pseudo
      * element and swap depending on the collapsed state.
@@ -1305,7 +1297,7 @@
 
     /* Dark mode overrides for ice bath cards.  Deep gradients and
        softened border colours provide separation while maintaining a
-       lowâ€‘contrast look suitable for night viewing. */
+       lowÃ¢â‚¬â€˜contrast look suitable for night viewing. */
     [data-theme="dark"] .icebath-result-card {
       background: linear-gradient(180deg, rgba(24, 37, 58, 0.95) 0%, rgba(20, 32, 55, 0.93) 100%);
       border-color: rgba(80, 120, 170, 0.35);
@@ -1733,22 +1725,90 @@
       box-sizing: border-box;
     }
 
+    .module-launcher-card {
+      border-radius: 28px;
+      padding: 10px;
+      background: linear-gradient(180deg, rgba(250, 255, 255, 0.94) 0%, rgba(232, 248, 255, 0.9) 100%);
+      border: 1px solid rgba(156, 224, 250, 0.62);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 18px 36px rgba(31, 73, 105, 0.16);
+    }
+
     .module-launch-btn {
+      --module-a: #32c8ef;
+      --module-b: #0096d6;
+      --module-ring: rgba(0, 159, 227, 0.85);
       width: 100%;
       min-width: 0;
       box-sizing: border-box;
-      /* Remove the large minimum height so cards shrink based on available width */
-      min-height: 0;
-      /* Padding handled in the more specific screenHome rule for square cards */
-      padding: 0;
-      border-radius: 12px;
-      font-size: clamp(14px, 3.7vw, 17px);
-      line-height: 1.15;
-      text-align: center;
+      position: relative;
+      overflow: hidden;
+      min-height: 136px;
+      padding: 70px 16px 22px;
+      border-radius: 24px;
+      border: 2px solid rgba(255,255,255,0.65);
+      outline: 2px solid var(--module-ring);
+      outline-offset: -5px;
+      background:
+        radial-gradient(circle at 88% 83%, rgba(255,255,255,0.20) 0 56px, transparent 57px),
+        radial-gradient(circle at 88% 10%, rgba(255,255,255,0.08) 0 58px, transparent 60px),
+        linear-gradient(135deg, var(--module-a) 0%, var(--module-b) 100%);
+      color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 7px 14px rgba(16, 48, 73, 0.16);
+      font-size: clamp(20px, 5vw, 25px);
+      font-weight: 900;
+      line-height: 1.12;
+      text-align: left;
+      text-shadow: 0 2px 5px rgba(11, 42, 67, 0.25);
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: flex-end;
+      justify-content: flex-start;
     }
+
+    .module-launch-btn::before {
+      content: attr(data-icon);
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 24px;
+      line-height: 1;
+      background: rgba(255,255,255,0.22);
+      border: 1px solid rgba(255,255,255,0.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 6px 12px rgba(13, 52, 82, 0.10);
+    }
+
+    .module-launch-btn::after {
+      content: attr(data-badge);
+      position: absolute;
+      right: 20px;
+      top: 22px;
+      min-width: 62px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      text-align: center;
+      color: rgba(255,255,255,0.94);
+      background: rgba(255,255,255,0.20);
+      border: 1px solid rgba(255,255,255,0.28);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-shadow: none;
+    }
+
+    .module-launch-btn.module-card-pool { --module-a: #37d4f1; --module-b: #0094d4; --module-ring: #08afe4; }
+    .module-launch-btn.module-card-loop { --module-a: #2acfb9; --module-b: #0c827c; --module-ring: #1fc5ad; }
+    .module-launch-btn.module-card-tower { --module-a: #42d29f; --module-b: #07856f; --module-ring: #18bf91; }
+    .module-launch-btn.module-card-tap { --module-a: #55a7ff; --module-b: #2457d6; --module-ring: #3b87ff; }
+    .module-launch-btn.module-card-billi { --module-a: #a863f7; --module-b: #6b25d8; --module-ring: #9148f0; }
+    .module-launch-btn.module-card-ice { --module-a: #7edbf5; --module-b: #20a8d4; --module-ring: #35c5ee; }
+    .module-launch-btn.module-card-tmv { --module-a: #ff7c3e; --module-b: #dc2c36; --module-ring: #ff790b; }
+    .module-launch-btn.module-card-filter { --module-a: #8495a9; --module-b: #34465b; --module-ring: #6f8194; }
 
     .module-choice-grid {
       display: grid;
@@ -1759,132 +1819,6 @@
       display: grid;
       gap: 10px;
     }
-
-    /* Begin custom polished home screen overrides */
-    #screenHome .home-hero {
-      /* Clean, minimal card for the hero section */
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(0, 161, 224, 0.12);
-      box-shadow: 0 4px 12px rgba(0, 54, 112, 0.08);
-    }
-
-    #screenHome .home-hero h2 {
-      font-size: 1.6rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    #screenHome .home-hero p {
-      font-size: 0.95rem;
-    }
-
-    /* Modernise the module container */
-    .module-launcher-card {
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(0, 161, 224, 0.12);
-      box-shadow: 0 4px 12px rgba(0, 54, 112, 0.08);
-      border-radius: 12px;
-      padding: 16px;
-    }
-
-    .home-module-grid {
-      /* Use auto-fit to responsively wrap modules on small screens. Shrink card width
-         so more modules fit without scrolling. Each module is at least 90px wide
-         and will expand to fill available space. */
-      /* Further shrink the module cards so they fit more comfortably on small screens. */
-      /* Fix the card width to roughly 70px and centre the grid so leftover space
-         is evenly distributed on both sides. This prevents the modules from
-         stretching to fill the row and keeps them compact. */
-      /* Shrink cards further so they are roughly 1cm smaller on mobile. Each card
-         has a fixed width of about 60px, and the grid is centered so it
-         doesn't lean to the right. */
-      grid-template-columns: repeat(auto-fit, 60px);
-      justify-content: center;
-      gap: 3px;
-      margin-top: 4px;
-    }
-
-    .module-launch-btn {
-      /* Crisp, tactile buttons for each service module */
-      border: 1px solid rgba(0, 161, 224, 0.20);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 251, 255, 0.92) 100%);
-      box-shadow: 0 4px 8px rgba(0, 54, 112, 0.05);
-      border-radius: 14px;
-      color: var(--text);
-      font-weight: 500;
-      transition: transform 0.05s ease, box-shadow 0.05s ease;
-    }
-
-    .module-launch-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 4px rgba(0, 54, 112, 0.05);
-    }
-
-    /* Center the WaterOps brand and hero text on small screens */
-    .header .waterops-header-lockup {
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #screenHome .home-hero h2,
-    #screenHome .home-hero p {
-      text-align: center;
-    }
-
-    /* Add icons and flex layout to home module buttons */
-    #screenHome .module-launch-btn {
-      /* Arrange icons and labels vertically and make buttons square */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      /* Reduce gap between icon and text to conserve vertical space */
-      gap: 4px;
-      aspect-ratio: 1;
-      /* Reduce padding further so icons and labels fit comfortably in smaller squares */
-      padding: 4px;
-      text-align: center;
-    }
-    #screenHome .module-launch-btn .module-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      /* Reduce icon container to fit smaller square cards */
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-      border-radius: 4px;
-      background-color: rgba(0, 161, 224, 0.15);
-      color: rgba(0, 87, 162, 1);
-      font-size: 11px;
-    }
-    #screenHome .module-launch-btn .module-label {
-      flex: none;
-      text-align: center;
-      font-size: clamp(9px, 2vw, 11px);
-      line-height: 1.3;
-    }
-
-    /* Adjust header brand for a polished look */
-    .header {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(238, 248, 255, 0.96));
-      border: 1px solid rgba(0, 161, 224, 0.12);
-      box-shadow: 0 4px 12px rgba(0, 54, 112, 0.06);
-      padding: 12px 20px;
-    }
-
-    .waterops-brand-name {
-      font-size: clamp(1.4rem, 5vw, 1.8rem);
-      font-weight: 800;
-    }
-
-    .brand-copy h1 {
-      font-size: clamp(1.4rem, 4vw, 2rem);
-    }
-
-    .brand-copy p {
-      font-size: clamp(0.85rem, 2vw, 1rem);
-    }
-    /* End custom polished home screen overrides */
 
     .report-category-grid {
       display: grid;
@@ -3137,7 +3071,7 @@
       }
 
       body {
-        padding-bottom: 78px;
+        padding-bottom: 96px;
       }
 
       .bottom-tab-bar {
@@ -3148,21 +3082,34 @@
         z-index: 50;
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 4px;
-        padding: 6px;
-        border: 1px solid rgba(0, 150, 210, 0.22);
-        border-radius: 16px;
-        background: rgba(246, 252, 255, 0.94);
-        box-shadow: 0 14px 30px rgba(0, 65, 105, 0.22);
+        gap: 6px;
+        padding: 8px;
+        border: 1px solid rgba(255,255,255,0.68);
+        border-radius: 22px;
+        background: rgba(242, 248, 253, 0.9);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.78), 0 16px 32px rgba(54, 75, 93, 0.24);
         backdrop-filter: blur(14px);
       }
 
       .bottom-tab-bar .tab-btn {
-        min-height: 44px;
-        border-radius: 12px;
+        min-width: 0;
+        min-height: 54px;
+        border-radius: 16px;
         padding: 6px 4px;
-        font-size: 11.5px;
+        border-color: rgba(92, 117, 139, 0.26);
+        background: rgba(255,255,255,0.52);
+        color: #11395c;
+        font-size: clamp(13.5px, 4vw, 16px);
+        font-weight: 900;
         line-height: 1.05;
+        overflow-wrap: anywhere;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 5px 10px rgba(48, 72, 94, 0.08);
+      }
+
+      .bottom-tab-bar .tab-btn.active {
+        background: rgba(188, 207, 222, 0.72);
+        color: #073457;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.78), 0 6px 12px rgba(39, 64, 86, 0.12);
       }
     }
 
@@ -3637,7 +3584,8 @@
     #screenHome .card {
       width: 100% !important;
       max-width: 100% !important;
-      min-width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box;
     }
 
     @media (max-width: 640px) {
@@ -3647,15 +3595,18 @@
       #screenReportsHub.screen-panel.active,
       #screenStockHub.screen-panel.active,
       #screenMoreHub.screen-panel.active {
-        width: calc(100vw - 16px) !important;
-        max-width: calc(100vw - 16px) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
       }
 
       #screenHome .workflow-shell,
       #screenHome .home-hero,
       #screenHome .card {
-        width: calc(100vw - 16px) !important;
-        max-width: calc(100vw - 16px) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
         box-sizing: border-box;
       }
 
@@ -3673,96 +3624,42 @@
       }
 
       #screenHome .card {
-        /* Restore comfortable padding and smooth corners for home screen cards
-           to align with the polished aesthetic. */
-        padding: 14px;
-        border-radius: 12px;
+        padding: 10px;
+        border-radius: 28px;
         overflow: hidden;
       }
 
+      #screenHome .home-hero {
+        display: none;
+      }
+
       #screenHome .workflow-shell {
-        gap: 6px;
+        gap: 10px;
       }
 
       #screenHome .module-launch-btn {
-        /* Restyle the module buttons on the home screen with a more
-           generous size, refined border radius and neutral text flow.
-           The !important flags ensure these overrides take precedence over
-           earlier responsive tweaks for mobile. */
         width: 100% !important;
         min-width: 0 !important;
-        min-height: 52px;
-        padding: 10px 12px;
-        font-size: 1rem;
-        line-height: 1.2;
-        border-radius: 14px;
+        min-height: 136px;
+        padding: 70px 16px 20px;
+        font-size: clamp(19px, 5.4vw, 23px);
+        border-radius: 24px;
         white-space: normal;
         overflow-wrap: anywhere;
-        border: 1px solid rgba(0, 161, 224, 0.20);
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 251, 255, 0.92) 100%);
-        box-shadow: 0 4px 8px rgba(0, 54, 112, 0.05);
-        font-weight: 500;
+        line-height: 1.1;
       }
 
       #screenHome .home-module-grid {
-        /* Use auto-fit with a minimum width to distribute modules evenly while
-           allowing them to wrap elegantly on narrow screens. */
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
       }
 
       #screenHome .hub-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: minmax(0, 1fr);
       }
 
       #screenReportsHub .card {
         padding: 10px;
-      }
-
-      /* === Revert Home page to a single vertical row of modules === */
-      /* Force the home module grid into a vertical layout on the home screen. */
-      #screenHome .home-module-grid {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        width: 100% !important;
-        gap: 8px !important;
-        justify-content: flex-start !important;
-      }
-
-      /* Style each module launch button as a full-width row with icon on the left and label text. */
-      #screenHome .home-module-grid .module-launch-btn {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        width: 100% !important;
-        /* Shrink module cards to match the height of the 'Service modules' heading */
-        min-height: 48px !important;
-        padding: 6px 12px !important;
-        box-sizing: border-box !important;
-        gap: 12px !important;
-      }
-
-      /* Ensure icons in the module launch button are consistent size and aligned. */
-      #screenHome .home-module-grid .module-launch-btn .module-icon {
-        width: 24px !important;
-        height: 24px !important;
-        flex-shrink: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        font-size: 16px !important;
-        border: 1px solid rgba(0, 161, 224, 0.20) !important;
-        border-radius: 4px !important;
-      }
-
-      /* Make the module label expand to fill remaining space and align text to the left. */
-      #screenHome .home-module-grid .module-launch-btn .module-label {
-        flex: 1 !important;
-        text-align: left !important;
-        font-size: clamp(12px, 4vw, 14px) !important;
-        line-height: 1.2 !important;
       }
 
       #screenReportsHub .report-category-grid {
@@ -3781,1068 +3678,302 @@
         grid-template-columns: minmax(0, 1fr);
       }
     }
-  
-/* === FINAL OVERRIDE: compact single-row Home service modules === */
-/* This block is intentionally placed at the very end of the CSS so it wins over
-   all earlier square-card / grid rules. */
-#screenHome .module-launcher-card {
-  padding: 8px !important;
-  border-radius: 12px !important;
-  overflow: hidden !important;
-}
-
-#screenHome .home-module-grid {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  gap: 8px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  box-sizing: border-box !important;
-  grid-template-columns: none !important;
-}
-
-#screenHome .home-module-grid .module-launch-btn,
-#screenHome .module-launch-btn {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  height: 52px !important;
-  min-height: 52px !important;
-  max-height: 52px !important;
-  aspect-ratio: auto !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 12px !important;
-  padding: 8px 12px !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-  border-radius: 12px !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-align: left !important;
-}
-
-#screenHome .home-module-grid .module-launch-btn .module-icon,
-#screenHome .module-launch-btn .module-icon {
-  width: 30px !important;
-  height: 30px !important;
-  min-width: 30px !important;
-  max-width: 30px !important;
-  min-height: 30px !important;
-  max-height: 30px !important;
-  flex: 0 0 30px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 8px !important;
-  font-size: 16px !important;
-  line-height: 1 !important;
-}
-
-#screenHome .home-module-grid .module-launch-btn .module-label,
-#screenHome .module-launch-btn .module-label {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  text-align: left !important;
-  font-size: 15px !important;
-  line-height: 1.15 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-/* Keep the heading card visually close to the same height for comparison. */
-#screenHome .home-hero {
-  padding: 8px 10px !important;
-  border-radius: 12px !important;
-}
-
-#screenHome .home-hero h2 {
-  font-size: 22px !important;
-  line-height: 1.15 !important;
-  margin: 0 !important;
-}
-
-#screenHome .home-hero p {
-  display: none !important;
-}
-/* === END FINAL OVERRIDE === */
-
-  
-/* === FINAL FIX: prevent Home screen right-side overhang === */
-/* Stops the home page from being wider than the iPhone viewport. */
-html,
-body {
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
-}
-
-body {
-  box-sizing: border-box !important;
-}
-
-.app,
-#mainContent,
-.screen-panel,
-#screenHome,
-#screenHome .workflow-shell,
-#screenHome .home-hero,
-#screenHome .module-launcher-card,
-#screenHome .home-module-grid {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-  overflow-x: hidden !important;
-}
-
-/* Pull the home module card safely inside the viewport. */
-#screenHome .module-launcher-card {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  padding-left: 8px !important;
-  padding-right: 8px !important;
-}
-
-/* Make every service module row calculate its size inside the container,
-   including padding and border. */
-#screenHome .home-module-grid {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 8px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-#screenHome .home-module-grid .module-launch-btn,
-#screenHome .module-launch-btn {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  transform: none !important;
-  left: auto !important;
-  right: auto !important;
-}
-
-/* Keep the bottom tab bar from forcing page width wider than the screen. */
-.bottom-tab-bar {
-  width: auto !important;
-  max-width: none !important;
-  left: max(10px, env(safe-area-inset-left)) !important;
-  right: max(10px, env(safe-area-inset-right)) !important;
-  box-sizing: border-box !important;
-}
-/* === END FINAL FIX: prevent Home screen right-side overhang === */
-
-  
-/* === FINAL HOME HEADER CLEANUP: remove Service modules heading and enlarge logo === */
-
-/* Hide the separate Service modules heading section on the Home screen. */
-#screenHome .home-hero {
-  display: none !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  overflow: hidden !important;
-}
-
-/* Use the removed heading space to make the WaterOps header more prominent. */
-.header {
-  min-height: 92px !important;
-  padding: 18px 18px !important;
-  margin-bottom: 10px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-}
-
-/* Ensure the brand block is centred and fills the header cleanly. */
-.header .brand,
-.header .brand-header-image,
-.header .waterops-header-lockup,
-.header .waterops-brand-mark {
-  width: 100% !important;
-  max-width: 100% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-}
-
-/* Enlarge the droplet icon and WaterOps wordmark. */
-.header .waterops-brand-icon {
-  width: clamp(44px, 11vw, 62px) !important;
-  height: clamp(44px, 11vw, 62px) !important;
-  flex: 0 0 clamp(44px, 11vw, 62px) !important;
-  max-width: clamp(44px, 11vw, 62px) !important;
-}
-
-.header .waterops-brand-name {
-  font-size: clamp(42px, 12vw, 64px) !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-  letter-spacing: -0.035em !important;
-  white-space: nowrap !important;
-}
-
-/* Hide the small tagline so the logo uses the header space properly. */
-.header .brand-copy,
-.header .brand-copy-center {
-  display: none !important;
-}
-
-/* Pull the service module list up under the enlarged logo. */
-#screenHome .workflow-shell {
-  gap: 8px !important;
-}
-
-#screenHome .module-launcher-card {
-  margin-top: 0 !important;
-}
-
-/* Keep the home list inside the screen after the header expands. */
-#screenHome,
-#screenHome .workflow-shell,
-#screenHome .module-launcher-card,
-#screenHome .home-module-grid {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Smaller phones: avoid clipping the WaterOps wordmark. */
-@media (max-width: 390px) {
-  .header {
-    min-height: 84px !important;
-    padding: 14px 12px !important;
-  }
-
-  .header .waterops-brand-icon {
-    width: 40px !important;
-    height: 40px !important;
-    flex-basis: 40px !important;
-  }
-
-  .header .waterops-brand-name {
-    font-size: clamp(36px, 11vw, 52px) !important;
-  }
-}
-/* === END FINAL HOME HEADER CLEANUP === */
-
-
-
-/* === WATEROPS SERVICE MODULE COLOUR CARD REFRESH ===
-   CSS-only home module styling. Does not change module IDs, click handlers,
-   report output, dosing logic, QR logic, jobs, assets, or pool data. */
-#screenHome .module-launcher-card {
-  padding: 10px !important;
-  border-radius: 18px !important;
-  background:
-    radial-gradient(circle at top left, rgba(0, 161, 224, 0.12), transparent 38%),
-    linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(239,249,255,0.94) 100%) !important;
-  border: 1px solid rgba(0, 120, 180, 0.16) !important;
-  box-shadow: 0 12px 26px rgba(0, 54, 112, 0.08) !important;
-}
-
-#screenHome .home-module-grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 8px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: visible !important;
-}
-
-#screenHome .home-module-grid .module-launch-btn,
-#screenHome .module-launch-btn {
-  position: relative !important;
-  isolation: isolate !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 108px !important;
-  aspect-ratio: auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: space-between !important;
-  gap: 8px !important;
-  padding: 11px 10px 10px !important;
-  overflow: hidden !important;
-  border-radius: 18px !important;
-  /* Sharper outer border so the coloured service modules stand out clearly */
-  border: 2px solid rgba(255,255,255,0.78) !important;
-  outline: 1px solid rgba(7, 45, 80, 0.22) !important;
-  outline-offset: -3px !important;
-  background:
-    radial-gradient(circle at 94% 8%, rgba(255,255,255,0.48), transparent 24%),
-    radial-gradient(circle at 10% 105%, rgba(255,255,255,0.22), transparent 30%),
-    linear-gradient(135deg, var(--module-start, #32c5ff) 0%, var(--module-mid, #00a1e0) 48%, var(--module-end, #006fae) 100%) !important;
-  color: #ffffff !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.34),
-    inset 0 0 0 1px rgba(255,255,255,0.28),
-    0 0 0 1px var(--module-edge, #00a1e0),
-    0 10px 18px rgba(7, 45, 80, 0.16) !important;
-  text-align: left !important;
-  font-weight: 800 !important;
-  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease !important;
-}
-
-#screenHome .module-launch-btn::before {
-  content: "" !important;
-  position: absolute !important;
-  inset: auto -28px -34px auto !important;
-  width: 92px !important;
-  height: 92px !important;
-  border-radius: 999px !important;
-  background: rgba(255,255,255,0.16) !important;
-  z-index: -1 !important;
-}
-
-#screenHome .module-launch-btn::after {
-  content: var(--module-badge, "Service") !important;
-  position: absolute !important;
-  top: 8px !important;
-  right: 8px !important;
-  max-width: 68px !important;
-  padding: 3px 7px !important;
-  border-radius: 999px !important;
-  background: rgba(255,255,255,0.22) !important;
-  border: 1px solid rgba(255,255,255,0.24) !important;
-  color: rgba(255,255,255,0.95) !important;
-  font-size: 9px !important;
-  line-height: 1.05 !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.02em !important;
-  text-transform: uppercase !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-#screenHome .module-launch-btn .module-icon {
-  width: 34px !important;
-  height: 34px !important;
-  border-radius: 12px !important;
-  background: rgba(255,255,255,0.22) !important;
-  border: 1px solid rgba(255,255,255,0.24) !important;
-  color: #ffffff !important;
-  font-size: 16px !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22) !important;
-}
-
-#screenHome .module-launch-btn .module-label {
-  width: 100% !important;
-  color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(0, 34, 68, 0.28) !important;
-  font-size: clamp(12px, 3.2vw, 14px) !important;
-  line-height: 1.12 !important;
-  font-weight: 900 !important;
-  letter-spacing: -0.01em !important;
-  padding-right: 4px !important;
-}
-
-#screenHome .module-launch-btn:active {
-  transform: scale(0.985) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.22),
-    0 5px 10px rgba(7, 45, 80, 0.13) !important;
-  filter: saturate(1.05) !important;
-}
-
-@media (hover: hover) {
-  #screenHome .module-launch-btn:hover {
-    transform: translateY(-1px) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.36),
-      inset 0 0 0 1px rgba(255,255,255,0.30),
-      0 0 0 1px var(--module-edge, #00a1e0),
-      0 14px 24px rgba(7, 45, 80, 0.20) !important;
-  }
-}
-
-/* Per-module colour themes */
-#screenHome .module-launch-btn:nth-child(1) {
-  --module-start: #42d9ff;
-  --module-mid: #009fe3;
-  --module-end: #005fae;
-  --module-edge: #00a1e0;
-  --module-badge: "Pool";
-}
-
-#screenHome .module-launch-btn:nth-child(2) {
-  --module-start: #2dd4bf;
-  --module-mid: #0f9f8f;
-  --module-end: #0f5f76;
-  --module-edge: #14b8a6;
-  --module-badge: "Loop";
-}
-
-#screenHome .module-launch-btn:nth-child(3) {
-  --module-start: #56e0b7;
-  --module-mid: #12a37a;
-  --module-end: #08605c;
-  --module-edge: #10b981;
-  --module-badge: "Tower";
-}
-
-#screenHome .module-launch-btn:nth-child(4) {
-  --module-start: #60a5fa;
-  --module-mid: #2563eb;
-  --module-end: #1e3a8a;
-  --module-edge: #3b82f6;
-  --module-badge: "Tap";
-}
-
-#screenHome .module-launch-btn:nth-child(5) {
-  --module-start: #c084fc;
-  --module-mid: #7c3aed;
-  --module-end: #4c1d95;
-  --module-edge: #8b5cf6;
-  --module-badge: "Billi";
-}
-
-#screenHome .module-launch-btn:nth-child(6) {
-  --module-start: #bae6fd;
-  --module-mid: #38bdf8;
-  --module-end: #0369a1;
-  --module-edge: #38bdf8;
-  --module-badge: "Ice";
-}
-
-#screenHome .module-launch-btn:nth-child(7) {
-  --module-start: #fb923c;
-  --module-mid: #ef4444;
-  --module-end: #991b1b;
-  --module-edge: #f97316;
-  --module-badge: "TMV";
-}
-
-#screenHome .module-launch-btn:nth-child(8) {
-  --module-start: #94a3b8;
-  --module-mid: #475569;
-  --module-end: #1e293b;
-  --module-edge: #64748b;
-  --module-badge: "Filter";
-}
-
-@media (max-width: 380px) {
-  #screenHome .home-module-grid {
-    gap: 7px !important;
-  }
-
-  #screenHome .module-launch-btn {
-    min-height: 100px !important;
-    padding: 10px 9px 9px !important;
-    border-radius: 16px !important;
-  }
-
-  #screenHome .module-launch-btn::after {
-    max-width: 58px !important;
-    font-size: 8px !important;
-    padding: 3px 6px !important;
-  }
-
-  #screenHome .module-launch-btn .module-icon {
-    width: 30px !important;
-    height: 30px !important;
-    border-radius: 10px !important;
-    font-size: 14px !important;
-  }
-
-  #screenHome .module-launch-btn .module-label {
-    font-size: clamp(11px, 3.1vw, 13px) !important;
-  }
-}
-/* === END WATEROPS SERVICE MODULE COLOUR CARD REFRESH === */
-
-  
-
-/* === FINAL HOME MODULE HEIGHT FILL: stretch service cards downwards ===
-   Uses the empty space above the bottom tabs by making the home module panel and
-   service cards taller on phone screens. CSS-only; no service logic changed. */
-@media (max-width: 700px) {
-  #screenHome .workflow-shell {
-    min-height: calc(100dvh - 190px) !important;
-  }
-
-  #screenHome .module-launcher-card {
-    min-height: calc(100dvh - 275px) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: stretch !important;
-  }
-
-  #screenHome .home-module-grid {
-    flex: 1 1 auto !important;
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    grid-template-rows: repeat(4, minmax(124px, 1fr)) !important;
-    align-content: stretch !important;
-    gap: 9px !important;
-  }
-
-  #screenHome .home-module-grid .module-launch-btn,
-  #screenHome .module-launch-btn {
-    height: 100% !important;
-    min-height: 124px !important;
-    max-height: none !important;
-    justify-content: space-between !important;
-  }
-}
-
-@media (max-width: 390px) {
-  #screenHome .module-launcher-card {
-    min-height: calc(100dvh - 268px) !important;
-  }
-
-  #screenHome .home-module-grid {
-    grid-template-rows: repeat(4, minmax(116px, 1fr)) !important;
-    gap: 8px !important;
-  }
-
-  #screenHome .home-module-grid .module-launch-btn,
-  #screenHome .module-launch-btn {
-    min-height: 116px !important;
-  }
-}
-/* === END FINAL HOME MODULE HEIGHT FILL === */
-
-
-
-/* === FINAL FIXED BOTTOM NAV BAR ===
-   Keeps the Home / Jobs / Assets / Reports / More bar stationary on iPhone.
-   Adds safe bottom padding so stretched service cards do not hide behind it. */
-@media (max-width: 700px) {
-  body {
-    padding-bottom: calc(112px + env(safe-area-inset-bottom)) !important;
-  }
-
-  .bottom-tab-bar {
-    position: fixed !important;
-    left: max(10px, env(safe-area-inset-left)) !important;
-    right: max(10px, env(safe-area-inset-right)) !important;
-    bottom: max(10px, env(safe-area-inset-bottom)) !important;
-    z-index: 2000 !important;
-    width: auto !important;
-    max-width: none !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    transform: none !important;
-  }
-
-  #screenHome {
-    padding-bottom: 8px !important;
-  }
-
-  #screenHome .module-launcher-card {
-    margin-bottom: 0 !important;
-  }
-}
-/* === END FINAL FIXED BOTTOM NAV BAR === */
-
-
-
-
-
-
-
-/* === FINAL HEADER GREY BUBBLE RESTORE + SAFE TOP ===
-   Restores the light grey/slate filter-style header with visible bubble effects,
-   while keeping the iPhone safe top spacing. CSS-only. */
-@media (max-width: 700px) {
-  body {
-    padding-top: calc(24px + env(safe-area-inset-top)) !important;
-  }
-}
-
-.header {
-  position: relative !important;
-  overflow: hidden !important;
-  background:
-    radial-gradient(circle at 92% 16%, rgba(255,255,255,0.82), transparent 17%),
-    radial-gradient(circle at 74% 92%, rgba(100,116,139,0.18), transparent 28%),
-    linear-gradient(135deg, #f8fbfe 0%, #e3e9f0 48%, #cbd5df 100%) !important;
-  border: 1px solid rgba(100, 116, 139, 0.34) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    inset 0 -1px 0 rgba(100,116,139,0.12),
-    0 10px 22px rgba(71, 85, 105, 0.12) !important;
-}
-
-.header::before {
-  content: "" !important;
-  position: absolute !important;
-  right: 72px !important;
-  bottom: -62px !important;
-  width: 185px !important;
-  height: 185px !important;
-  border-radius: 999px !important;
-  background:
-    radial-gradient(circle at 35% 30%, rgba(255,255,255,0.24), rgba(255,255,255,0.08) 48%, transparent 70%) !important;
-  border: 1px solid rgba(255,255,255,0.10) !important;
-  pointer-events: none !important;
-  z-index: 0 !important;
-}
-
-.header::after {
-  content: "" !important;
-  position: absolute !important;
-  right: -34px !important;
-  bottom: -48px !important;
-  width: 150px !important;
-  height: 150px !important;
-  border-radius: 999px !important;
-  background:
-    radial-gradient(circle at 34% 28%, rgba(255,255,255,0.26), rgba(255,255,255,0.10) 52%, transparent 74%) !important;
-  border: 1px solid rgba(255,255,255,0.10) !important;
-  filter: none !important;
-  opacity: 1 !important;
-  pointer-events: none !important;
-  z-index: 0 !important;
-}
-
-.header .brand,
-.header .brand-header-image,
-.header .waterops-header-lockup,
-.header .waterops-brand-mark,
-.header .waterops-brand-icon,
-.header .waterops-brand-name {
-  position: relative !important;
-  z-index: 1 !important;
-}
-/* === END FINAL HEADER GREY BUBBLE RESTORE + SAFE TOP === */
-
-
-
-/* === FINAL BOTTOM NAV GREY HEADER MATCH ===
-   Makes the Home / Jobs / Assets / Reports / More buttons match the grey/slate
-   WaterOps header style while keeping the active tab obvious. CSS-only. */
-.bottom-tab-bar {
-  background:
-    radial-gradient(circle at 92% 12%, rgba(255,255,255,0.76), transparent 18%),
-    linear-gradient(135deg, rgba(248,251,254,0.96) 0%, rgba(227,233,240,0.94) 48%, rgba(203,213,223,0.94) 100%) !important;
-  border: 1px solid rgba(100, 116, 139, 0.34) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    0 12px 26px rgba(71, 85, 105, 0.16) !important;
-}
-
-.bottom-tab-bar .tab-btn {
-  background:
-    radial-gradient(circle at 86% 16%, rgba(255,255,255,0.70), transparent 22%),
-    linear-gradient(135deg, #f8fbfe 0%, #e3e9f0 50%, #cbd5df 100%) !important;
-  border: 1px solid rgba(100, 116, 139, 0.34) !important;
-  color: #17324d !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.90),
-    inset 0 -1px 0 rgba(100,116,139,0.10),
-    0 6px 12px rgba(71, 85, 105, 0.08) !important;
-}
-
-.bottom-tab-bar .tab-btn.active {
-  background:
-    radial-gradient(circle at 86% 16%, rgba(255,255,255,0.78), transparent 20%),
-    linear-gradient(135deg, #e8eef5 0%, #cbd5df 48%, #94a3b8 100%) !important;
-  border: 1px solid rgba(71, 85, 105, 0.44) !important;
-  color: #073b67 !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.94),
-    0 8px 16px rgba(71, 85, 105, 0.18) !important;
-}
-
-.bottom-tab-bar .tab-btn:active {
-  transform: translateY(1px) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.72),
-    0 3px 8px rgba(71, 85, 105, 0.12) !important;
-}
-/* === END FINAL BOTTOM NAV GREY HEADER MATCH === */
-
-
-
-/* === FINAL HOME NON-SCROLLABLE LAYOUT ===
-   Locks only the Home screen to the visible phone viewport so it does not scroll.
-   Other screens remain scrollable. CSS-only; no app logic changed. */
-@media (max-width: 700px) {
-  html,
-  body {
-    min-height: 100dvh !important;
-  }
-
-  body:has(#screenHome.active) {
-    height: 100dvh !important;
-    max-height: 100dvh !important;
-    overflow: hidden !important;
-    padding-top: calc(18px + env(safe-area-inset-top)) !important;
-    padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important;
-  }
-
-  body:has(#screenHome.active) .app {
-    height: calc(100dvh - 18px - env(safe-area-inset-top) - 92px - env(safe-area-inset-bottom)) !important;
-    max-height: calc(100dvh - 18px - env(safe-area-inset-top) - 92px - env(safe-area-inset-bottom)) !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  body:has(#screenHome.active) .header {
-    flex: 0 0 auto !important;
-    min-height: 84px !important;
-    padding: 12px 14px !important;
-    margin-bottom: 8px !important;
-  }
-
-  body:has(#screenHome.active) #screenHome {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  body:has(#screenHome.active) #screenHome .workflow-shell {
-    height: 100% !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  body:has(#screenHome.active) #screenHome .module-launcher-card {
-    height: 100% !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-    padding: 8px !important;
-  }
-
-  body:has(#screenHome.active) #screenHome .home-module-grid {
-    height: 100% !important;
-    min-height: 0 !important;
-    grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
-    gap: 7px !important;
-  }
-
-  body:has(#screenHome.active) #screenHome .home-module-grid .module-launch-btn,
-  body:has(#screenHome.active) #screenHome .module-launch-btn {
-    min-height: 0 !important;
-    height: 100% !important;
-    padding: 9px 9px 8px !important;
-    border-radius: 17px !important;
-  }
-
-  body:has(#screenHome.active) #screenHome .module-launch-btn .module-icon {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 11px !important;
-    font-size: 15px !important;
-  }
-
-  body:has(#screenHome.active) #screenHome .module-launch-btn .module-label {
-    font-size: clamp(11px, 3vw, 14px) !important;
-    line-height: 1.08 !important;
-  }
-}
-
-@media (max-width: 390px) {
-  body:has(#screenHome.active) {
-    padding-top: calc(20px + env(safe-area-inset-top)) !important;
-    padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important;
-  }
-
-  body:has(#screenHome.active) .app {
-    height: calc(100dvh - 20px - env(safe-area-inset-top) - 88px - env(safe-area-inset-bottom)) !important;
-    max-height: calc(100dvh - 20px - env(safe-area-inset-top) - 88px - env(safe-area-inset-bottom)) !important;
-  }
-
-  body:has(#screenHome.active) .header {
-    min-height: 78px !important;
-    padding: 10px 12px !important;
-    margin-bottom: 7px !important;
-  }
-
-  body:has(#screenHome.active) .header .waterops-brand-icon {
-    width: clamp(40px, 10vw, 54px) !important;
-    height: clamp(40px, 10vw, 54px) !important;
-    flex-basis: clamp(40px, 10vw, 54px) !important;
-  }
-
-  body:has(#screenHome.active) .header .waterops-brand-name {
-    font-size: clamp(34px, 10.8vw, 50px) !important;
-  }
-
-  body:has(#screenHome.active) #screenHome .home-module-grid {
-    gap: 6px !important;
-  }
-
-  body:has(#screenHome.active) #screenHome .home-module-grid .module-launch-btn,
-  body:has(#screenHome.active) #screenHome .module-launch-btn {
-    padding: 8px !important;
-    border-radius: 16px !important;
-  }
-}
-/* === END FINAL HOME NON-SCROLLABLE LAYOUT === */
-
-
-
-/* === FINAL HOME BOTTOM BAR POSITION: sit under service modules ===
-   Keeps the nav stationary, but raises it so it sits directly under the
-   service module card area instead of sitting low near the bottom edge. */
-@media (max-width: 700px) {
-  body:has(#screenHome.active) {
-    padding-bottom: calc(124px + env(safe-area-inset-bottom)) !important;
-  }
-
-  body:has(#screenHome.active) .bottom-tab-bar,
-  .bottom-tab-bar {
-    position: fixed !important;
-    left: max(10px, env(safe-area-inset-left)) !important;
-    right: max(10px, env(safe-area-inset-right)) !important;
-    bottom: calc(58px + env(safe-area-inset-bottom)) !important;
-    z-index: 2000 !important;
-    width: auto !important;
-    max-width: none !important;
-    margin: 0 !important;
-    transform: none !important;
-  }
-
-  body:has(#screenHome.active) .app {
-    height: calc(100dvh - 18px - env(safe-area-inset-top) - 124px - env(safe-area-inset-bottom)) !important;
-    max-height: calc(100dvh - 18px - env(safe-area-inset-top) - 124px - env(safe-area-inset-bottom)) !important;
-  }
-}
-
-@media (max-width: 390px) {
-  body:has(#screenHome.active) {
-    padding-bottom: calc(116px + env(safe-area-inset-bottom)) !important;
-  }
-
-  body:has(#screenHome.active) .bottom-tab-bar,
-  .bottom-tab-bar {
-    bottom: calc(50px + env(safe-area-inset-bottom)) !important;
-  }
-
-  body:has(#screenHome.active) .app {
-    height: calc(100dvh - 20px - env(safe-area-inset-top) - 116px - env(safe-area-inset-bottom)) !important;
-    max-height: calc(100dvh - 20px - env(safe-area-inset-top) - 116px - env(safe-area-inset-bottom)) !important;
-  }
-}
-/* === END FINAL HOME BOTTOM BAR POSITION === */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* === FINAL FREE WATEROPS HEADER ===
-   Removes the boxed card around the WaterOps logo so it sits freely on the
-   same grey page background. CSS-only; no app logic changed. */
-.header {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border-radius: 0 !important;
-  overflow: visible !important;
-}
-
-.header::before,
-.header::after {
-  display: none !important;
-  content: none !important;
-}
-
-.header .brand,
-.header .brand-header-image,
-.header .waterops-header-lockup,
-.header .waterops-brand-mark {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-.header .waterops-brand-icon {
-  filter: drop-shadow(0 8px 14px rgba(15, 23, 42, 0.28)) !important;
-}
-
-.header .waterops-brand-name {
-  text-shadow: 0 1px 2px rgba(255,255,255,0.18) !important;
-}
-
-@media (max-width: 700px) {
-  body:has(#screenHome.active) .header,
-  .header {
-    min-height: 80px !important;
-    padding: 10px 10px 8px !important;
-    margin-bottom: 6px !important;
-  }
-}
-
-@media (max-width: 390px) {
-  body:has(#screenHome.active) .header,
-  .header {
-    min-height: 74px !important;
-    padding: 8px 8px 6px !important;
-    margin-bottom: 6px !important;
-  }
-}
-/* === END FINAL FREE WATEROPS HEADER === */
-
-
-
-
-
-
-
-/* === FINAL UNIFORM GREY BACKGROUND ===
-   Makes the page background and top safe-area/status strip one consistent grey
-   tone so there is no visible shift at the top. CSS-only. */
-:root {
-  --waterops-uniform-grey: #b7c0ca;
-}
-
-html,
-body {
-  background: var(--waterops-uniform-grey) !important;
-}
-
-body::before {
-  opacity: 0 !important;
-  background: none !important;
-}
-
-@media (max-width: 700px) {
-  body::after {
-    content: "" !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: calc(30px + env(safe-area-inset-top)) !important;
-    background: var(--waterops-uniform-grey) !important;
-    pointer-events: none !important;
-    z-index: 0 !important;
-  }
-}
-
-.app,
-#screenHome,
-.screen-panel,
-.workflow-shell {
-  background: transparent !important;
-}
-/* === END FINAL UNIFORM GREY BACKGROUND === */
-
-
-
-/* === FINAL HEADER RESET BUTTON ===
-   Adds a compact reset button at the top-right of the free WaterOps header.
-   It uses the existing Reset last test behaviour. */
-.header {
-  position: relative !important;
-}
-
-.home-header-reset-btn {
-  position: absolute !important;
-  right: max(16px, env(safe-area-inset-right)) !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  z-index: 6 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 5px !important;
-  min-width: 72px !important;
-  min-height: 36px !important;
-  padding: 7px 10px !important;
-  border-radius: 999px !important;
-  border: 1px solid rgba(71, 85, 105, 0.38) !important;
-  background:
-    radial-gradient(circle at 82% 14%, rgba(255,255,255,0.82), transparent 24%),
-    linear-gradient(135deg, rgba(248,251,254,0.94) 0%, rgba(227,233,240,0.94) 48%, rgba(203,213,223,0.96) 100%) !important;
-  color: #17324d !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    0 7px 14px rgba(71, 85, 105, 0.16) !important;
-  font: inherit !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.01em !important;
-  cursor: pointer !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-}
-
-.home-header-reset-btn span {
-  font-size: 15px !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-}
-
-.home-header-reset-btn strong {
-  font-size: 11px !important;
-  line-height: 1 !important;
-}
-
-.home-header-reset-btn:active {
-  transform: translateY(-50%) scale(0.97) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.76),
-    0 3px 8px rgba(71, 85, 105, 0.12) !important;
-}
-
-@media (max-width: 700px) {
-  .home-header-reset-btn {
-    right: 14px !important;
-  }
-}
-
-@media (max-width: 430px) {
-  .home-header-reset-btn {
-    right: 10px !important;
-    min-width: 38px !important;
-    width: 38px !important;
-    height: 38px !important;
-    min-height: 38px !important;
-    padding: 0 !important;
-  }
-
-  .home-header-reset-btn strong {
-    display: none !important;
-  }
-
-  .home-header-reset-btn span {
-    font-size: 18px !important;
-  }
-
-  .header .waterops-brand-mark {
-    padding-right: 44px !important;
-    box-sizing: border-box !important;
-  }
-}
-/* === END FINAL HEADER RESET BUTTON === */
-
-</style>
+    /* GitHub Pages phone home-module card styling. CSS-only; module IDs and handlers stay unchanged. */
+    #screenHome .module-launcher-card {
+      padding: 10px !important;
+      border-radius: 18px !important;
+      background:
+        radial-gradient(circle at top left, rgba(0, 161, 224, 0.12), transparent 38%),
+        linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(239,249,255,0.94) 100%) !important;
+      border: 1px solid rgba(0, 120, 180, 0.16) !important;
+      box-shadow: 0 12px 26px rgba(0, 54, 112, 0.08) !important;
+    }
+
+    #screenHome .home-module-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 8px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: visible !important;
+    }
+
+    #screenHome .home-module-grid .module-launch-btn,
+    #screenHome .module-launch-btn {
+      position: relative !important;
+      isolation: isolate !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 108px !important;
+      aspect-ratio: auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      justify-content: space-between !important;
+      gap: 8px !important;
+      padding: 11px 10px 10px !important;
+      overflow: hidden !important;
+      border-radius: 18px !important;
+      border: 2px solid rgba(255,255,255,0.78) !important;
+      outline: 1px solid rgba(7, 45, 80, 0.22) !important;
+      outline-offset: -3px !important;
+      background:
+        radial-gradient(circle at 94% 8%, rgba(255,255,255,0.48), transparent 24%),
+        radial-gradient(circle at 10% 105%, rgba(255,255,255,0.22), transparent 30%),
+        linear-gradient(135deg, var(--module-start, #32c5ff) 0%, var(--module-mid, #00a1e0) 48%, var(--module-end, #006fae) 100%) !important;
+      color: #ffffff !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.34),
+        inset 0 0 0 1px rgba(255,255,255,0.28),
+        0 0 0 1px var(--module-edge, #00a1e0),
+        0 10px 18px rgba(7, 45, 80, 0.16) !important;
+      text-align: left !important;
+      font-weight: 800 !important;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease !important;
+    }
+
+    #screenHome .module-launch-btn::before {
+      content: "" !important;
+      position: absolute !important;
+      inset: auto -28px -34px auto !important;
+      width: 92px !important;
+      height: 92px !important;
+      border-radius: 999px !important;
+      background: rgba(255,255,255,0.16) !important;
+      z-index: -1 !important;
+    }
+
+    #screenHome .module-launch-btn::after {
+      content: var(--module-badge, "Service") !important;
+      position: absolute !important;
+      top: 8px !important;
+      right: 8px !important;
+      max-width: 68px !important;
+      padding: 3px 7px !important;
+      border-radius: 999px !important;
+      background: rgba(255,255,255,0.22) !important;
+      border: 1px solid rgba(255,255,255,0.24) !important;
+      color: rgba(255,255,255,0.95) !important;
+      font-size: 9px !important;
+      line-height: 1.05 !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.02em !important;
+      text-transform: uppercase !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    #screenHome .module-launch-btn .module-icon {
+      width: 34px !important;
+      height: 34px !important;
+      border-radius: 12px !important;
+      background: rgba(255,255,255,0.22) !important;
+      border: 1px solid rgba(255,255,255,0.24) !important;
+      color: #ffffff !important;
+      font-size: 16px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22) !important;
+    }
+
+    #screenHome .module-launch-btn .module-label {
+      width: 100% !important;
+      color: #ffffff !important;
+      text-shadow: 0 1px 2px rgba(0, 34, 68, 0.28) !important;
+      font-size: clamp(12px, 3.2vw, 14px) !important;
+      line-height: 1.12 !important;
+      font-weight: 900 !important;
+      letter-spacing: -0.01em !important;
+      padding-right: 4px !important;
+    }
+
+    #screenHome .module-launch-btn:nth-child(1) {
+      --module-start: #42d9ff;
+      --module-mid: #009fe3;
+      --module-end: #005fae;
+      --module-edge: #00a1e0;
+      --module-badge: "Pool";
+    }
+
+    #screenHome .module-launch-btn:nth-child(2) {
+      --module-start: #2dd4bf;
+      --module-mid: #0f9f8f;
+      --module-end: #0f5f76;
+      --module-edge: #14b8a6;
+      --module-badge: "Loop";
+    }
+
+    #screenHome .module-launch-btn:nth-child(3) {
+      --module-start: #56e0b7;
+      --module-mid: #12a37a;
+      --module-end: #08605c;
+      --module-edge: #10b981;
+      --module-badge: "Tower";
+    }
+
+    #screenHome .module-launch-btn:nth-child(4) {
+      --module-start: #60a5fa;
+      --module-mid: #2563eb;
+      --module-end: #1e3a8a;
+      --module-edge: #3b82f6;
+      --module-badge: "Tap";
+    }
+
+    #screenHome .module-launch-btn:nth-child(5) {
+      --module-start: #c084fc;
+      --module-mid: #7c3aed;
+      --module-end: #4c1d95;
+      --module-edge: #8b5cf6;
+      --module-badge: "Billi";
+    }
+
+    #screenHome .module-launch-btn:nth-child(6) {
+      --module-start: #bae6fd;
+      --module-mid: #38bdf8;
+      --module-end: #0369a1;
+      --module-edge: #38bdf8;
+      --module-badge: "Ice";
+    }
+
+    #screenHome .module-launch-btn:nth-child(7) {
+      --module-start: #fb923c;
+      --module-mid: #ef4444;
+      --module-end: #991b1b;
+      --module-edge: #f97316;
+      --module-badge: "TMV";
+    }
+
+    #screenHome .module-launch-btn:nth-child(8) {
+      --module-start: #94a3b8;
+      --module-mid: #475569;
+      --module-end: #1e293b;
+      --module-edge: #64748b;
+      --module-badge: "Filter";
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding-bottom: calc(112px + env(safe-area-inset-bottom)) !important;
+      }
+
+      #screenHome .workflow-shell {
+        min-height: calc(100dvh - 190px) !important;
+        gap: 8px !important;
+      }
+
+      #screenHome .module-launcher-card {
+        min-height: calc(100dvh - 275px) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: stretch !important;
+      }
+
+      #screenHome .home-module-grid {
+        flex: 1 1 auto !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-rows: repeat(4, minmax(124px, 1fr)) !important;
+        align-content: stretch !important;
+        gap: 9px !important;
+      }
+
+      #screenHome .home-module-grid .module-launch-btn,
+      #screenHome .module-launch-btn {
+        height: 100% !important;
+        min-height: 124px !important;
+        max-height: none !important;
+        justify-content: space-between !important;
+      }
+
+      .bottom-tab-bar {
+        position: fixed !important;
+        left: max(10px, env(safe-area-inset-left)) !important;
+        right: max(10px, env(safe-area-inset-right)) !important;
+        bottom: max(10px, env(safe-area-inset-bottom)) !important;
+        z-index: 2000 !important;
+        width: auto !important;
+        max-width: none !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        transform: none !important;
+        background:
+          radial-gradient(circle at 92% 12%, rgba(255,255,255,0.76), transparent 18%),
+          linear-gradient(135deg, rgba(248,251,254,0.96) 0%, rgba(227,233,240,0.94) 48%, rgba(203,213,223,0.94) 100%) !important;
+        border: 1px solid rgba(100, 116, 139, 0.34) !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.92),
+          0 12px 26px rgba(71, 85, 105, 0.16) !important;
+      }
+
+      .bottom-tab-bar .tab-btn {
+        background:
+          radial-gradient(circle at 86% 16%, rgba(255,255,255,0.70), transparent 22%),
+          linear-gradient(135deg, #f8fbfe 0%, #e3e9f0 50%, #cbd5df 100%) !important;
+        border: 1px solid rgba(100, 116, 139, 0.34) !important;
+        color: #17324d !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.90),
+          inset 0 -1px 0 rgba(100,116,139,0.10),
+          0 6px 12px rgba(71, 85, 105, 0.08) !important;
+      }
+
+      .bottom-tab-bar .tab-btn.active {
+        background:
+          radial-gradient(circle at 86% 16%, rgba(255,255,255,0.78), transparent 20%),
+          linear-gradient(135deg, #e8eef5 0%, #cbd5df 48%, #94a3b8 100%) !important;
+        border: 1px solid rgba(71, 85, 105, 0.44) !important;
+        color: #073b67 !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.94),
+          0 8px 16px rgba(71, 85, 105, 0.18) !important;
+      }
+    }
+
+    @media (max-width: 390px) {
+      #screenHome .module-launcher-card {
+        min-height: calc(100dvh - 268px) !important;
+      }
+
+      #screenHome .home-module-grid {
+        grid-template-rows: repeat(4, minmax(116px, 1fr)) !important;
+        gap: 8px !important;
+      }
+
+      #screenHome .module-launch-btn {
+        min-height: 116px !important;
+      }
+    }
+
+    @media (max-width: 380px) {
+      #screenHome .home-module-grid {
+        gap: 7px !important;
+      }
+
+      #screenHome .module-launch-btn {
+        min-height: 100px !important;
+        padding: 10px 9px 9px !important;
+        border-radius: 16px !important;
+      }
+
+      #screenHome .module-launch-btn::after {
+        max-width: 58px !important;
+        font-size: 8px !important;
+        padding: 3px 6px !important;
+      }
+
+      #screenHome .module-launch-btn .module-icon {
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 10px !important;
+        font-size: 14px !important;
+      }
+
+      #screenHome .module-launch-btn .module-label {
+        font-size: clamp(11px, 3.1vw, 13px) !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#mainContent">Skip to app content</a>
@@ -4894,10 +4025,6 @@ body::before {
           <p>Water testing, dosing, closed loops and service logging.</p>
         </div>
       </div>
-      <button class="home-header-reset-btn" id="homeHeaderResetBtn" type="button" aria-label="Reset last test results" title="Reset last test">
-        <span aria-hidden="true">↺</span>
-        <strong>Reset</strong>
-      </button>
       <div class="app-tabs" id="appTabs" role="tablist" aria-label="Primary sections">
         <button class="tab-btn" type="button" data-screen="home">Home</button>
         <button class="tab-btn" type="button" data-screen="jobs">Jobs</button>
@@ -4920,7 +4047,7 @@ body::before {
       Side navigation bar to improve discoverability of the main application modules.  A vertical
       menu anchors to the left of the page on larger screens and replaces the original
       horizontal tab bar.  Each button has an icon and descriptive label.  On smaller
-      screens the sideâ€‘nav hides automatically and the existing horizontal tabs can still
+      screens the sideÃ¢â‚¬â€˜nav hides automatically and the existing horizontal tabs can still
       appear (see media queries in the CSS below).
     -->
     <nav class="side-nav" id="sideNav" aria-label="Primary sections">
@@ -4991,7 +4118,6 @@ body::before {
 
         <section class="card span-12 module-launcher-card">
           <div class="home-module-grid">
-            <!-- Updated icons: Use Font Awesome for a professional look -->
             <button class="tab-btn module-launch-btn" type="button" data-module-screen="pools" data-module-label="Pool / spa / ice bath">
               <span class="module-icon"><i class="fa-solid fa-person-swimming" aria-hidden="true"></i></span>
               <span class="module-label">Pool / spa / ice bath</span>
@@ -5689,12 +4815,24 @@ body::before {
             <input id="coolingTowerSite" type="text" placeholder="Site / building name" />
           </div>
           <div class="field">
-            <label for="coolingTowerId">Tower ID</label>
+            <label for="coolingTowerId">Cooling tower/system ID</label>
             <input id="coolingTowerId" type="text" placeholder="e.g. CT-01" />
           </div>
           <div class="field">
-            <label for="coolingTowerLocation">Location</label>
+            <label for="coolingTowerLocation">Building/location</label>
             <input id="coolingTowerLocation" type="text" placeholder="Roof, plant room, yard" />
+          </div>
+          <div class="field">
+            <label for="coolingTowerActRegistration">ACT registration number</label>
+            <input id="coolingTowerActRegistration" type="text" placeholder="Registration number" />
+          </div>
+          <div class="field">
+            <label for="coolingTowerAssetRef">Asset/QR reference</label>
+            <input id="coolingTowerAssetRef" type="text" placeholder="Asset ID or linked QR code" />
+          </div>
+          <div class="field">
+            <label for="coolingTowerSamplingPoint">Sampling point</label>
+            <input id="coolingTowerSamplingPoint" type="text" placeholder="Basin, return, bleed, sample tap" />
           </div>
           <div class="field">
             <label for="coolingTowerVolume">System volume</label>
@@ -5718,15 +4856,28 @@ body::before {
             <input id="coolingTowerTime" type="time" />
           </div>
           <div class="field">
-            <label for="coolingTowerVisitType">Visit type</label>
+            <label for="coolingTowerVisitType">Service type</label>
             <select id="coolingTowerVisitType">
               <option value="Routine service">Routine service</option>
-              <option value="Water test">Water test</option>
-              <option value="Microbial sample">Microbial sample</option>
-              <option value="Clean / disinfection">Clean / disinfection</option>
+              <option value="Follow-up">Follow-up</option>
               <option value="Corrective action">Corrective action</option>
-              <option value="Start-up">Start-up</option>
+              <option value="Lab sampling">Lab sampling</option>
+              <option value="Clean">Clean</option>
+              <option value="Other">Other</option>
             </select>
+          </div>
+          <div class="field">
+            <label for="coolingTowerSystemStatus">System status</label>
+            <select id="coolingTowerSystemStatus">
+              <option value="Operating">Operating</option>
+              <option value="Offline">Offline</option>
+              <option value="Under maintenance">Under maintenance</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column: 1 / -1;">
+            <label for="coolingTowerSystemNotes">Notes</label>
+            <textarea id="coolingTowerSystemNotes" placeholder="Site access, operating status, registration notes or asset notes"></textarea>
           </div>
         </div>
         <div class="actions" style="margin-bottom: 12px;">
@@ -5742,15 +4893,27 @@ body::before {
       </section>
 
       <section class="card collapsed span-12">
-        <h2>Cooling tower test results</h2>
+        <h2>Tower/System Water Test</h2>
         <div class="field-grid">
+          <div class="field">
+            <label for="coolingPh">pH</label>
+            <input id="coolingPh" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 8.3" />
+          </div>
+          <div class="field">
+            <label for="coolingTemperature">Temperature</label>
+            <input id="coolingTemperature" type="number" inputmode="decimal" step="0.1" placeholder="deg C" />
+          </div>
+          <div class="field">
+            <label for="coolingConductivity">Conductivity</label>
+            <input id="coolingConductivity" type="number" inputmode="decimal" step="1" placeholder="uS/cm" />
+          </div>
           <div class="field">
             <label for="coolingTds">TDS</label>
             <input id="coolingTds" type="number" inputmode="decimal" step="1" placeholder="ppm" />
           </div>
           <div class="field">
-            <label for="coolingPh">pH</label>
-            <input id="coolingPh" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 8.3" />
+            <label for="coolingOrp">ORP</label>
+            <input id="coolingOrp" type="number" inputmode="decimal" step="1" placeholder="mV" />
           </div>
           <div class="field">
             <label for="coolingAlk">ALK</label>
@@ -5761,16 +4924,39 @@ body::before {
             <input id="coolingInhibitor" type="number" inputmode="decimal" step="0.01" placeholder="ppm or product units" />
           </div>
           <div class="field">
-            <label for="coolingChlorides">Chlorides</label>
+            <label for="coolingChlorides">Chloride</label>
             <input id="coolingChlorides" type="number" inputmode="decimal" step="1" placeholder="ppm" />
           </div>
           <div class="field">
-            <label for="coolingOrp">ORP</label>
-            <input id="coolingOrp" type="number" inputmode="decimal" step="1" placeholder="mV" />
+            <label for="coolingHardness">Hardness</label>
+            <input id="coolingHardness" type="number" inputmode="decimal" step="1" placeholder="ppm" />
           </div>
           <div class="field">
-            <label for="coolingFreeHalogen">Free Chlorine / Bromine</label>
-            <input id="coolingFreeHalogen" type="number" inputmode="decimal" step="0.01" placeholder="ppm" />
+            <label for="coolingVisualCondition">Visual clarity/condition</label>
+            <select id="coolingVisualCondition">
+              <option value="">Select condition</option>
+              <option value="Clear">Clear</option>
+              <option value="Slightly cloudy">Slightly cloudy</option>
+              <option value="Cloudy">Cloudy</option>
+              <option value="Dirty / sediment noted">Dirty / sediment noted</option>
+              <option value="Biofilm / slime noted">Biofilm / slime noted</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="coolingOdour">Odour</label>
+            <select id="coolingOdour">
+              <option value="">Select odour</option>
+              <option value="None noted">None noted</option>
+              <option value="Chlorine / biocide">Chlorine / biocide</option>
+              <option value="Musty">Musty</option>
+              <option value="Sewer / stagnant">Sewer / stagnant</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column: 1 / -1;">
+            <label for="coolingTestComments">Comments</label>
+            <textarea id="coolingTestComments" placeholder="Tower/system water test comments"></textarea>
           </div>
         </div>
         <div class="table-wrap" style="margin-top: 12px;">
@@ -5780,6 +4966,214 @@ body::before {
             </thead>
             <tbody id="coolingTowerTestTableBody"></tbody>
           </table>
+        </div>
+      </section>
+
+      <section class="card collapsed span-12">
+        <h2>Biocide / Treatment Program</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="coolingBiocideType">Biocide type</label>
+            <select id="coolingBiocideType">
+              <option value="Unknown">Unknown</option>
+              <option value="Oxidising">Oxidising</option>
+              <option value="Non-oxidising">Non-oxidising</option>
+              <option value="Both">Both</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field cooling-biocide-oxidising hidden">
+            <label for="coolingOxidisingResidualTested">Oxidising biocide residual tested</label>
+            <select id="coolingOxidisingResidualTested">
+              <option>No</option>
+              <option>Yes</option>
+              <option>Not applicable</option>
+            </select>
+          </div>
+          <div class="field cooling-biocide-oxidising hidden">
+            <label for="coolingOxidisingBiocideType">Oxidising biocide type</label>
+            <select id="coolingOxidisingBiocideType">
+              <option value="">Select type</option>
+              <option>Free chlorine</option>
+              <option>Total chlorine</option>
+              <option>Bromine</option>
+              <option>Chlorine dioxide</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field cooling-biocide-oxidising hidden">
+            <label for="coolingOxidisingResidualResult">Oxidising biocide residual result</label>
+            <input id="coolingOxidisingResidualResult" type="text" placeholder="Enter result if tested" />
+          </div>
+          <div class="field cooling-biocide-oxidising hidden">
+            <label for="coolingOxidisingResidualUnit">Oxidising biocide residual unit</label>
+            <select id="coolingOxidisingResidualUnit">
+              <option>mg/L</option>
+              <option>ppm</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field cooling-biocide-nonoxidising hidden">
+            <label for="coolingNonOxidisingUsed">Non-oxidising biocide used</label>
+            <select id="coolingNonOxidisingUsed">
+              <option>Unknown</option>
+              <option>No</option>
+              <option>Yes</option>
+            </select>
+          </div>
+          <div class="field cooling-biocide-nonoxidising hidden">
+            <label for="coolingNonOxidisingProduct">Non-oxidising biocide product/name</label>
+            <input id="coolingNonOxidisingProduct" type="text" />
+          </div>
+          <div class="field cooling-biocide-nonoxidising hidden">
+            <label for="coolingNonOxidisingActive">Active ingredient, if known</label>
+            <select id="coolingNonOxidisingActive">
+              <option>Unknown</option>
+              <option>Glutaraldehyde</option>
+              <option>DBNPA</option>
+              <option>Isothiazolinone</option>
+              <option>THPS</option>
+              <option>Quaternary ammonium compound</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field cooling-biocide-nonoxidising hidden">
+            <label for="coolingNonOxidisingDoseAmount">Non-oxidising biocide dose amount</label>
+            <input id="coolingNonOxidisingDoseAmount" type="text" />
+          </div>
+          <div class="field cooling-biocide-nonoxidising hidden">
+            <label for="coolingNonOxidisingDoseUnit">Non-oxidising biocide dose unit</label>
+            <input id="coolingNonOxidisingDoseUnit" type="text" placeholder="L, mL, kg, ppm, other" />
+          </div>
+          <div class="field cooling-biocide-nonoxidising hidden">
+            <label for="coolingNonOxidisingDosingMethod">Non-oxidising biocide dosing method</label>
+            <input id="coolingNonOxidisingDosingMethod" type="text" placeholder="Manual slug dose, timed pump, supplier program..." />
+          </div>
+          <div class="field cooling-biocide-nonoxidising hidden">
+            <label for="coolingNonOxidisingTestMethodAvailable">Non-oxidising biocide test method available</label>
+            <select id="coolingNonOxidisingTestMethodAvailable">
+              <option>Unknown</option>
+              <option>No</option>
+              <option>Yes</option>
+            </select>
+          </div>
+          <div class="field cooling-biocide-nonoxidising hidden">
+            <label for="coolingNonOxidisingTestResult">Non-oxidising biocide test result</label>
+            <input id="coolingNonOxidisingTestResult" type="text" placeholder="Only if supplier/lab method is available" />
+          </div>
+          <div class="field cooling-biocide-nonoxidising hidden" style="grid-column: 1 / -1;">
+            <label for="coolingNonOxidisingMethodNotes">Non-oxidising biocide test method notes</label>
+            <textarea id="coolingNonOxidisingMethodNotes" placeholder="Supplier method, lab method, chain of custody, or reason not tested"></textarea>
+          </div>
+          <div class="field cooling-biocide-nonoxidising hidden">
+            <label for="coolingSupplierRecommendedRange">Supplier recommended range, if provided</label>
+            <input id="coolingSupplierRecommendedRange" type="text" placeholder="Manual entry only" />
+          </div>
+          <div class="field" style="grid-column: 1 / -1;">
+            <label for="coolingTreatmentNotes">Treatment notes</label>
+            <textarea id="coolingTreatmentNotes" placeholder="Supplier-specific notes, site treatment program details, or observations"></textarea>
+          </div>
+        </div>
+        <div class="summary cooling-biocide-nonoxidising hidden" id="coolingNonOxidisingMethodNotice" style="margin-top: 12px;">No universal field residual test recorded for this non-oxidising biocide. Refer to supplier method, lab testing, or site treatment program.</div>
+      </section>
+
+      <section class="card collapsed span-12">
+        <h2>Incoming/Makeup Water Test</h2>
+        <div class="field-grid">
+          <div class="field"><label for="coolingMakeupPh">pH</label><input id="coolingMakeupPh" type="number" inputmode="decimal" step="0.01" /></div>
+          <div class="field"><label for="coolingMakeupTemperature">Temperature</label><input id="coolingMakeupTemperature" type="number" inputmode="decimal" step="0.1" placeholder="deg C" /></div>
+          <div class="field"><label for="coolingMakeupConductivity">Conductivity</label><input id="coolingMakeupConductivity" type="number" inputmode="decimal" step="1" placeholder="uS/cm" /></div>
+          <div class="field"><label for="coolingMakeupTds">TDS</label><input id="coolingMakeupTds" type="number" inputmode="decimal" step="1" placeholder="ppm" /></div>
+          <div class="field"><label for="coolingMakeupChloride">Chloride</label><input id="coolingMakeupChloride" type="number" inputmode="decimal" step="1" placeholder="ppm" /></div>
+          <div class="field"><label for="coolingMakeupAlk">Alkalinity</label><input id="coolingMakeupAlk" type="number" inputmode="decimal" step="1" placeholder="ppm" /></div>
+          <div class="field"><label for="coolingMakeupHardness">Hardness</label><input id="coolingMakeupHardness" type="number" inputmode="decimal" step="1" placeholder="ppm" /></div>
+          <div class="field" style="grid-column: 1 / -1;"><label for="coolingMakeupComments">Comments</label><textarea id="coolingMakeupComments" placeholder="Incoming/makeup water comments"></textarea></div>
+        </div>
+        <div class="summary" style="margin-top: 12px;">
+          <strong>Cycles of concentration</strong><br />
+          Chloride-based cycles: <span id="coolingChlorideCycles">Not calculated</span><br />
+          Conductivity-based cycles: <span id="coolingConductivityCycles">Not calculated</span><br />
+          <span class="subtle">Chloride-based cycles are generally preferred where chloride values are available.</span>
+        </div>
+      </section>
+
+      <section class="card collapsed span-12">
+        <h2>Cooling tower service checklist</h2>
+        <div class="check-grid">
+          <label class="check-pill"><input id="coolingCheckBasinInspected" type="checkbox" /> Tower basin inspected</label>
+          <label class="check-pill"><input id="coolingCheckStrainerCleaned" type="checkbox" /> Strainer checked/cleaned</label>
+          <label class="check-pill"><input id="coolingCheckDriftEliminators" type="checkbox" /> Drift eliminators inspected</label>
+          <label class="check-pill"><input id="coolingCheckFillPack" type="checkbox" /> Fill pack condition checked</label>
+          <label class="check-pill"><input id="coolingCheckDosingPumps" type="checkbox" /> Dosing pumps checked</label>
+          <label class="check-pill"><input id="coolingCheckChemicalDrums" type="checkbox" /> Chemical drums checked</label>
+          <label class="check-pill"><input id="coolingCheckBleedValve" type="checkbox" /> Bleed valve/controller checked</label>
+          <label class="check-pill"><input id="coolingCheckConductivityController" type="checkbox" /> Conductivity controller checked</label>
+          <label class="check-pill"><input id="coolingCheckWaterMeter" type="checkbox" /> Water meter checked, if present</label>
+          <label class="check-pill"><input id="coolingCheckLeaks" type="checkbox" /> Leaks checked</label>
+          <label class="check-pill"><input id="coolingCheckNoiseVibration" type="checkbox" /> Unusual noise/vibration checked</label>
+          <label class="check-pill"><input id="coolingCheckAccessSafety" type="checkbox" /> Access/safety issues noted</label>
+          <label class="check-pill"><input id="coolingCheckSdsAvailable" type="checkbox" /> SDS available</label>
+          <label class="check-pill"><input id="coolingCheckLogbookAvailable" type="checkbox" /> Logbook/records available</label>
+          <label class="check-pill"><input id="coolingCheckRegistrationAvailable" type="checkbox" /> Registration details available</label>
+          <label class="check-pill"><input id="coolingCheckPhotosTaken" type="checkbox" /> Photos taken, if applicable</label>
+        </div>
+      </section>
+
+      <section class="card collapsed span-12">
+        <h2>Chemical/stock usage</h2>
+        <div class="field-grid">
+          <div class="field"><label for="coolingChemicalAdded">Chemical added</label><select id="coolingChemicalAdded"><option>No</option><option>Yes</option></select></div>
+          <div class="field"><label for="coolingChemicalType">Chemical type</label><input id="coolingChemicalType" type="text" placeholder="Biocide, inhibitor, dispersant..." /></div>
+          <div class="field"><label for="coolingChemicalQuantity">Quantity</label><input id="coolingChemicalQuantity" type="number" inputmode="decimal" step="0.01" /></div>
+          <div class="field"><label for="coolingChemicalUnit">Unit</label><select id="coolingChemicalUnit"><option>L</option><option>mL</option><option>kg</option><option>g</option><option>tablet</option><option>other</option></select></div>
+          <div class="field"><label for="coolingChemicalSource">Source</label><select id="coolingChemicalSource"><option>Ute stock</option><option>Stock onsite</option></select></div>
+          <div class="field"><label for="coolingDrumLevelBefore">Drum level before</label><input id="coolingDrumLevelBefore" type="text" placeholder="e.g. 40%" /></div>
+          <div class="field"><label for="coolingDrumLevelAfter">Drum level after</label><input id="coolingDrumLevelAfter" type="text" placeholder="e.g. 25%" /></div>
+          <div class="field" style="grid-column: 1 / -1;"><label for="coolingChemicalNotes">Notes</label><textarea id="coolingChemicalNotes" placeholder="Chemical, stock or dosing notes"></textarea></div>
+        </div>
+      </section>
+
+      <section class="card collapsed span-12">
+        <h2>Lab sampling/compliance</h2>
+        <div class="field-grid">
+          <div class="field"><label for="coolingLegionellaSampleTaken">Legionella sample taken</label><select id="coolingLegionellaSampleTaken"><option>No</option><option>Yes</option></select></div>
+          <div class="field"><label for="coolingHpcSampleTaken">HCC/HPC sample taken</label><select id="coolingHpcSampleTaken"><option>No</option><option>Yes</option></select></div>
+          <div class="field"><label for="coolingSampleDateTime">Sample date/time</label><input id="coolingSampleDateTime" type="datetime-local" /></div>
+          <div class="field"><label for="coolingLabName">Lab name</label><input id="coolingLabName" type="text" /></div>
+          <div class="field"><label for="coolingSampleReference">Sample reference number</label><input id="coolingSampleReference" type="text" /></div>
+          <div class="field"><label for="coolingResultPending">Result pending</label><select id="coolingResultPending"><option>Yes</option><option>No</option></select></div>
+          <div class="field"><label for="coolingLegionellaResult">Legionella result</label><input id="coolingLegionellaResult" type="text" placeholder="cfu/mL" /></div>
+          <div class="field"><label for="coolingHpcResult">HCC/HPC result</label><input id="coolingHpcResult" type="text" placeholder="cfu/mL" /></div>
+          <div class="field"><label for="coolingCorrectiveActionRequired">Corrective action required</label><select id="coolingCorrectiveActionRequired"><option>No</option><option>Yes</option></select></div>
+          <div class="field"><label for="coolingFollowUpDate">Follow-up date</label><input id="coolingFollowUpDate" type="date" /></div>
+          <div class="field" style="grid-column: 1 / -1;"><label for="coolingLabNotes">Notes</label><textarea id="coolingLabNotes" placeholder="Lab sampling, compliance or follow-up notes"></textarea></div>
+        </div>
+        <div class="summary" id="coolingComplianceAlertList" style="margin-top: 12px;">No cooling tower compliance alerts flagged.</div>
+      </section>
+
+      <section class="card collapsed span-12">
+        <h2>Instrument traceability / reagent tracking</h2>
+        <div class="field-grid">
+          <div class="field"><label for="coolingSpinTouchUsed">SpinTouch used</label><select id="coolingSpinTouchUsed"><option>No</option><option>Yes</option></select></div>
+          <div class="field"><label for="coolingSpinTouchSerial">SpinTouch serial number</label><input id="coolingSpinTouchSerial" type="text" /></div>
+          <div class="field"><label for="coolingSpinTouchModel">SpinTouch model</label><input id="coolingSpinTouchModel" type="text" placeholder="Model / disk type" /></div>
+          <div class="field" style="grid-column: 1 / -1;"><label for="coolingSpinTouchCalibration">SpinTouch calibration/check details</label><textarea id="coolingSpinTouchCalibration" placeholder="Check standard, calibration date, verification result or notes"></textarea></div>
+          <div class="field"><label for="coolingMyronUsed">Myron Ultrameter II used</label><select id="coolingMyronUsed"><option>No</option><option>Yes</option></select></div>
+          <div class="field"><label for="coolingMyronSerial">Myron Ultrameter II serial number</label><input id="coolingMyronSerial" type="text" /></div>
+          <div class="field" style="grid-column: 1 / -1;"><label for="coolingMyronCalibration">Myron calibration details</label><textarea id="coolingMyronCalibration" placeholder="Calibration/check solution, date, result or notes"></textarea></div>
+          <div class="field"><label for="coolingReagentName">Reagent name</label><input id="coolingReagentName" type="text" /></div>
+          <div class="field"><label for="coolingReagentBrand">Reagent brand/manufacturer</label><input id="coolingReagentBrand" type="text" /></div>
+          <div class="field"><label for="coolingReagentLot">Lot/batch number</label><input id="coolingReagentLot" type="text" /></div>
+          <div class="field"><label for="coolingReagentExpiry">Use-by/expiry date</label><input id="coolingReagentExpiry" type="date" /></div>
+          <div class="field">
+            <label for="coolingReagentLinkedInstrument">Linked instrument</label>
+            <select id="coolingReagentLinkedInstrument">
+              <option value="">Select instrument</option>
+              <option>SpinTouch</option>
+              <option>Myron Ultrameter II</option>
+              <option>Other</option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -6014,6 +5408,7 @@ body::before {
           <button class="button" id="generateCoolingReportBtn" type="button">Generate report</button>
           <button class="button secondary" id="saveCoolingReportBtn" type="button">Save report PDF</button>
         </div>
+        <div class="hint" id="coolingLiveSaveStatus" style="margin-bottom: 12px;">Live spreadsheet save will run when the Cooling Tower report PDF is saved.</div>
         <div class="report-output" id="coolingReportOutput">Tap Generate report to build the cooling tower service summary.</div>
       </section>
     </div>
@@ -6605,7 +6000,7 @@ body::before {
 
       <section class="card collapsed span-12">
         <h2>Disinfection records</h2>
-        <div class="mode-note tmv-act-system-note" style="margin-bottom: 12px;">The ACT Code of Practice Appendix C describes heat disinfection by raising the warm water storage system to 70°C and flushing each outlet in turn for two minutes with water at a minimum temperature of 60°C. Reasonable precautions must be taken to reduce scalding risk.</div>
+        <div class="mode-note tmv-act-system-note" style="margin-bottom: 12px;">The ACT Code of Practice Appendix C describes heat disinfection by raising the warm water storage system to 70Â°C and flushing each outlet in turn for two minutes with water at a minimum temperature of 60Â°C. Reasonable precautions must be taken to reduce scalding risk.</div>
         <div class="mode-note tmv-act-system-note" style="margin-bottom: 12px;">The ACT Code of Practice Appendix C describes chlorine disinfection using approximately 10 mg/L chlorine residual in the system, pH 7.0 to 7.6, flushing outlets until free chlorine is not less than 7 mg/L at one outlet preferably furthest downstream, standing for one hour, then confirming free chlorine is not less than 2 mg/L at the furthest outlet before draining, refilling and recommissioning.</div>
         <div class="field-grid">
           <div class="field"><label for="tmvThermalDisinfectionPerformed">Thermal disinfection performed</label><select id="tmvThermalDisinfectionPerformed"><option>N/A</option><option>No</option><option>Yes</option></select></div>
@@ -7181,6 +6576,7 @@ body::before {
     let costSyncRefreshInFlight = false;
     let blueRiiotAutoFetchTimer = null;
     let blueRiiotAutoFetchInFlight = false;
+    let coolingTowerReportSaveInFlight = false;
 
     const REPORT_CATEGORIES = [
       { key: 'pool', label: 'Pool / spa / ice bath reports' },
@@ -9339,6 +8735,34 @@ body::before {
       }
     }
 
+    function setCoolingTowerLiveSaveStatus(message, tone = 'info') {
+      const el = qs('coolingLiveSaveStatus');
+      if (!el) return;
+      el.textContent = message;
+      el.style.color = tone === 'error' ? '#b91c1c' : tone === 'success' ? '#166534' : '#29557f';
+    }
+
+    async function updateCoolingTowerLiveSheet(payload) {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        setCoolingTowerLiveSaveStatus('Offline/local only - sync when connection returns.', 'error');
+        setSheetStatus('Offline/local only - Cooling Tower live sync was not attempted.', 'error');
+        return { attempted: false, success: false, offline: true };
+      }
+      setCoolingTowerLiveSaveStatus('Saving...', 'info');
+      const result = await updateLiveMasterSheet(payload);
+      if (result && result.success) {
+        setCoolingTowerLiveSaveStatus('Saved to live spreadsheet', 'success');
+        setSheetStatus('Cooling Tower saved to live spreadsheet.', 'success');
+        showAppToast('Cooling Tower saved to live spreadsheet.');
+      } else if (result && result.training) {
+        setCoolingTowerLiveSaveStatus('Training mode - live spreadsheet save skipped.', 'info');
+      } else {
+        setCoolingTowerLiveSaveStatus('Saved locally - live sync failed', 'error');
+        showAppToast('Cooling Tower saved locally - live sync failed.');
+      }
+      return result;
+    }
+
     function getCostSyncDeviceId() {
       let id = localStorage.getItem(COST_SYNC_DEVICE_KEY) || '';
       if (!id) {
@@ -10680,7 +10104,13 @@ body::before {
           id: tower.id || `tower_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           towerId: tower.towerId || tower.idLabel || tower.name || '',
           location: tower.location || '',
+          actRegistration: tower.actRegistration || '',
+          assetRef: tower.assetRef || tower.qrCodeValue || '',
+          samplingPoint: tower.samplingPoint || '',
           volume: tower.volume || '',
+          systemStatus: tower.systemStatus || 'Operating',
+          systemNotes: tower.systemNotes || '',
+          qrCodeValue: tower.qrCodeValue || '',
           photos: Array.isArray(tower.photos) ? tower.photos : [],
           consumables: Array.isArray(tower.consumables) ? tower.consumables : [],
           createdAt: tower.createdAt || new Date().toISOString(),
@@ -10739,7 +10169,12 @@ body::before {
       if (inputs.coolingTowerSite) inputs.coolingTowerSite.value = site ? site.name : '';
       if (inputs.coolingTowerId) inputs.coolingTowerId.value = tower ? (tower.towerId || '') : '';
       if (inputs.coolingTowerLocation) inputs.coolingTowerLocation.value = tower ? (tower.location || '') : '';
+      if (inputs.coolingTowerActRegistration) inputs.coolingTowerActRegistration.value = tower ? (tower.actRegistration || '') : '';
+      if (inputs.coolingTowerAssetRef) inputs.coolingTowerAssetRef.value = tower ? (tower.assetRef || tower.qrCodeValue || '') : '';
+      if (inputs.coolingTowerSamplingPoint) inputs.coolingTowerSamplingPoint.value = tower ? (tower.samplingPoint || '') : '';
       if (inputs.coolingTowerVolume) inputs.coolingTowerVolume.value = tower ? (tower.volume || '') : '';
+      if (inputs.coolingTowerSystemStatus) inputs.coolingTowerSystemStatus.value = tower ? (tower.systemStatus || 'Operating') : 'Operating';
+      if (inputs.coolingTowerSystemNotes) inputs.coolingTowerSystemNotes.value = tower ? (tower.systemNotes || '') : '';
       renderCoolingTowerSelectors(state);
       renderCoolingTowerPhotos();
       renderCoolingTowerCouponRecords();
@@ -10785,13 +10220,18 @@ body::before {
       if (!site) return;
       let tower = getActiveCoolingTower(state);
       if (!tower || qs('coolingTowerSelect')?.value === '') {
-        tower = { id: makeCoolingId('tower'), towerId, location: '', volume: '', photos: [], consumables: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        tower = { id: makeCoolingId('tower'), towerId, location: '', actRegistration: '', assetRef: '', samplingPoint: '', volume: '', systemStatus: 'Operating', systemNotes: '', photos: [], consumables: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
         site.towers.push(tower);
         state.activeTowerId = tower.id;
       }
       tower.towerId = towerId;
       tower.location = inputs.coolingTowerLocation?.value || '';
+      tower.actRegistration = inputs.coolingTowerActRegistration?.value || '';
+      tower.assetRef = inputs.coolingTowerAssetRef?.value || tower.qrCodeValue || '';
+      tower.samplingPoint = inputs.coolingTowerSamplingPoint?.value || '';
       tower.volume = inputs.coolingTowerVolume?.value || '';
+      tower.systemStatus = inputs.coolingTowerSystemStatus?.value || 'Operating';
+      tower.systemNotes = inputs.coolingTowerSystemNotes?.value || '';
       tower.updatedAt = new Date().toISOString();
       saveCoolingTowerState(state);
       renderCoolingTowerSection();
@@ -10804,7 +10244,12 @@ body::before {
       saveCoolingTowerState(state);
       if (inputs.coolingTowerId) inputs.coolingTowerId.value = '';
       if (inputs.coolingTowerLocation) inputs.coolingTowerLocation.value = '';
+      if (inputs.coolingTowerActRegistration) inputs.coolingTowerActRegistration.value = '';
+      if (inputs.coolingTowerAssetRef) inputs.coolingTowerAssetRef.value = '';
+      if (inputs.coolingTowerSamplingPoint) inputs.coolingTowerSamplingPoint.value = '';
       if (inputs.coolingTowerVolume) inputs.coolingTowerVolume.value = '';
+      if (inputs.coolingTowerSystemStatus) inputs.coolingTowerSystemStatus.value = 'Operating';
+      if (inputs.coolingTowerSystemNotes) inputs.coolingTowerSystemNotes.value = '';
       renderCoolingTowerSection();
       saveState();
     }
@@ -11100,22 +10545,102 @@ body::before {
       `).join('');
     }
 
+    const COOLING_ALERT_THRESHOLDS = {
+      legionellaNotificationCfuMl: 1000,
+      hpcNotificationCfuMl: 5000000,
+      recordsRetentionYears: 7
+    };
+
     const COOLING_TOWER_TEST_FIELDS = [
-      { id: 'coolingTds', label: 'TDS', unit: 'ppm', decimals: 0 },
       { id: 'coolingPh', label: 'pH', unit: '', decimals: 2 },
-      { id: 'coolingAlk', label: 'ALK', unit: 'ppm', decimals: 0 },
-      { id: 'coolingInhibitor', label: 'Inhibitor', unit: '', decimals: 2 },
-      { id: 'coolingChlorides', label: 'Chlorides', unit: 'ppm', decimals: 0 },
+      { id: 'coolingTemperature', label: 'Temperature', unit: 'deg C', decimals: 1 },
+      { id: 'coolingConductivity', label: 'Conductivity', unit: 'uS/cm', decimals: 0 },
+      { id: 'coolingTds', label: 'TDS', unit: 'ppm', decimals: 0 },
       { id: 'coolingOrp', label: 'ORP', unit: 'mV', decimals: 0 },
-      { id: 'coolingFreeHalogen', label: 'Free Chlorine / Bromine', unit: 'ppm', decimals: 2 }
+      { id: 'coolingAlk', label: 'Alkalinity', unit: 'ppm', decimals: 0 },
+      { id: 'coolingChlorides', label: 'Chloride', unit: 'ppm', decimals: 0 },
+      { id: 'coolingInhibitor', label: 'Inhibitor', unit: 'ppm or product units', decimals: 2 },
+      { id: 'coolingHardness', label: 'Hardness', unit: 'ppm', decimals: 0 },
+      { id: 'coolingVisualCondition', label: 'Visual clarity/condition', unit: '', type: 'text' },
+      { id: 'coolingOdour', label: 'Odour', unit: '', type: 'text' },
+      { id: 'coolingTestComments', label: 'Comments', unit: '', type: 'text' }
+    ];
+
+    const COOLING_MAKEUP_TEST_FIELDS = [
+      { id: 'coolingMakeupPh', label: 'pH', unit: '', decimals: 2 },
+      { id: 'coolingMakeupTemperature', label: 'Temperature', unit: 'deg C', decimals: 1 },
+      { id: 'coolingMakeupConductivity', label: 'Conductivity', unit: 'uS/cm', decimals: 0 },
+      { id: 'coolingMakeupTds', label: 'TDS', unit: 'ppm', decimals: 0 },
+      { id: 'coolingMakeupChloride', label: 'Chloride', unit: 'ppm', decimals: 0 },
+      { id: 'coolingMakeupAlk', label: 'Alkalinity', unit: 'ppm', decimals: 0 },
+      { id: 'coolingMakeupHardness', label: 'Hardness', unit: 'ppm', decimals: 0 },
+      { id: 'coolingMakeupComments', label: 'Comments', unit: '', type: 'text' }
+    ];
+
+    const COOLING_SERVICE_CHECK_FIELDS = [
+      ['coolingCheckBasinInspected', 'Tower basin inspected'],
+      ['coolingCheckStrainerCleaned', 'Strainer checked/cleaned'],
+      ['coolingCheckDriftEliminators', 'Drift eliminators inspected'],
+      ['coolingCheckFillPack', 'Fill pack condition checked'],
+      ['coolingCheckDosingPumps', 'Dosing pumps checked'],
+      ['coolingCheckChemicalDrums', 'Chemical drums checked'],
+      ['coolingCheckBleedValve', 'Bleed valve/controller checked'],
+      ['coolingCheckConductivityController', 'Conductivity controller checked'],
+      ['coolingCheckWaterMeter', 'Water meter checked, if present'],
+      ['coolingCheckLeaks', 'Leaks checked'],
+      ['coolingCheckNoiseVibration', 'Unusual noise/vibration checked'],
+      ['coolingCheckAccessSafety', 'Access/safety issues noted'],
+      ['coolingCheckSdsAvailable', 'SDS available'],
+      ['coolingCheckLogbookAvailable', 'Logbook/records available'],
+      ['coolingCheckRegistrationAvailable', 'Registration details available'],
+      ['coolingCheckPhotosTaken', 'Photos taken, if applicable']
     ];
 
     function getCoolingTowerTestRows() {
       return COOLING_TOWER_TEST_FIELDS.map(field => {
         const input = inputs[field.id];
+        if (field.type === 'text') {
+          const value = (input?.value || '').trim();
+          return { ...field, value, display: value || '-' };
+        }
         const value = input ? n(input.value) : null;
         return { ...field, value, display: value == null ? '-' : formatNumber(value, field.decimals) };
       });
+    }
+
+    function getCoolingMakeupTestRows() {
+      return COOLING_MAKEUP_TEST_FIELDS.map(field => {
+        const input = inputs[field.id];
+        if (field.type === 'text') {
+          const value = (input?.value || '').trim();
+          return { ...field, value, display: value || '-' };
+        }
+        const value = input ? n(input.value) : null;
+        return { ...field, value, display: value == null ? '-' : formatNumber(value, field.decimals) };
+      });
+    }
+
+    function calculateCoolingCycle(towerValue, makeupValue) {
+      const tower = n(towerValue);
+      const makeup = n(makeupValue);
+      if (tower == null || makeup == null || makeup <= 0) return { value: null, display: 'Not calculated' };
+      return { value: tower / makeup, display: formatNumber(tower / makeup, 1) };
+    }
+
+    function getCoolingCycles() {
+      return {
+        chloride: calculateCoolingCycle(inputs.coolingChlorides?.value, inputs.coolingMakeupChloride?.value),
+        conductivity: calculateCoolingCycle(inputs.coolingConductivity?.value, inputs.coolingMakeupConductivity?.value),
+        note: 'Chloride-based cycles are generally preferred where chloride values are available.'
+      };
+    }
+
+    function renderCoolingCycles() {
+      const cycles = getCoolingCycles();
+      const chloride = qs('coolingChlorideCycles');
+      const conductivity = qs('coolingConductivityCycles');
+      if (chloride) chloride.textContent = cycles.chloride.display;
+      if (conductivity) conductivity.textContent = cycles.conductivity.display;
     }
 
     function renderCoolingTowerTestSummary() {
@@ -11128,6 +10653,291 @@ body::before {
           <td>${escapeHtml(row.unit || '-')}</td>
         </tr>
       `).join('');
+      renderCoolingCycles();
+    }
+
+    function getCoolingCheckedItems(fields) {
+      return fields.filter(([id]) => inputs[id] && inputs[id].checked).map(([, label]) => label);
+    }
+
+    function getCoolingChemicalModel() {
+      const added = (inputs.coolingChemicalAdded?.value || 'No') === 'Yes';
+      return {
+        added,
+        type: (inputs.coolingChemicalType?.value || '').trim(),
+        quantity: (inputs.coolingChemicalQuantity?.value || '').trim(),
+        unit: inputs.coolingChemicalUnit?.value || '',
+        source: inputs.coolingChemicalSource?.value || '',
+        drumBefore: (inputs.coolingDrumLevelBefore?.value || '').trim(),
+        drumAfter: (inputs.coolingDrumLevelAfter?.value || '').trim(),
+        notes: (inputs.coolingChemicalNotes?.value || '').trim()
+      };
+    }
+
+    function getCoolingBiocideVisibility() {
+      const type = inputs.coolingBiocideType?.value || 'Unknown';
+      return {
+        type,
+        showOxidising: type === 'Oxidising' || type === 'Both',
+        showNonOxidising: type === 'Non-oxidising' || type === 'Both'
+      };
+    }
+
+    function updateCoolingBiocideVisibility() {
+      const visibility = getCoolingBiocideVisibility();
+      document.querySelectorAll('.cooling-biocide-oxidising').forEach(el => {
+        el.classList.toggle('hidden', !visibility.showOxidising);
+      });
+      document.querySelectorAll('.cooling-biocide-nonoxidising').forEach(el => {
+        el.classList.toggle('hidden', !visibility.showNonOxidising);
+      });
+      const notice = qs('coolingNonOxidisingMethodNotice');
+      if (notice) {
+        const method = inputs.coolingNonOxidisingTestMethodAvailable?.value || 'Unknown';
+        notice.classList.toggle('hidden', !(visibility.showNonOxidising && (method === 'No' || method === 'Unknown')));
+      }
+    }
+
+    function getCoolingBiocideModel() {
+      const visibility = getCoolingBiocideVisibility();
+      const nonOxidisingMethod = inputs.coolingNonOxidisingTestMethodAvailable?.value || 'Unknown';
+      return {
+        type: visibility.type,
+        showOxidising: visibility.showOxidising,
+        showNonOxidising: visibility.showNonOxidising,
+        oxidising: {
+          residualTested: inputs.coolingOxidisingResidualTested?.value || 'No',
+          type: inputs.coolingOxidisingBiocideType?.value || '',
+          result: (inputs.coolingOxidisingResidualResult?.value || '').trim(),
+          unit: inputs.coolingOxidisingResidualUnit?.value || ''
+        },
+        nonOxidising: {
+          used: inputs.coolingNonOxidisingUsed?.value || 'Unknown',
+          product: (inputs.coolingNonOxidisingProduct?.value || '').trim(),
+          activeIngredient: inputs.coolingNonOxidisingActive?.value || 'Unknown',
+          doseAmount: (inputs.coolingNonOxidisingDoseAmount?.value || '').trim(),
+          doseUnit: (inputs.coolingNonOxidisingDoseUnit?.value || '').trim(),
+          dosingMethod: (inputs.coolingNonOxidisingDosingMethod?.value || '').trim(),
+          testMethodAvailable: nonOxidisingMethod,
+          testResult: (inputs.coolingNonOxidisingTestResult?.value || '').trim(),
+          methodNotes: (inputs.coolingNonOxidisingMethodNotes?.value || '').trim(),
+          supplierRecommendedRange: (inputs.coolingSupplierRecommendedRange?.value || '').trim()
+        },
+        treatmentNotes: (inputs.coolingTreatmentNotes?.value || '').trim(),
+        noUniversalFieldTestText: 'No universal field residual test recorded for this non-oxidising biocide. Refer to supplier method, lab testing, or site treatment program.',
+        reportNoFieldMethodText: 'Non-oxidising biocide residual not tested â€” no field method recorded.'
+      };
+    }
+
+    function getCoolingBiocideReportRows() {
+      const model = getCoolingBiocideModel();
+      const rows = [['Biocide type', model.type || 'Unknown']];
+      if (model.showOxidising) {
+        rows.push(['Oxidising biocide residual tested', model.oxidising.residualTested]);
+        rows.push(['Oxidising biocide type', model.oxidising.type || '-']);
+        if (model.oxidising.residualTested === 'Yes') {
+          rows.push(['Oxidising biocide residual result', [model.oxidising.result || '-', model.oxidising.unit || ''].filter(Boolean).join(' ')]);
+        }
+      }
+      if (model.showNonOxidising) {
+        rows.push(['Non-oxidising biocide used', model.nonOxidising.used]);
+        if (model.nonOxidising.product) rows.push(['Non-oxidising biocide product/name', model.nonOxidising.product]);
+        if (model.nonOxidising.activeIngredient && model.nonOxidising.activeIngredient !== 'Unknown') rows.push(['Active ingredient, if known', model.nonOxidising.activeIngredient]);
+        const dose = [model.nonOxidising.doseAmount, model.nonOxidising.doseUnit].filter(Boolean).join(' ');
+        if (dose) rows.push(['Non-oxidising biocide dose', dose]);
+        if (model.nonOxidising.dosingMethod) rows.push(['Non-oxidising biocide dosing method', model.nonOxidising.dosingMethod]);
+        rows.push(['Non-oxidising biocide test method available', model.nonOxidising.testMethodAvailable]);
+        if (model.nonOxidising.testMethodAvailable === 'Yes' && model.nonOxidising.testResult) {
+          rows.push(['Non-oxidising biocide test result', model.nonOxidising.testResult]);
+        }
+        if (model.nonOxidising.testMethodAvailable === 'No' || model.nonOxidising.testMethodAvailable === 'Unknown') {
+          rows.push(['Non-oxidising residual test', model.reportNoFieldMethodText]);
+        }
+        if (model.nonOxidising.methodNotes) rows.push(['Non-oxidising biocide test method notes', model.nonOxidising.methodNotes]);
+        if (model.nonOxidising.supplierRecommendedRange) rows.push(['Supplier recommended range', model.nonOxidising.supplierRecommendedRange]);
+      }
+      if (model.treatmentNotes) rows.push(['Treatment notes', model.treatmentNotes]);
+      return rows;
+    }
+
+    function parseCoolingResultNumber(value) {
+      const cleaned = String(value || '').replace(/,/g, '').match(/-?\d+(\.\d+)?/);
+      if (!cleaned) return null;
+      const numberValue = Number(cleaned[0]);
+      return Number.isFinite(numberValue) ? numberValue : null;
+    }
+
+    function getCoolingLabModel() {
+      return {
+        legionellaSampleTaken: inputs.coolingLegionellaSampleTaken?.value || 'No',
+        hpcSampleTaken: inputs.coolingHpcSampleTaken?.value || 'No',
+        sampleDateTime: inputs.coolingSampleDateTime?.value || '',
+        labName: (inputs.coolingLabName?.value || '').trim(),
+        sampleReference: (inputs.coolingSampleReference?.value || '').trim(),
+        resultPending: inputs.coolingResultPending?.value || 'Yes',
+        legionellaResult: (inputs.coolingLegionellaResult?.value || '').trim(),
+        legionellaValue: parseCoolingResultNumber(inputs.coolingLegionellaResult?.value),
+        hpcResult: (inputs.coolingHpcResult?.value || '').trim(),
+        hpcValue: parseCoolingResultNumber(inputs.coolingHpcResult?.value),
+        correctiveActionRequired: inputs.coolingCorrectiveActionRequired?.value || 'No',
+        followUpDate: inputs.coolingFollowUpDate?.value || '',
+        notes: (inputs.coolingLabNotes?.value || '').trim()
+      };
+    }
+
+    function getCoolingInstrumentTraceabilityModel() {
+      return {
+        spinTouchUsed: inputs.coolingSpinTouchUsed?.value || 'No',
+        spinTouchSerial: (inputs.coolingSpinTouchSerial?.value || '').trim(),
+        spinTouchModel: (inputs.coolingSpinTouchModel?.value || '').trim(),
+        spinTouchCalibration: (inputs.coolingSpinTouchCalibration?.value || '').trim(),
+        myronUsed: inputs.coolingMyronUsed?.value || 'No',
+        myronSerial: (inputs.coolingMyronSerial?.value || '').trim(),
+        myronCalibration: (inputs.coolingMyronCalibration?.value || '').trim()
+      };
+    }
+
+    function getCoolingReagentTrackingModel() {
+      return {
+        name: (inputs.coolingReagentName?.value || '').trim(),
+        brand: (inputs.coolingReagentBrand?.value || '').trim(),
+        lotBatch: (inputs.coolingReagentLot?.value || '').trim(),
+        expiryDate: inputs.coolingReagentExpiry?.value || '',
+        linkedInstrument: inputs.coolingReagentLinkedInstrument?.value || ''
+      };
+    }
+
+    function getCoolingChecklistResults() {
+      return COOLING_SERVICE_CHECK_FIELDS.map(([id, label]) => ({
+        id,
+        label,
+        checked: Boolean(inputs[id] && inputs[id].checked)
+      }));
+    }
+
+    function makeCoolingTowerRecordIdPart(value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 48) || 'na';
+    }
+
+    function makeCoolingTowerServiceRecordId(model) {
+      const site = getActiveCoolingSite();
+      const tower = getActiveCoolingTower();
+      return [
+        'cooling-tower',
+        site?.id || model.site,
+        tower?.id || model.towerId,
+        model.rawDate || getLocalDateInputValue(new Date()),
+        inputs.coolingTowerTime?.value || '',
+        model.visitType || ''
+      ].map(makeCoolingTowerRecordIdPart).join('-');
+    }
+
+    function buildCoolingTowerLiveSheetPayload(options = {}) {
+      const model = options.model || getCoolingTowerReportModel();
+      const recordId = options.recordId || makeCoolingTowerServiceRecordId(model);
+      const reportId = options.reportId || `report-${recordId}`;
+      const savedAt = options.savedAt || new Date().toISOString();
+      const tower = getActiveCoolingTower();
+      const site = getActiveCoolingSite();
+      return {
+        payloadType: 'coolingTowerService',
+        sentAt: savedAt,
+        savedAt,
+        timestampSaved: savedAt,
+        deviceId: getCostSyncDeviceId(),
+        recordId,
+        reportId,
+        reportReference: reportId,
+        reportFilename: options.filename || '',
+        siteId: site?.id || '',
+        towerKey: tower?.id || '',
+        siteName: model.site || '',
+        buildingLocation: model.location || '',
+        towerSystemId: model.towerId || '',
+        actRegistrationNumber: model.actRegistration || '',
+        assetQrReference: model.assetRef || '',
+        samplingPoint: model.samplingPoint || '',
+        technician: model.technician || '',
+        serviceDate: model.rawDate || '',
+        serviceTime: inputs.coolingTowerTime?.value || '',
+        dateTime: `${model.rawDate || ''} ${inputs.coolingTowerTime?.value || ''}`.trim(),
+        serviceType: model.visitType || '',
+        systemStatus: model.systemStatus || '',
+        systemNotes: model.systemNotes || '',
+        towerWaterResults: model.testRows,
+        incomingMakeupWaterResults: model.makeupRows,
+        cycles: model.cycles,
+        biocide: model.biocide,
+        biocideRows: model.biocideRows,
+        onlineDisinfectionCorrectiveAction: {
+          clean: model.clean,
+          correctiveActionRequired: model.lab.correctiveActionRequired,
+          followUpDate: model.lab.followUpDate,
+          notes: model.lab.notes || model.notes || ''
+        },
+        serviceChecklist: getCoolingChecklistResults(),
+        serviceChecklistCompleted: model.checklist,
+        chemicalStockUsage: model.chemical,
+        labSampling: model.lab,
+        instrumentTraceability: model.instrumentTraceability,
+        reagentTracking: model.reagentTracking,
+        complianceAlerts: model.alerts,
+        technicianNotes: model.notes || '',
+        photoCount: model.photos.length,
+        photoNames: model.photos.map(photo => photo.name || '').filter(Boolean),
+        controllerConsumables: model.consumables,
+        corrosionCoupons: model.coupons
+      };
+    }
+
+    function getCoolingComplianceAlerts() {
+      const alerts = [];
+      const lab = getCoolingLabModel();
+      const cycles = getCoolingCycles();
+      const registration = (inputs.coolingTowerActRegistration?.value || '').trim();
+      const today = getLocalDateInputValue(new Date());
+      if (lab.legionellaValue != null && lab.legionellaValue >= COOLING_ALERT_THRESHOLDS.legionellaNotificationCfuMl) {
+        alerts.push('ACT Health notification may be required within 24 hours for Legionella result - check compliance requirements.');
+      } else if (lab.legionellaValue != null && lab.legionellaValue > 0) {
+        alerts.push('Legionella detected or elevated - check compliance requirements.');
+      }
+      if (lab.hpcValue != null && lab.hpcValue >= COOLING_ALERT_THRESHOLDS.hpcNotificationCfuMl) {
+        alerts.push('ACT Health notification may be required within 24 hours for HCC/HPC result - check compliance requirements.');
+      } else if (lab.hpcValue != null && lab.hpcValue > 0) {
+        alerts.push('HCC/HPC elevated - check compliance requirements.');
+      }
+      if ((inputs.coolingTowerVisitType?.value || '') === 'Lab sampling' && lab.legionellaSampleTaken !== 'Yes' && lab.hpcSampleTaken !== 'Yes') {
+        alerts.push('Lab sample overdue or not recorded - check compliance requirements.');
+      }
+      if ((inputs.coolingTowerVisitType?.value || '') === 'Clean' && !(inputs.coolingCleanEnabled && inputs.coolingCleanEnabled.checked)) {
+        alerts.push('Cleaning overdue or not recorded - check compliance requirements.');
+      }
+      if (inputs.coolingCleanStatus?.value === 'Required - not completed') {
+        alerts.push('Cleaning overdue or incomplete - check compliance requirements.');
+      }
+      if (!registration) alerts.push('Missing ACT registration number.');
+      if (!(inputs.coolingCheckSdsAvailable && inputs.coolingCheckSdsAvailable.checked)) alerts.push('Missing SDS.');
+      if (!(inputs.coolingCheckLogbookAvailable && inputs.coolingCheckLogbookAvailable.checked)) alerts.push('Missing logbook/records.');
+      if (!(inputs.coolingCheckRegistrationAvailable && inputs.coolingCheckRegistrationAvailable.checked)) alerts.push('Registration details not confirmed available.');
+      if (cycles.chloride.value == null && n(inputs.coolingChlorides?.value) != null) alerts.push('Missing incoming/makeup chloride data where cycles are being calculated.');
+      if (cycles.conductivity.value == null && n(inputs.coolingConductivity?.value) != null) alerts.push('Missing incoming/makeup conductivity data where cycles are being calculated.');
+      if (lab.followUpDate && lab.correctiveActionRequired === 'Yes' && lab.followUpDate < today) alerts.push('Follow-up date has passed - check corrective action status.');
+      alerts.push(`Records should be retained for at least ${COOLING_ALERT_THRESHOLDS.recordsRetentionYears} years.`);
+      return alerts;
+    }
+
+    function renderCoolingComplianceAlerts() {
+      const box = qs('coolingComplianceAlertList');
+      if (!box) return;
+      const alerts = getCoolingComplianceAlerts();
+      box.innerHTML = alerts.length
+        ? `<strong>Compliance/alert notes</strong><ul style="margin: 6px 0 0 18px;">${alerts.map(alert => `<li>${escapeHtml(alert)}</li>`).join('')}</ul>`
+        : 'No cooling tower compliance alerts flagged.';
     }
 
     function getCoolingTowerCouponState() {
@@ -11307,13 +11117,28 @@ body::before {
         towerId: tower?.towerId || inputs.coolingTowerId?.value || '-',
         towerName: getCoolingTowerName(),
         location: tower?.location || inputs.coolingTowerLocation?.value || '-',
+        actRegistration: tower?.actRegistration || inputs.coolingTowerActRegistration?.value || '',
+        assetRef: tower?.assetRef || tower?.qrCodeValue || inputs.coolingTowerAssetRef?.value || '',
+        samplingPoint: tower?.samplingPoint || inputs.coolingTowerSamplingPoint?.value || '',
         volume: tower?.volume || inputs.coolingTowerVolume?.value || '',
+        systemStatus: tower?.systemStatus || inputs.coolingTowerSystemStatus?.value || '-',
+        systemNotes: (tower?.systemNotes || inputs.coolingTowerSystemNotes?.value || '').trim(),
         technician: inputs.coolingTowerTechnician?.value || '-',
         date: formatDateDisplay(inputs.coolingTowerDate?.value || ''),
         rawDate: inputs.coolingTowerDate?.value || '',
         testTime: formatTimeDisplay(inputs.coolingTowerTime?.value || ''),
         visitType: inputs.coolingTowerVisitType?.value || '-',
         testRows: getCoolingTowerTestRows(),
+        biocide: getCoolingBiocideModel(),
+        biocideRows: getCoolingBiocideReportRows(),
+        makeupRows: getCoolingMakeupTestRows(),
+        cycles: getCoolingCycles(),
+        checklist: getCoolingCheckedItems(COOLING_SERVICE_CHECK_FIELDS),
+        chemical: getCoolingChemicalModel(),
+        lab: getCoolingLabModel(),
+        instrumentTraceability: getCoolingInstrumentTraceabilityModel(),
+        reagentTracking: getCoolingReagentTrackingModel(),
+        alerts: getCoolingComplianceAlerts(),
         clean: getCoolingTowerCleanReportModel(),
         coupons,
         consumables: getCoolingTowerConsumables(),
@@ -11332,13 +11157,43 @@ body::before {
       lines.push(`Site: ${model.site}`);
       lines.push(`Tower ID: ${model.towerId}`);
       lines.push(`Location: ${model.location}`);
+      lines.push(`ACT registration number: ${model.actRegistration || '-'}`);
+      lines.push(`Asset/QR reference: ${model.assetRef || '-'}`);
+      lines.push(`Sampling point: ${model.samplingPoint || '-'}`);
       lines.push(`System volume: ${model.volume ? `${model.volume} L` : '-'}`);
+      lines.push(`System status: ${model.systemStatus}`);
       lines.push(`Technician: ${model.technician}`);
       lines.push(`Date/time: ${model.date} ${model.testTime}`.trim());
       lines.push(`Visit type: ${model.visitType}`);
+      if (model.systemNotes) lines.push(`System notes: ${model.systemNotes}`);
       lines.push('');
-      lines.push('Test results');
+      lines.push('Tower/System Water Test');
       model.testRows.forEach(row => lines.push(`${row.label}: ${row.display}${row.unit ? ` ${row.unit}` : ''}`));
+      lines.push('');
+      lines.push('Biocide / Treatment Program');
+      model.biocideRows.forEach(row => lines.push(`${row[0]}: ${row[1]}`));
+      lines.push('');
+      lines.push('Incoming/Makeup Water Test');
+      model.makeupRows.forEach(row => lines.push(`${row.label}: ${row.display}${row.unit ? ` ${row.unit}` : ''}`));
+      lines.push(`Chloride-based cycles: ${model.cycles.chloride.display}`);
+      lines.push(`Conductivity-based cycles: ${model.cycles.conductivity.display}`);
+      lines.push(model.cycles.note);
+      lines.push('');
+      lines.push('Service checklist');
+      lines.push(model.checklist.length ? model.checklist.join(', ') : 'No checklist items ticked.');
+      lines.push('');
+      lines.push('Chemical/stock usage');
+      lines.push(model.chemical.added ? `${model.chemical.type || 'Chemical'}: ${model.chemical.quantity || '-'} ${model.chemical.unit || ''} from ${model.chemical.source || '-'}` : 'No chemicals added');
+      if (model.chemical.notes) lines.push(`Chemical notes: ${model.chemical.notes}`);
+      lines.push('');
+      lines.push('Lab sampling/compliance');
+      lines.push(`Legionella sample taken: ${model.lab.legionellaSampleTaken}`);
+      lines.push(`HCC/HPC sample taken: ${model.lab.hpcSampleTaken}`);
+      lines.push(`Lab: ${model.lab.labName || '-'}`);
+      lines.push(`Legionella result: ${model.lab.legionellaResult || '-'}`);
+      lines.push(`HCC/HPC result: ${model.lab.hpcResult || '-'}`);
+      lines.push(`Corrective action required: ${model.lab.correctiveActionRequired}`);
+      lines.push('Alerts: ' + (model.alerts.length ? model.alerts.join('; ') : 'None flagged.'));
       lines.push('');
       if (model.clean.enabled) {
         lines.push('Cooling tower clean');
@@ -11382,6 +11237,44 @@ body::before {
     function buildCoolingTowerReportHtml() {
       const model = getCoolingTowerReportModel();
       const volumeLabel = model.volume ? `${model.volume} L` : '-';
+      const assetRows = [
+        ['Site', model.site, 'Tower ID', model.towerId],
+        ['Building/location', model.location, 'ACT registration', model.actRegistration || '-'],
+        ['Asset/QR reference', model.assetRef || '-', 'Sampling point', model.samplingPoint || '-'],
+        ['System volume', volumeLabel, 'System status', model.systemStatus],
+        ['Service type', model.visitType, 'Photos attached', String(model.photos.length)]
+      ];
+      const cycleRows = [
+        ['Chloride-based cycles', model.cycles.chloride.display],
+        ['Conductivity-based cycles', model.cycles.conductivity.display],
+        ['Calculation note', model.cycles.note]
+      ];
+      const chemicalRows = model.chemical.added ? [
+        ['Chemical added', 'Yes'],
+        ['Chemical type', model.chemical.type || '-'],
+        ['Quantity', [model.chemical.quantity || '-', model.chemical.unit || ''].filter(Boolean).join(' ')],
+        ['Source', model.chemical.source || '-'],
+        ['Drum level before/after', `${model.chemical.drumBefore || '-'} / ${model.chemical.drumAfter || '-'}`],
+        ['Notes', model.chemical.notes || '-']
+      ] : [['Chemical added', 'No chemicals added']];
+      const labRows = [
+        ['Legionella sample taken', model.lab.legionellaSampleTaken],
+        ['HCC/HPC sample taken', model.lab.hpcSampleTaken],
+        ['Sample date/time', model.lab.sampleDateTime || '-'],
+        ['Lab name', model.lab.labName || '-'],
+        ['Sample reference number', model.lab.sampleReference || '-'],
+        ['Result pending', model.lab.resultPending],
+        ['Legionella result', model.lab.legionellaResult || '-'],
+        ['HCC/HPC result', model.lab.hpcResult || '-'],
+        ['Corrective action required', model.lab.correctiveActionRequired],
+        ['Follow-up date', formatDateDisplay(model.lab.followUpDate || '') || '-'],
+        ['Notes', model.lab.notes || '-']
+      ];
+      const correctiveRows = [
+        ['Corrective action required', model.lab.correctiveActionRequired],
+        ['Follow-up date', formatDateDisplay(model.lab.followUpDate || '') || '-'],
+        ['Corrective action notes', model.lab.notes || model.notes || '-']
+      ];
       const cleanRows = model.clean.enabled ? [
         ['Clean selected', 'Yes'],
         ['Clean type', model.clean.type],
@@ -11428,28 +11321,12 @@ body::before {
           <div class="report-section-bar">Cooling tower asset</div>
           <table class="report-table">
             <tbody>
-              <tr>
-                <th style="width:22%;">Site</th>
-                <td style="width:28%;">${escapeHtml(model.site)}</td>
-                <th style="width:22%;">Tower ID</th>
-                <td style="width:28%;">${escapeHtml(model.towerId)}</td>
-              </tr>
-              <tr>
-                <th>Location</th>
-                <td>${escapeHtml(model.location)}</td>
-                <th>System volume</th>
-                <td>${escapeHtml(volumeLabel)}</td>
-              </tr>
-              <tr>
-                <th>Visit type</th>
-                <td>${escapeHtml(model.visitType)}</td>
-                <th>Photos attached</th>
-                <td>${escapeHtml(String(model.photos.length))}</td>
-              </tr>
+              ${assetRows.map(row => `<tr><th style="width:22%;">${escapeHtml(row[0])}</th><td style="width:28%;">${escapeHtml(row[1])}</td><th style="width:22%;">${escapeHtml(row[2])}</th><td style="width:28%;">${escapeHtml(row[3])}</td></tr>`).join('')}
+              ${model.systemNotes ? `<tr><th>System notes</th><td colspan="3">${escapeHtml(model.systemNotes)}</td></tr>` : ''}
             </tbody>
           </table>
 
-          <div class="report-section-bar">Cooling tower test results</div>
+          <div class="report-section-bar">Tower/System Water Test</div>
           <table class="report-table">
             <thead>
               <tr>
@@ -11467,6 +11344,49 @@ body::before {
                 </tr>
               `).join('')}
             </tbody>
+          </table>
+
+          <div class="report-section-bar">Biocide / Treatment Program</div>
+          <table class="report-table">
+            <tbody>${model.biocideRows.map(row => `<tr><td style="width:30%; font-weight:800;">${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td></tr>`).join('')}</tbody>
+          </table>
+
+          <div class="report-section-bar">Incoming/Makeup Water Test</div>
+          <table class="report-table">
+            <thead><tr><th style="width:44%;">Result</th><th style="width:28%;">Value</th><th>Unit</th></tr></thead>
+            <tbody>
+              ${model.makeupRows.map(row => `<tr><td>${escapeHtml(row.label)}</td><td>${escapeHtml(row.display)}</td><td>${escapeHtml(row.unit || '-')}</td></tr>`).join('')}
+            </tbody>
+          </table>
+
+          <div class="report-section-bar">Cycles of concentration</div>
+          <table class="report-table">
+            <tbody>${cycleRows.map(row => `<tr><td style="width:30%; font-weight:800;">${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td></tr>`).join('')}</tbody>
+          </table>
+
+          <div class="report-section-bar">Service checklist summary</div>
+          <table class="report-table">
+            <tbody>${model.checklist.length ? model.checklist.map(item => `<tr><td>${escapeHtml(item)}</td></tr>`).join('') : '<tr><td>No checklist items ticked.</td></tr>'}</tbody>
+          </table>
+
+          <div class="report-section-bar">Chemical/stock usage</div>
+          <table class="report-table">
+            <tbody>${chemicalRows.map(row => `<tr><td style="width:30%; font-weight:800;">${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td></tr>`).join('')}</tbody>
+          </table>
+
+          <div class="report-section-bar">Lab sampling details</div>
+          <table class="report-table">
+            <tbody>${labRows.map(row => `<tr><td style="width:30%; font-weight:800;">${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td></tr>`).join('')}</tbody>
+          </table>
+
+          <div class="report-section-bar">Compliance/alert notes</div>
+          <table class="report-table">
+            <tbody>${model.alerts.length ? model.alerts.map(alert => `<tr><td>${escapeHtml(alert)}</td></tr>`).join('') : '<tr><td>No cooling tower compliance alerts flagged.</td></tr>'}</tbody>
+          </table>
+
+          <div class="report-section-bar">Corrective actions</div>
+          <table class="report-table">
+            <tbody>${correctiveRows.map(row => `<tr><td style="width:30%; font-weight:800;">${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td></tr>`).join('')}</tbody>
           </table>
 
           <div class="report-section-bar">Cooling tower clean</div>
@@ -11571,11 +11491,22 @@ body::before {
     }
 
     async function saveCoolingTowerPdfReport() {
+      if (coolingTowerReportSaveInFlight) {
+        showAppToast('Cooling Tower save already in progress.');
+        return;
+      }
+      const button = qs('saveCoolingReportBtn');
       try {
+        coolingTowerReportSaveInFlight = true;
+        if (button) button.disabled = true;
         await buildAndSaveCoolingTowerPdfReport();
       } catch (error) {
         console.error('Cooling tower PDF generation failed', error);
         showPdfErrorPanel(error && error.message ? error.message : 'The cooling tower PDF could not be created.');
+        setCoolingTowerLiveSaveStatus('Live spreadsheet save not attempted - report save failed.', 'error');
+      } finally {
+        coolingTowerReportSaveInFlight = false;
+        if (button) button.disabled = false;
       }
     }
 
@@ -11671,15 +11602,84 @@ body::before {
       const volumeLabel = model.volume ? `${model.volume} L` : '-';
       const assetRows = [
         ['Site', model.site, 'Tower ID', model.towerId],
-        ['Location', model.location, 'System volume', volumeLabel],
-        ['Visit type', model.visitType, 'Photos attached', String(model.photos.length)]
+        ['Building/location', model.location, 'ACT registration', model.actRegistration || '-'],
+        ['Asset/QR reference', model.assetRef || '-', 'Sampling point', model.samplingPoint || '-'],
+        ['System volume', volumeLabel, 'System status', model.systemStatus],
+        ['Service type', model.visitType, 'Photos attached', String(model.photos.length)]
       ];
       y = drawTable(doc, margin, y, [34, 95, 34, pageWidth - (margin * 2) - 34 - 95 - 34], ['', '', '', ''], assetRows, { fontSize: 7.8, headerFontSize: 7.8, striped: true });
       y += 4;
+      if (model.systemNotes) y = drawNotesBlock('System notes', model.systemNotes, y);
 
-      y = drawSectionBar('Cooling tower test results', y);
+      y = drawSectionBar('Tower/System Water Test', y);
       const testRows = model.testRows.map(row => [row.label, row.display, row.unit || '-']);
       y = drawTable(doc, margin, y, [80, 42, pageWidth - (margin * 2) - 80 - 42], ['Result', 'Value', 'Unit'], testRows, { fontSize: 8.2, headerFontSize: 8.2, striped: true });
+      y += 4;
+
+      y = drawSectionBar('Biocide / Treatment Program', y);
+      y = drawTable(doc, margin, y, [58, pageWidth - (margin * 2) - 58], ['Item', 'Result'], model.biocideRows, { fontSize: 7.6, headerFontSize: 7.8, striped: true });
+      y += 4;
+
+      y = drawSectionBar('Incoming/Makeup Water Test', y);
+      const makeupRows = model.makeupRows.map(row => [row.label, row.display, row.unit || '-']);
+      y = drawTable(doc, margin, y, [80, 42, pageWidth - (margin * 2) - 80 - 42], ['Result', 'Value', 'Unit'], makeupRows, { fontSize: 8.2, headerFontSize: 8.2, striped: true });
+      y += 4;
+
+      y = drawSectionBar('Cycles of concentration', y);
+      const cycleRows = [
+        ['Chloride-based cycles', model.cycles.chloride.display],
+        ['Conductivity-based cycles', model.cycles.conductivity.display],
+        ['Calculation note', model.cycles.note]
+      ];
+      y = drawTable(doc, margin, y, [58, pageWidth - (margin * 2) - 58], ['Cycle', 'Result'], cycleRows, { fontSize: 7.8, headerFontSize: 7.8, striped: true });
+      y += 4;
+
+      y = drawSectionBar('Service checklist summary', y);
+      const checklistRows = model.checklist.length ? model.checklist.map(item => [item]) : [['No checklist items ticked.']];
+      y = drawTable(doc, margin, y, [pageWidth - (margin * 2)], ['Completed / noted item'], checklistRows, { fontSize: 7.2, headerFontSize: 7.4, striped: true });
+      y += 4;
+
+      y = drawSectionBar('Chemical/stock usage', y);
+      const chemicalRows = model.chemical.added ? [
+        ['Chemical added', 'Yes'],
+        ['Chemical type', model.chemical.type || '-'],
+        ['Quantity', [model.chemical.quantity || '-', model.chemical.unit || ''].filter(Boolean).join(' ')],
+        ['Source', model.chemical.source || '-'],
+        ['Drum level before/after', `${model.chemical.drumBefore || '-'} / ${model.chemical.drumAfter || '-'}`],
+        ['Notes', model.chemical.notes || '-']
+      ] : [['Chemical added', 'No chemicals added']];
+      y = drawTable(doc, margin, y, [58, pageWidth - (margin * 2) - 58], ['Item', 'Result'], chemicalRows, { fontSize: 7.6, headerFontSize: 7.8, striped: true });
+      y += 4;
+
+      y = drawSectionBar('Lab sampling details', y);
+      const labRows = [
+        ['Legionella sample taken', model.lab.legionellaSampleTaken],
+        ['HCC/HPC sample taken', model.lab.hpcSampleTaken],
+        ['Sample date/time', model.lab.sampleDateTime || '-'],
+        ['Lab name', model.lab.labName || '-'],
+        ['Sample reference number', model.lab.sampleReference || '-'],
+        ['Result pending', model.lab.resultPending],
+        ['Legionella result', model.lab.legionellaResult || '-'],
+        ['HCC/HPC result', model.lab.hpcResult || '-'],
+        ['Corrective action required', model.lab.correctiveActionRequired],
+        ['Follow-up date', formatDateDisplay(model.lab.followUpDate || '') || '-'],
+        ['Notes', model.lab.notes || '-']
+      ];
+      y = drawTable(doc, margin, y, [58, pageWidth - (margin * 2) - 58], ['Item', 'Result'], labRows, { fontSize: 7.2, headerFontSize: 7.4, striped: true });
+      y += 4;
+
+      y = drawSectionBar('Compliance/alert notes', y);
+      const alertRows = model.alerts.length ? model.alerts.map(alert => [alert]) : [['No cooling tower compliance alerts flagged.']];
+      y = drawTable(doc, margin, y, [pageWidth - (margin * 2)], ['Alert / note'], alertRows, { fontSize: 7.2, headerFontSize: 7.4, striped: true });
+      y += 4;
+
+      y = drawSectionBar('Corrective actions', y);
+      const correctiveRows = [
+        ['Corrective action required', model.lab.correctiveActionRequired],
+        ['Follow-up date', formatDateDisplay(model.lab.followUpDate || '') || '-'],
+        ['Corrective action notes', model.lab.notes || model.notes || '-']
+      ];
+      y = drawTable(doc, margin, y, [58, pageWidth - (margin * 2) - 58], ['Item', 'Result'], correctiveRows, { fontSize: 7.4, headerFontSize: 7.6, striped: true });
       y += 4;
 
       y = drawSectionBar('Cooling tower clean', y);
@@ -11766,19 +11766,25 @@ body::before {
 
       const filenameBase = `${model.site}-${model.towerId}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const filename = `${filenameBase || 'cooling-tower-report'}-${model.rawDate || 'report'}.pdf`;
+      const savedAt = new Date().toISOString();
+      const recordId = makeCoolingTowerServiceRecordId(model);
+      const reportId = `report-${recordId}`;
       updatePdfPreparingPanel('Finalising the PDF file...', 88);
       await waitForBrowserPaint();
       const blob = doc.output('blob');
       await saveBlob(blob, filename, 'application/pdf');
       recordGeneratedReport({
+        id: reportId,
         moduleType: 'cooling',
         reportTitle: model.title,
         siteName: model.site,
         assetName: model.towerId,
         technician: model.technician,
+        createdAt: savedAt,
         filename,
         summary: 'Cooling tower PDF saved.'
       });
+      await updateCoolingTowerLiveSheet(buildCoolingTowerLiveSheetPayload({ model, recordId, reportId, filename, savedAt }));
     }
 
     function renderCoolingTowerSection() {
@@ -11788,6 +11794,9 @@ body::before {
       renderCoolingTowerCouponRecords();
       renderCoolingTowerConsumables();
       updateCoolingCleanVisibility();
+      updateCoolingBiocideVisibility();
+      renderCoolingCycles();
+      renderCoolingComplianceAlerts();
     }
 
     const ZIP_TAP_STORAGE_KEY = 'mbs-zip-tap-assets-v1';
@@ -20911,7 +20920,7 @@ async function buildAndSavePdfReport() {
         const savedAt = stored && stored.__draftSavedAt ? new Date(stored.__draftSavedAt) : null;
         const hasValidSavedAt = savedAt instanceof Date && !Number.isNaN(savedAt.getTime());
         const isSameLocalDay = hasValidSavedAt && getLocalDateInputValue(savedAt) === getLocalDateInputValue(new Date());
-        const dateTimeFields = new Set(['reportDate', 'testTime', 'closedDate', 'closedTime', 'coolingTowerDate', 'coolingTowerTime', 'zipDate', 'zipTime', 'billiDate', 'billiTime', 'iceMachineDate', 'iceMachineTime', 'tmvSampleDate', 'tmvSampleTime', 'filterDate', 'filterTime']);
+        const dateTimeFields = new Set(['reportDate', 'testTime', 'closedDate', 'closedTime', 'coolingTowerDate', 'coolingTowerTime', 'coolingSampleDateTime', 'zipDate', 'zipTime', 'billiDate', 'billiTime', 'iceMachineDate', 'iceMachineTime', 'tmvSampleDate', 'tmvSampleTime', 'filterDate', 'filterTime']);
 
         Object.keys(inputs).forEach(key => {
           if (!inputs[key]) return;
@@ -21015,6 +21024,7 @@ async function buildAndSavePdfReport() {
       renderClosedLoopTable();
       if (qs('reportOutput')) qs('reportOutput').textContent = 'Tap Generate report to build the service report.';
       if (qs('closedReportOutput')) qs('closedReportOutput').textContent = 'Tap Generate report to build the closed loop report.';
+      if (qs('coolingReportOutput')) qs('coolingReportOutput').textContent = 'Tap Generate report to build the cooling tower service summary.';
       if (qs('zipReportOutput')) qs('zipReportOutput').textContent = 'Tap Generate report to build the Zip Tap / HydroTap service report.';
       if (qs('billiReportOutput')) qs('billiReportOutput').textContent = 'Tap Generate report to build the Billi service report.';
       if (qs('iceMachineReportOutput')) qs('iceMachineReportOutput').textContent = 'Tap Generate report to build the Ice Machine service report.';
@@ -21071,8 +21081,15 @@ async function buildAndSavePdfReport() {
         'closedMakeupStatus', 'closedFilterStatus', 'closedCorrosionStatus', 'closedGlycolStatus',
         'hhwTds', 'hhwTdsMin', 'hhwTdsMax', 'hhwPh', 'hhwPhMin', 'hhwPhMax', 'hhwInhibitor', 'hhwInhibitorMin', 'hhwInhibitorMax',
         'chwTds', 'chwTdsMin', 'chwTdsMax', 'chwPh', 'chwPhMin', 'chwPhMax', 'chwInhibitor', 'chwInhibitorMin', 'chwInhibitorMax',
-        'coolingSiteSelect', 'coolingTowerSelect', 'coolingTowerSite', 'coolingTowerId', 'coolingTowerLocation', 'coolingTowerVolume', 'coolingTowerTechnician', 'coolingTowerDate', 'coolingTowerTime', 'coolingTowerVisitType',
-        'coolingTds', 'coolingPh', 'coolingAlk', 'coolingInhibitor', 'coolingChlorides', 'coolingOrp', 'coolingFreeHalogen',
+        'coolingSiteSelect', 'coolingTowerSelect', 'coolingTowerSite', 'coolingTowerId', 'coolingTowerLocation', 'coolingTowerActRegistration', 'coolingTowerAssetRef', 'coolingTowerSamplingPoint', 'coolingTowerVolume', 'coolingTowerTechnician', 'coolingTowerDate', 'coolingTowerTime', 'coolingTowerVisitType', 'coolingTowerSystemStatus', 'coolingTowerSystemNotes',
+        'coolingTds', 'coolingPh', 'coolingTemperature', 'coolingConductivity', 'coolingAlk', 'coolingInhibitor', 'coolingChlorides', 'coolingOrp', 'coolingHardness', 'coolingVisualCondition', 'coolingOdour', 'coolingTestComments',
+        'coolingBiocideType', 'coolingOxidisingResidualTested', 'coolingOxidisingBiocideType', 'coolingOxidisingResidualResult', 'coolingOxidisingResidualUnit',
+        'coolingNonOxidisingUsed', 'coolingNonOxidisingProduct', 'coolingNonOxidisingActive', 'coolingNonOxidisingDoseAmount', 'coolingNonOxidisingDoseUnit', 'coolingNonOxidisingDosingMethod', 'coolingNonOxidisingTestMethodAvailable', 'coolingNonOxidisingTestResult', 'coolingNonOxidisingMethodNotes', 'coolingSupplierRecommendedRange', 'coolingTreatmentNotes',
+        'coolingMakeupPh', 'coolingMakeupTemperature', 'coolingMakeupConductivity', 'coolingMakeupTds', 'coolingMakeupChloride', 'coolingMakeupAlk', 'coolingMakeupHardness', 'coolingMakeupComments',
+        'coolingCheckBasinInspected', 'coolingCheckStrainerCleaned', 'coolingCheckDriftEliminators', 'coolingCheckFillPack', 'coolingCheckDosingPumps', 'coolingCheckChemicalDrums', 'coolingCheckBleedValve', 'coolingCheckConductivityController', 'coolingCheckWaterMeter', 'coolingCheckLeaks', 'coolingCheckNoiseVibration', 'coolingCheckAccessSafety', 'coolingCheckSdsAvailable', 'coolingCheckLogbookAvailable', 'coolingCheckRegistrationAvailable', 'coolingCheckPhotosTaken',
+        'coolingChemicalAdded', 'coolingChemicalType', 'coolingChemicalQuantity', 'coolingChemicalUnit', 'coolingChemicalSource', 'coolingDrumLevelBefore', 'coolingDrumLevelAfter', 'coolingChemicalNotes',
+        'coolingLegionellaSampleTaken', 'coolingHpcSampleTaken', 'coolingSampleDateTime', 'coolingLabName', 'coolingSampleReference', 'coolingResultPending', 'coolingLegionellaResult', 'coolingHpcResult', 'coolingCorrectiveActionRequired', 'coolingFollowUpDate', 'coolingLabNotes',
+        'coolingSpinTouchUsed', 'coolingSpinTouchSerial', 'coolingSpinTouchModel', 'coolingSpinTouchCalibration', 'coolingMyronUsed', 'coolingMyronSerial', 'coolingMyronCalibration', 'coolingReagentName', 'coolingReagentBrand', 'coolingReagentLot', 'coolingReagentExpiry', 'coolingReagentLinkedInstrument',
         'coolingCleanEnabled', 'coolingCleanType', 'coolingCleanStatus', 'coolingCleanBeforeCondition', 'coolingCleanPostSample',
         'coolingCleanTowerIsolated', 'coolingCleanFanPumpIsolated', 'coolingCleanBiodispersant', 'coolingCleanDrained', 'coolingCleanBasin',
         'coolingCleanFillPack', 'coolingCleanDriftEliminators', 'coolingCleanStrainersNozzles', 'coolingCleanSludgeRemoved', 'coolingCleanDisinfected',
@@ -21448,12 +21465,6 @@ async function buildAndSavePdfReport() {
         showAppToast('Equipment register cleared.');
       });
       qs('resetBtn').addEventListener('click', () => {
-        if (!confirm('Reset the current pool test form? Saved history and assets will stay in place.')) return;
-        resetAll();
-        showAppToast('Pool test form reset.');
-      });
-
-      qs('homeHeaderResetBtn')?.addEventListener('click', () => {
         if (!confirm('Reset the current pool test form? Saved history and assets will stay in place.')) return;
         resetAll();
         showAppToast('Pool test form reset.');

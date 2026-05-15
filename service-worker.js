@@ -1,4 +1,4 @@
-const WATEROPS_CACHE = 'waterops-app-v2026-05-15-02';
+const WATEROPS_CACHE = 'waterops-app-v2026-05-15-03';
 const WATEROPS_APP_ROOT = new URL('./', self.registration.scope).href;
 const WATEROPS_INDEX = new URL('./index.html', self.registration.scope).href;
 const WATEROPS_CORE_ASSETS = [
